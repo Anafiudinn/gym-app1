@@ -50,6 +50,7 @@ class TransaksiController extends Controller
         $members = Member::orderBy('nama')->get();
         // Mengambil semua paket KECUALI yang namanya 'Harian'
         $paket = Paket::where('nama_paket', '!=', 'Harian')->get();
+         $paketDefault = Paket::where('nama_paket', 'Harian')->first(); // khusus default
 
         // Summary cards
         $totalHariIni    = Transaksi::whereDate('created_at', today())->sum('jumlah_bayar');
@@ -67,7 +68,9 @@ class TransaksiController extends Controller
             'activeTab',
             'totalHariIni',
             'totalBulanIni',
-            'countHariIni'
+            'countHariIni',
+            'paketDefault' // ✅ TAMBAHKAN INI
+
         ));
     }
 
@@ -76,6 +79,7 @@ class TransaksiController extends Controller
         $request->validate(['nama_tamu' => 'required']);
 
         $paket = Paket::where('nama_paket', 'Harian')->first();
+        
 
         if (!$paket) {
             return back()->with('error', 'Gagal: Paket bernama "Harian" belum dibuat di database!');
