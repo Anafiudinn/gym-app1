@@ -25,4 +25,5 @@ class Paket extends Model
     {
         return $this->hasMany(Membership::class);
     }
+  
 }
