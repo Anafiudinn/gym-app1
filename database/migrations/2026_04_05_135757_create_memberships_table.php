@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('memberships', function (Blueprint $table) {
             $table->id();
             $table->foreignId('member_id')->constrained('members')->cascadeOnDelete();
-            $table->foreignId('transaksi_id')->constrained('transaksi')->cascadeOnDelete();
-            $table->foreignId('paket_id')->constrained('paket')->cascadeOnDelete();
+            $table->foreignId('transaksi_id')->constrained('transaksis')->cascadeOnDelete();
+            $table->foreignId('paket_id')->constrained('pakets')->cascadeOnDelete();
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->enum('status', ['aktif', 'kadaluarsa'])->default('aktif');

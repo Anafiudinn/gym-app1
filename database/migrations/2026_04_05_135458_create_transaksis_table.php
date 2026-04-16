@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('kode_invoice')->unique();
             $table->foreignId('member_id')->nullable()->constrained('members')->nullOnDelete();
             $table->string('nama_tamu')->nullable();
-            $table->foreignId('paket_id')->nullable()->constrained('paket')->nullOnDelete();
+            $table->foreignId('paket_id')->nullable()->constrained('pakets')->nullOnDelete();
             $table->enum('tipe', ['harian', 'membership']);
             $table->integer('jumlah_bayar');
             $table->enum('metode_pembayaran', ['transfer', 'cash']);

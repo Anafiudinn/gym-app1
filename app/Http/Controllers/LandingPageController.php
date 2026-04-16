@@ -8,6 +8,7 @@ use App\Models\Paket;
 use App\Models\Transaksi;
 use App\Models\VerifikasiPembayaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class LandingPageController extends Controller
@@ -51,6 +52,13 @@ class LandingPageController extends Controller
             'paket_id' => 'required'
         ]);
 
+          try {
+            return DB::transaction(function () use ($request) {
+                $paket = Paket::findOrFail($request->paket_id);
+            
+
+                // 2. LOGIKA SAKTI: Cek apakah ada transaksi pending sebelumnya
+
         // 1. Update atau Create Member
         $member = Member::updateOrCreate(
             ['no_wa' => $request->no_wa],
@@ -91,6 +99,12 @@ class LandingPageController extends Controller
         }
 
         return redirect('/pembayaran/' . $transaksi->kode_invoice);
+            });
+        } catch (\Exception $e) {
+            // Log error jika perlu
+            return back()->with('error', 'Terjadi kesalahan saat memproses pendaftaran. Silakan coba lagi.');
+        }
+
     }
 
     // 🔹 FORM UPLOAD

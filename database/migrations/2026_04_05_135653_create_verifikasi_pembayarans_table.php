@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('verifikasi_pembayarans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaksi_id')->constrained('transaksi')->cascadeOnDelete();
+            $table->foreignId('transaksi_id')->constrained('transaksis')->cascadeOnDelete();
             $table->string('nama_rekening');
             $table->string('nama_bank');
             $table->string('bukti_pembayaran');
