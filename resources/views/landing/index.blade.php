@@ -1041,6 +1041,9 @@
         <div class="galeri-item">
             <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Locker Room" loading="lazy">
         </div>
+         <div class="galeri-item">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Locker Room" loading="lazy">
+        </div>
     </div>
 </section>
 

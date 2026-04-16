@@ -30,11 +30,21 @@ class Member extends Model
         return $this->hasMany(Transaksi::class);
     }
 
-    public function membership()
+    public function memberships()
     {
-        return $this->hasMany(Membership::class);
+        return $this->hasMany(Membership::class, 'member_id');
     }
+    public function membership()
+{
+    // Ini akan mengambil 1 data membership terbaru milik si member
+    return $this->hasOne(Membership::class)->latestOfMany();
+}
 
+    // Relasi untuk mengambil paket yang AKTIF saja (opsional, buat dashboard)
+    public function membershipAktif()
+    {
+        return $this->hasOne(Membership::class)->latestOfMany();
+    }
     public function absensi()
     {
         return $this->hasMany(Absensi::class);

@@ -1,194 +1,368 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Kasir Transaksi</h2>
-    </x-slot>
+@extends('layouts.admin')
+@section('title', 'Transaksi')
+@section('page-title', 'Transaksi')
 
-    <div class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        
-        {{-- NOTIFIKASI --}}
-        @if(session('success'))
-            <div class="mb-6 flex items-center p-4 text-green-800 rounded-2xl bg-green-50 border border-green-100 animate-fade-in">
-                <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                <span class="text-sm font-bold">{{ session('success') }}</span>
+@push('styles')
+<style>
+    .tab-btn {
+        padding: 10px 0;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #6b7280;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s;
+    }
+
+    .tab-btn:hover {
+        color: #374151;
+    }
+
+    .tab-btn.active {
+        color: #10b981;
+        border-bottom-color: #10b981;
+    }
+
+    .form-input {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 9px 13px;
+        font-size: 13px;
+        color: #111827;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #9ca3af;
+        margin-bottom: 5px;
+    }
+
+    .btn-green {
+        width: 100%;
+        background: #10b981;
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 11px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+        letter-spacing: 0.04em;
+    }
+
+    .btn-green:hover {
+        background: #059669;
+    }
+
+    .btn-green:active {
+        transform: scale(0.985);
+    }
+
+    .btn-outline-green {
+        width: 100%;
+        background: #f0fdf4;
+        color: #059669;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 11px;
+        border-radius: 10px;
+        border: 1px solid #bbf7d0;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .btn-outline-green:hover {
+        background: #dcfce7;
+    }
+</style>
+@endpush
+
+@section('content')
+{{-- Tambahkan ini di atas form membership di index.blade.php --}}
+@if ($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+{{-- MAIN GRID 2 KOLOM --}}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+    {{-- KIRI: SUMMARY + FORM (4 kolom) --}}
+    <div class="lg:col-span-4 space-y-4 order-1">
+
+        {{-- SUMMARY CARDS - KIRI ATAS --}}
+        <div class="bg-white rounded-xl border border-gray-100 px-5 py-4">
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Pemasukan Hari Ini</p>
+            <p class="text-[22px] font-bold text-gray-800 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
+            <p class="text-[11px] text-gray-400 mt-1">{{ $countHariIni }} transaksi</p>
+        </div>
+
+        {{-- FORM INPUT - KIRI BAWAH --}}
+        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div class="flex gap-5 px-5 border-b border-gray-100">
+                <button onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active">Tamu Harian</button>
+                <button onclick="switchTab('membership')" id="btn-membership" class="tab-btn">Membership</button>
             </div>
-        @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {{-- KIRI: INPUT AREA --}}
-            <div class="lg:col-span-5 space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    {{-- TAB NAVIGATION --}}
-                    <div class="flex border-b border-gray-50">
-                        <button onclick="switchTab('tamu')" id="btn-tamu" class="flex-1 py-4 text-sm font-bold transition-all border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50/30">
-                            Tamu Harian
-                        </button>
-                        <button onclick="switchTab('membership')" id="btn-membership" class="flex-1 py-4 text-sm font-bold transition-all border-b-2 border-transparent text-gray-400 hover:text-gray-600">
-                            Membership
-                        </button>
-                    </div>
-
-                    <div class="p-8">
-                        {{-- FORM TAMU HARIAN --}}
-                        <div id="pane-tamu" class="space-y-4">
-                            <div class="bg-blue-50 p-4 rounded-2xl mb-6 flex justify-between items-center">
-                                <div>
-                                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest">Paket Default</p>
-                                    <h4 class="text-lg font-black text-blue-900">Visit Harian</h4>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-2xl font-black text-blue-600 italic">Rp20k</span>
-                                </div>
-                            </div>
-                            
-                            <form method="POST" action="/transaksi/harian">
-                                @csrf
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-400 uppercase ml-1">Nama Pengunjung</label>
-                                        <input type="text" name="nama_tamu" placeholder="Input nama tamu..." 
-                                            class="w-full mt-1 border-gray-200 rounded-2xl focus:ring-indigo-500 focus:border-indigo-500 p-4" required>
-                                    </div>
-                                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-100 transition-all transform active:scale-95">
-                                        BAYAR SEKARANG
-                                    </button>
-                                </div>
-                            </form>
+            <div class="p-5">
+                {{-- PANE TAMU --}}
+                <div id="pane-tamu">
+                    <div class="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Paket Default</p>
+                            <p class="text-[14px] font-bold text-emerald-900 mt-0.5">Visit Harian</p>
                         </div>
-
-                        {{-- FORM MEMBERSHIP --}}
-                        <div id="pane-membership" class="hidden space-y-4">
-                            <form method="POST" action="/transaksi/membership">
-                                @csrf
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-400 uppercase ml-1">Tipe Transaksi</label>
-                                        <select name="tipe_member" id="tipe_member" class="w-full mt-1 border-gray-200 rounded-2xl focus:ring-indigo-500" required>
-                                            <option value="baru">✨ Member Baru</option>
-                                            <option value="perpanjang">🔄 Perpanjang Member</option>
-                                        </select>
-                                    </div>
-
-                                    <div id="form_baru" class="space-y-4 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <input type="text" name="nama" placeholder="Nama Lengkap" class="w-full border-gray-200 rounded-xl">
-                                        <input type="text" name="no_wa" placeholder="No. WhatsApp (628...)" class="w-full border-gray-200 rounded-xl">
-                                        <select name="jenis_kelamin" class="w-full border-gray-200 rounded-xl">
-                                            <option value="">Pilih Gender</option>
-                                            <option value="L">Laki-laki</option>
-                                            <option value="P">Perempuan</option>
-                                        </select>
-                                    </div>
-
-                                    <div id="form_perpanjang" class="hidden">
-                                        <label class="text-xs font-bold text-gray-400 uppercase ml-1">Pilih Member</label>
-                                        <select name="member_id" class="w-full mt-1 border-gray-200 rounded-2xl select2">
-                                            <option value="">-- Cari Nama / Kode --</option>
-                                            @foreach($members as $m)
-                                                <option value="{{ $m->id }}">{{ $m->nama }} ({{ $m->kode_member }})</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-400 uppercase ml-1">Pilih Paket</label>
-                                        <select name="paket_id" class="w-full mt-1 border-gray-200 rounded-2xl font-bold text-indigo-600" required>
-                                            <option value="">-- Pilih Durasi Paket --</option>
-                                            @foreach($paket as $p)
-                                                <option value="{{ $p->id }}">{{ $p->nama_paket }} - Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <button class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-green-100 transition-all transform active:scale-95">
-                                        PROSES MEMBERSHIP
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                        <span class="text-[20px] font-black text-emerald-600">Rp20k</span>
                     </div>
+                    {{-- Cari bagian PANE TAMU di file Blade --}}
+                    <form method="POST" action="{{ route('transaksi.harian') }}" class="space-y-3">
+                        @csrf
+                        <div>
+                            <label class="form-label">Nama Pengunjung</label>
+                            <input type="text" name="nama_tamu" placeholder="Masukkan nama tamu..." class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn-green">Bayar Sekarang</button>
+                    </form>
                 </div>
-            </div>
 
-            {{-- KANAN: RECENT TRANSACTIONS --}}
-            <div class="lg:col-span-7">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                        <h3 class="font-black text-gray-800 uppercase tracking-tighter">Riwayat Transaksi Terakhir</h3>
-                        <span class="text-xs font-bold bg-white px-3 py-1 rounded-full border shadow-sm text-gray-500">Live Updates</span>
-                    </div>
+                {{-- PANE MEMBERSHIP --}}
+                <div id="pane-membership" class="hidden">
+                    <form method="POST" action="/transaksi/membership" class="space-y-3">
+                        @csrf
+                        <div>
+                            <label class="form-label">Tipe Transaksi</label>
+                            <select name="tipe_member" id="tipe_member" class="form-input" required>
+                                <option value="baru">Member Baru</option>
+                                <option value="perpanjang">Perpanjang Member</option>
+                            </select>
+                        </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                                    <th class="px-6 py-4">Invoice</th>
-                                    <th class="px-6 py-4">Pelanggan</th>
-                                    <th class="px-6 py-4">Item/Paket</th>
-                                    <th class="px-6 py-4 text-right">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                @foreach($data as $d)
-                                <tr class="hover:bg-gray-50/50 transition-colors group">
-                                    <td class="px-6 py-4">
-                                        <span class="text-xs font-mono font-bold text-gray-400 group-hover:text-indigo-600 italic">#{{ $d->kode_invoice }}</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-gray-800">{{ $d->member->nama ?? $d->nama_tamu }}</div>
-                                        <div class="text-[10px] text-gray-400 uppercase font-black">{{ $d->tipe }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $d->paket->nama_paket ?? 'Visit Harian' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="text-sm font-black text-gray-900 leading-none">Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}</div>
-                                        <span class="text-[9px] font-bold text-green-500 uppercase">{{ $d->status}}</span>
-                                    </td>
-                                </tr>
+                        <div id="form_baru" class="space-y-2.5 p-3.5 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                            <input type="text" name="nama" placeholder="Nama Lengkap" class="form-input">
+                            <input type="text" name="no_wa" placeholder="No. WhatsApp (628...)" class="form-input">
+                            <select name="jenis_kelamin" class="form-input">
+                                <option value="">Jenis Kelamin</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div id="form_perpanjang" class="hidden">
+                            <label class="form-label">Pilih Member</label>
+                            <select name="member_id" id="select-member" class="form-input">
+                                <option value="">— Cari Nama / Kode —</option>
+                                @foreach($members as $m)
+                                <option value="{{ $m->id }}"
+                                    {{ isset($selectedMemberId) && $selectedMemberId == $m->id ? 'selected' : '' }}>
+                                    {{ $m->nama }} ({{ $m->kode_member }})
+                                </option>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Paket</label>
+                            <select name="paket_id" class="form-input" required>
+                                <option value="">— Pilih Durasi Paket —</option>
+                                @foreach($paket as $p)
+                                <option value="{{ $p->id }}">{{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-outline-green">Proses Membership</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- SCRIPTS --}}
-    <script>
-        // Switch between Harian and Membership Tabs
-        function switchTab(tab) {
-            const paneTamu = document.getElementById('pane-tamu');
-            const paneMember = document.getElementById('pane-membership');
-            const btnTamu = document.getElementById('btn-tamu');
-            const btnMember = document.getElementById('btn-membership');
+    {{-- KANAN: RIWAYAT TRANSAKSI (8 kolom) --}}
+    <div class="lg:col-span-8 space-y-3 order-2">
 
-            if(tab === 'tamu') {
-                paneTamu.classList.remove('hidden');
-                paneMember.classList.add('hidden');
-                btnTamu.className = "flex-1 py-4 text-sm font-bold transition-all border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50/30";
-                btnMember.className = "flex-1 py-4 text-sm font-bold transition-all border-b-2 border-transparent text-gray-400 hover:text-gray-600";
-            } else {
-                paneTamu.classList.add('hidden');
-                paneMember.classList.remove('hidden');
-                btnMember.className = "flex-1 py-4 text-sm font-bold transition-all border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50/30";
-                btnTamu.className = "flex-1 py-4 text-sm font-bold transition-all border-b-2 border-transparent text-gray-400 hover:text-gray-600";
-            }
-        }
+        {{-- FILTER BAR --}}
+        <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <form action="{{ route('transaksi.index') }}" method="GET">
+                @if(request('tab')) <input type="hidden" name="tab" value="{{ request('tab') }}"> @endif
+                <div class="flex flex-wrap gap-2.5">
+                    <div class="flex-1 min-w-[160px]">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Cari nama / invoice..."
+                            class="form-input text-[12px]" style="padding: 8px 12px;">
+                    </div>
+                    <div>
+                        <input type="date" name="date_from" value="{{ request('date_from') }}"
+                            class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
+                    </div>
+                    <div>
+                        <input type="date" name="date_to" value="{{ request('date_to') }}"
+                            class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
+                    </div>
+                    <div>
+                        <select name="tipe" class="form-input text-[12px]" style="padding: 8px 12px; width: 130px;">
+                            <option value="">Semua Tipe</option>
+                            <option value="harian" {{ request('tipe') === 'harian' ? 'selected' : '' }}>Harian</option>
+                            <option value="membership" {{ request('tipe') === 'membership' ? 'selected' : '' }}>Membership</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="status" class="form-input text-[12px]" style="padding: 8px 12px; width: 130px;">
+                            <option value="">Semua Status</option>
+                            <option value="dibayar" {{ request('status') === 'dibayar' ? 'selected' : '' }}>Dibayar</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="batal" {{ request('status') === 'batal' ? 'selected' : '' }}>Batal</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition">
+                        <i class="fa-solid fa-filter text-[10px] mr-1"></i> Filter
+                    </button>
+                    @if(request()->hasAny(['search','date_from','date_to','tipe','status']))
+                    <a href="{{ route('transaksi.index') }}"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center">
+                        Reset
+                    </a>
+                    @endif
+                </div>
+            </form>
+        </div>
 
-        // Handle Member Baru vs Perpanjang inside Membership Tab
-        const tipe = document.getElementById('tipe_member');
-        const formBaru = document.getElementById('form_baru');
-        const formPerpanjang = document.getElementById('form_perpanjang');
+        {{-- TABLE --}}
+        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+                <div>
+                    <h3 class="text-[12.5px] font-bold text-gray-700">Riwayat Transaksi</h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ $data->total() }} total data</p>
+                </div>
+                <span class="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Live
+                </span>
+            </div>
 
-        tipe.addEventListener('change', function () {
-            if (this.value === 'baru') {
-                formBaru.classList.remove('hidden');
-                formPerpanjang.classList.add('hidden');
-            } else {
-                formBaru.classList.add('hidden');
-                formPerpanjang.classList.remove('hidden');
-            }
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50/60 border-b border-gray-100">
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">#</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Invoice</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pelanggan</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Paket</th>
+                            <th class="px-4 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse($data as $d)
+                        <tr class="hover:bg-gray-50/50 transition-colors group">
+                            <td class="px-4 py-3.5 text-[12px] text-gray-400">
+                                {{ $data->firstItem() + $loop->index }}
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <span class="text-[11px] font-semibold text-gray-800 group-hover:text-emerald-600 transition">
+                                    {{ $d->kode_invoice }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <div class="text-[12.5px] font-semibold text-gray-700">{{ $d->created_at->format('d M Y') }}</div>
+                                <div class="text-[10.5px] text-gray-400">{{ $d->created_at->format('H:i') }}</div>
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <div class="text-[12.5px] font-semibold text-gray-800">
+                                    {{ $d->member->nama ?? $d->nama_tamu }}
+                                </div>
+                                <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide
+                                    {{ $d->tipe === 'membership' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500' }}">
+                                    {{ $d->tipe }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3.5 text-[12.5px] text-gray-600">
+                                {{ $d->paket->nama_paket ?? 'Visit Harian' }}
+                            </td>
+                            <td class="px-4 py-3.5 text-right">
+                                <div class="text-[13px] font-bold text-gray-900">
+                                    Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}
+                                </div>
+                                <span class="text-[9.5px] font-semibold uppercase
+                                    {{ $d->status === 'dibayar' ? 'text-emerald-500' : ($d->status === 'pending' ? 'text-orange-400' : 'text-red-400') }}">
+                                    {{ $d->status }}
+                                </span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="px-5 py-14 text-center">
+                                <i class="fa-solid fa-receipt text-3xl text-gray-200 mb-3 block"></i>
+                                <p class="text-[12px] text-gray-400">Tidak ada transaksi ditemukan</p>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- PAGINATION --}}
+            @if($data->hasPages())
+            <div class="px-5 py-3.5 border-t border-gray-100 flex items-center justify-between">
+                <p class="text-[11.5px] text-gray-400">
+                    Menampilkan {{ $data->firstItem() }}–{{ $data->lastItem() }} dari {{ $data->total() }} transaksi
+                </p>
+                {{ $data->links() }}
+            </div>
+            @endif
+        </div>
+    </div>
+
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+    const defaultTab = @js($activeTab ?? 'tamu');
+    const selectedMemberId = @js($selectedMemberId ?? null);
+
+    function switchTab(tab) {
+        ['tamu', 'membership'].forEach(t => {
+            document.getElementById('pane-' + t).classList.toggle('hidden', t !== tab);
+            document.getElementById('btn-' + t).classList.toggle('active', t === tab);
         });
-    </script>
-</x-app-layout>
+    }
+
+    const tipe = document.getElementById('tipe_member');
+    const formBaru = document.getElementById('form_baru');
+    const formPerpanjang = document.getElementById('form_perpanjang');
+
+    tipe.addEventListener('change', function() {
+        const isBaru = this.value === 'baru';
+        formBaru.classList.toggle('hidden', !isBaru);
+        formPerpanjang.classList.toggle('hidden', isBaru);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        switchTab(defaultTab);
+        if (defaultTab === 'membership' && selectedMemberId) {
+            tipe.value = 'perpanjang';
+            formBaru.classList.add('hidden');
+            formPerpanjang.classList.remove('hidden');
+        }
+    });
+</script>
+@endpush

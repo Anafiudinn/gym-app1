@@ -314,7 +314,7 @@
                 <div class="mc-footer">
                     <div class="mc-paket">
                         <div class="mc-label">Paket</div>
-                        <div class="mc-value">{{ $aktifTranaksi?->paket?->nama ?? '-' }}</div>
+                        <div class="mc-value">{{ $aktifTranaksi?->paket?->nama_paket ?? '-' }}</div>
                     </div>
                     @if($tanggalAktif)
                     <div class="mc-aktif-sd">

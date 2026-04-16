@@ -1,78 +1,95 @@
 <?php
 
-use App\Http\Controllers\AbsensiController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LandingPageController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\PaketController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\VerifikasiPembayaranController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{
+    AbsensiController,
+    DashboardController,
+    LandingPageController,
+    LaporanController,
+    MemberController,
+    PaketController,
+    ProfileController,
+    TransaksiController,
+    VerifikasiPembayaranController
+};
 
-Route::get('/', [LandingPageController::class, 'index']);
-Route::get('/daftar', [LandingPageController::class, 'create']);
-Route::post('/daftar', [LandingPageController::class, 'store']);
-// 🔹 PUSAT PEMBAYARAN (SINGLE DYNAMIC PAGE)
-// Halaman ini untuk menampilkan instruksi bayar & status (Lunas/Pending/Ditolak)
-// PEMBAYARAN
-Route::get('/pembayaran/{kode}', [LandingPageController::class, 'pembayaran'])->name('pembayaran');
+/*
+|--------------------------------------------------------------------------
+| Public Routes (Tanpa Login)
+|--------------------------------------------------------------------------
+*/
+Route::controller(LandingPageController::class)->group(function () {
+    Route::get('/', 'index')->name('landing');
+    Route::get('/daftar', 'create')->name('daftar.index');
+    Route::post('/daftar', 'store')->name('daftar.store');
+    
+    // Fitur Pembayaran & Cek Status
+    Route::get('/pembayaran/{kode}', 'pembayaran')->name('pembayaran');
+    Route::post('/pembayaran/{kode}/upload', 'uploadBukti')->name('pembayaran.upload');
+    Route::post('/pembayaran/{kode}/batal', 'batal')->name('pembayaran.batal'); // Diubah ke POST agar aman
+    Route::get('/cek-status', 'cekStatus')->name('pembayaran.cek');
+    Route::get('/cek-membership', 'cekMembership')->name('cek.membership');
+    Route::get('/konfirmasi/{kode}', 'konfirmasi')->name('pembayaran.konfirmasi');
+});
 
-Route::post('/pembayaran/{kode}/upload', [LandingPageController::class, 'uploadBukti'])->name('pembayaran.upload');
-
-Route::get('/pembayaran/{kode}/batal', [LandingPageController::class, 'batal'])->name('pembayaran.batal');
-
-// 🔹 FITUR LAINNYA
-Route::post('/batal/{kode}', [LandingPageController::class, 'batal'])->name('pembayaran.batal');
-Route::get('/konfirmasi/{kode}', [LandingPageController::class, 'konfirmasi']);
-Route::get('/cek-status', [LandingPageController::class, 'cekStatus'])->name('pembayaran.cek');
-
-// CEK MEMBERSHIP (Tambahkan method ini ke controller jika belum ada)
-Route::get('/cek-membership', [LandingPageController::class, 'cekMembership'])->name('cek.membership');
-
-// setelah login
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Harus Login)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // member
-    Route::get('/member', [MemberController::class, 'index'])->name('member.index');
-    Route::get('/member/{id}', [MemberController::class, 'show']);
-    Route::post('/member/{id}/toggle', [MemberController::class, 'toggleStatus']);
+    // Pengelolaan Member
+    Route::controller(MemberController::class)->prefix('member')->name('member.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{id}', 'show')->name('show');
+        Route::put('/{id}', 'update')->name('update');
+        Route::patch('/{id}/toggle', 'toggleStatus')->name('toggle');
+    });
 
-    // paket
-    Route::get('/paket', [PaketController::class, 'index'])->name('paket.index');
-    Route::post('/paket', [PaketController::class, 'store']);
-    Route::put('/paket/{id}', [PaketController::class, 'update']);
-    Route::delete('/paket/{id}', [PaketController::class, 'destroy']);
+    // Pengelolaan Paket
+    Route::controller(PaketController::class)->prefix('paket')->name('paket.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+    });
 
-    // transaksi
-    // halaman transaksi
-    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+    // Transaksi (Harian & Membership)
+    Route::controller(TransaksiController::class)->prefix('transaksi')->name('transaksi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/harian', 'storeHarian')->name('harian');
+        Route::post('/membership', 'storeMembership')->name('membership');
+    });
 
-    // 🔹 transaksi harian
-    Route::post('/transaksi/harian', [TransaksiController::class, 'storeHarian']);
+    // Verifikasi Pembayaran Online
+    Route::controller(VerifikasiPembayaranController::class)->prefix('verifikasi')->name('verifikasi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{id}/terima', 'terima')->name('terima');
+        Route::post('/{id}/tolak', 'tolak')->name('tolak');
+    });
 
-    // 🔹 membership (daftar / perpanjang)
-    Route::post('/transaksi/membership', [TransaksiController::class, 'storeMembership']);
+    // Absensi Member
+    Route::controller(AbsensiController::class)->prefix('absensi')->name('absensi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/cek', 'cekMember')->name('cek');
+        Route::post('/', 'store')->name('store');
+    });
 
-    // verifikasi
-    Route::get('/verifikasi', [VerifikasiPembayaranController::class, 'index'])->name('verifikasi.index');
-    Route::post('/verifikasi/{id}/terima', [VerifikasiPembayaranController::class, 'terima']);
-    Route::post('/verifikasi/{id}/tolak', [VerifikasiPembayaranController::class, 'tolak']);
+    // Laporan & Export
+    Route::controller(LaporanController::class)->prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/export', 'export')->name('export');
+    });
 
-    // absensi
-    Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
-    Route::post('/absensi', [AbsensiController::class, 'store']);
-
-    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Profile Settings
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::patch('/', 'update')->name('update');
+        Route::delete('/', 'destroy')->name('destroy');
+    });
 });
 
 require __DIR__ . '/auth.php';

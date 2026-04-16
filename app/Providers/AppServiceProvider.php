@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+// Di AppServiceProvider.php -> boot()
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Schema::defaultStringLength(100);
+        // URL::forceScheme('https');
     }
 }

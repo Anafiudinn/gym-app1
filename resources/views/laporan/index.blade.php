@@ -1,173 +1,314 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Laporan Keuangan</h2>
-            {{-- Tombol Cetak (Opsional: bisa diarahkan ke fungsi window.print() atau PDF) --}}
-            <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 flex items-center gap-2 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Cetak Laporan
-            </button>
-        </div>
-    </x-slot>
+@extends('layouts.admin')
 
-    <div class="p-4 max-w-7xl mx-auto space-y-6">
+@section('title', 'Laporan Keuangan')
+@section('page-title', 'Laporan Keuangan')
 
-        {{-- ========================= --}}
-        {{-- 🔹 FILTER AREA --}}
-        {{-- ========================= --}}
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <form method="GET" action="/laporan" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Cari Nama/Invoice</label>
-                    <input type="text" name="search" placeholder="Contoh: Budi..."
-                        value="{{ request('search') }}"
-                        class="w-full border-gray-200 rounded-2xl focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                </div>
+@push('styles')
+<style>
+    .card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #f0f0f0;
+    }
 
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Dari Tanggal</label>
-                    <input type="date" name="tanggal_awal"
-                        value="{{ request('tanggal_awal') }}"
-                        class="w-full border-gray-200 rounded-2xl focus:ring-indigo-500 text-sm">
-                </div>
+    .stat-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #f0f0f0;
+        padding: 20px 22px;
+    }
 
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase ml-1">Sampai Tanggal</label>
-                    <input type="date" name="tanggal_akhir"
-                        value="{{ request('tanggal_akhir') }}"
-                        class="w-full border-gray-200 rounded-2xl focus:ring-indigo-500 text-sm">
-                </div>
+    .stat-card.primary {
+        background: #10b981;
+        border-color: #10b981;
+    }
 
-                <div class="flex gap-2">
-                    <button class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
-                        Tampilkan
-                    </button>
-                    <a href="/laporan" class="bg-gray-100 text-gray-500 p-3 rounded-2xl hover:bg-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    </a>
-                </div>
-            </form>
-        </div>
+    .form-input {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #111827;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
 
-        {{-- ========================= --}}
-        {{-- 🔹 SUMMARY CARDS --}}
-        {{-- ========================= --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-indigo-600 p-6 rounded-3xl shadow-xl shadow-indigo-100 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-indigo-100 text-xs font-bold uppercase tracking-widest">Total Pemasukan</p>
-                    <h3 class="text-3xl font-black text-white mt-1">Rp{{ number_format($total, 0, ',', '.') }}</h3>
-                </div>
-                {{-- Dekorasi Ikon Transparan --}}
-                <svg class="absolute -right-4 -bottom-4 w-32 h-32 text-indigo-500 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path></svg>
-            </div>
+    .form-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
 
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Transaksi</p>
-                <h3 class="text-3xl font-black text-gray-800 mt-1">{{ $data->count() }} <span class="text-sm font-medium text-gray-400">Record</span></h3>
-            </div>
+    .form-label {
+        display: block;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #9ca3af;
+        margin-bottom: 5px;
+    }
 
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Periode Laporan</p>
-                <h3 class="text-lg font-bold text-gray-800 mt-2">
-                    @if(request('tanggal_awal'))
-                        {{ date('d/m/y', strtotime(request('tanggal_awal'))) }} - {{ date('d/m/y', strtotime(request('tanggal_akhir'))) }}
-                    @else
-                        Semua Waktu
-                    @endif
-                </h3>
-            </div>
-        </div>
+    .btn-filter {
+        background: #10b981;
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 9px 20px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+    }
 
-        {{-- ========================= --}}
-        {{-- 🔹 DATA TABLE --}}
-        {{-- ========================= --}}
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-gray-50/50 text-[11px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50">
-                            <th class="px-6 py-5">Tanggal</th>
-                            <th class="px-6 py-5">Pelanggan</th>
-                            <th class="px-6 py-5 text-center">Tipe</th>
-                            <th class="px-6 py-5 text-center">Paket</th>
-                            <th class="px-6 py-5 text-right">Jumlah</th>
-                            <th class="px-6 py-5 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @forelse($data as $d)
-                        <tr class="hover:bg-gray-50/50 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-gray-700">{{ $d->tanggal_pembayaran ? date('d M Y', strtotime($d->tanggal_pembayaran)) : '-' }}</div>
-                                <div class="text-[10px] text-gray-400 font-mono italic">ID: {{ $d->kode_invoice ?? '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-gray-800">{{ $d->member->nama ?? $d->nama_tamu }}</div>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="text-[10px] font-black uppercase px-2 py-1 rounded-lg bg-gray-100 text-gray-500">
-                                    {{ $d->tipe }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="text-sm text-gray-600">{{ $d->paket->nama_paket ?? '-' }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="text-sm font-black text-gray-900 leading-none">Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($d->status == 'dibayar' || $d->status == 'Lunas')
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase text-green-600">
-                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                                        Lunas
-                                    </span>
-                                @else
-                                    <span class="text-[10px] font-black uppercase text-gray-400">{{ $d->status }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-20 text-center text-gray-400 italic">
-                                Tidak ada data yang ditemukan untuk filter ini.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                    {{-- Footer Tabel untuk Total --}}
-                    <tfoot class="bg-gray-50/50 border-t-2 border-gray-100">
-                        <tr>
-                            <td colspan="4" class="px-6 py-5 text-sm font-black text-gray-800 text-right uppercase tracking-widest">Grand Total</td>
-                            <td class="px-6 py-5 text-right">
-                                <span class="text-lg font-black text-indigo-600 leading-none">Rp{{ number_format($total, 0, ',', '.') }}</span>
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
+    .btn-filter:hover {
+        background: #059669;
+    }
 
+    .btn-reset {
+        background: #f3f4f6;
+        color: #6b7280;
+        padding: 9px 12px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .btn-reset:hover {
+        background: #e5e7eb;
+    }
+
+    .th {
+        padding: 11px 20px;
+        text-align: left;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #9ca3af;
+        background: #fafafa;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .td {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f9fafb;
+        vertical-align: middle;
+    }
+
+    tr:last-child .td {
+        border-bottom: none;
+    }
+
+    tbody tr:hover td {
+        background: #fafafa;
+    }
+
+    .tipe-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .print-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+    }
+
+    .print-btn:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    @media print {
+
+        aside,
+        header,
+        .no-print {
+            display: none !important;
+        }
+
+        .stat-card.primary {
+            background: #fff !important;
+            border: 2px solid #10b981 !important;
+        }
+
+        .stat-card.primary * {
+            color: #111 !important;
+        }
+    }
+</style>
+@endpush
+
+@section('content')
+
+{{-- PAGE ACTIONS --}}
+<div class="flex items-center justify-between mb-5">
+    <a href="{{ route('laporan.export', request()->all()) }}" class="print-btn no-print">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Export Excel
+    </a>
+</div>
+
+
+
+{{-- STAT CARDS --}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+
+    {{-- Total Pemasukan --}}
+    <div class="stat-card primary">
+        <p class="text-[10.5px] font-bold text-emerald-100 uppercase tracking-widest mb-1">Total Pemasukan</p>
+        <h3 class="text-[26px] font-black text-white leading-tight">Rp{{ number_format($total, 0, ',', '.') }}</h3>
+        <p class="text-[11px] text-emerald-200 mt-1">dari {{ $data->count() }} transaksi</p>
     </div>
 
-    <style>
-        @media print {
-            nav, button, form, .bg-indigo-600 svg {
-                display: none !important;
-            }
-            .shadow-xl, .shadow-sm {
-                shadow: none !important;
-                border: 1px solid #eee !important;
-            }
-            .bg-indigo-600 {
-                background-color: #fff !important;
-                color: #000 !important;
-                border: 2px solid #000 !important;
-            }
-            .text-indigo-100, .text-white {
-                color: #000 !important;
-            }
-        }
-    </style>
-</x-app-layout>
+    {{-- Total Transaksi --}}
+    <div class="stat-card">
+        <p class="text-[10.5px] font-bold text-gray-400 uppercase tracking-widest mb-1">Jumlah Transaksi</p>
+        <h3 class="text-[26px] font-black text-gray-800 leading-tight">{{ $data->count() }}</h3>
+        <p class="text-[11px] text-gray-400 mt-1">record ditemukan</p>
+    </div>
+
+    {{-- Periode --}}
+    <div class="stat-card">
+        <p class="text-[10.5px] font-bold text-gray-400 uppercase tracking-widest mb-1">Periode Laporan</p>
+        <h3 class="text-[16px] font-bold text-gray-800 mt-2">
+            @if(request('tanggal_awal'))
+            {{ date('d/m/Y', strtotime(request('tanggal_awal'))) }}
+            <span class="text-gray-400 font-normal text-sm mx-1">—</span>
+            {{ date('d/m/Y', strtotime(request('tanggal_akhir'))) }}
+            @else
+            <span class="text-gray-500 font-semibold">Semua Waktu</span>
+            @endif
+        </h3>
+        @if(request('search'))
+        <p class="text-[11px] text-gray-400 mt-1">Filter: "{{ request('search') }}"</p>
+        @endif
+    </div>
+
+</div>
+{{-- FILTER --}}
+<div class="card p-5 mb-5 no-print">
+    <form method="GET" action="/laporan" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div>
+            <label class="form-label">Cari Nama / Invoice</label>
+            <input type="text" name="search" placeholder="Contoh: Budi..."
+                value="{{ request('search') }}" class="form-input">
+        </div>
+        <div>
+            <label class="form-label">Dari Tanggal</label>
+            <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-input">
+        </div>
+        <div>
+            <label class="form-label">Sampai Tanggal</label>
+            <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-input">
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="btn-filter flex-1">Tampilkan</button>
+            <a href="/laporan" class="btn-reset">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </a>
+        </div>
+    </form>
+</div>
+
+{{-- TABLE --}}
+<div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th class="th">Tanggal</th>
+                    <th class="th">Pelanggan</th>
+                    <th class="th text-center">Tipe</th>
+                    <th class="th text-center">Paket</th>
+                    <th class="th text-right">Jumlah</th>
+                    <th class="th text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($data as $d)
+                <tr>
+                    <td class="td">
+                        <div class="text-[12.5px] font-semibold text-gray-700">
+                            {{ $d->tanggal_pembayaran ? date('d M Y', strtotime($d->tanggal_pembayaran)) : '—' }}
+                        </div>
+                        <div class="text-[10.5px] font-mono text-gray-400 mt-0.5">{{ $d->kode_invoice ?? '—' }}</div>
+                    </td>
+                    <td class="td">
+                        <span class="text-[13px] font-semibold text-gray-800">{{ $d->member->nama ?? $d->nama_tamu }}</span>
+                    </td>
+                    <td class="td text-center">
+                        <span class="tipe-badge">{{ $d->tipe }}</span>
+                    </td>
+                    <td class="td text-center">
+                        <span class="text-[12.5px] text-gray-600">{{ $d->paket->nama_paket ?? '—' }}</span>
+                    </td>
+                    <td class="td text-right">
+                        <span class="text-[13px] font-bold text-gray-900">Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}</span>
+                    </td>
+                    <td class="td text-center">
+                        @if(in_array($d->status, ['dibayar', 'Lunas']))
+                        <span class="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase text-emerald-600">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            Lunas
+                        </span>
+                        @else
+                        <span class="text-[10.5px] font-semibold uppercase text-gray-400">{{ $d->status }}</span>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="td py-14 text-center text-[12px] text-gray-400 italic">
+                        Tidak ada data untuk filter ini.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+            {{-- Footer Total --}}
+            <tfoot>
+                <tr class="border-t-2 border-gray-100 bg-gray-50/60">
+                    <td colspan="4" class="px-5 py-4 text-right text-[11px] font-black text-gray-500 uppercase tracking-widest">
+                        Grand Total
+                    </td>
+                    <td class="px-5 py-4 text-right">
+                        <span class="text-[15px] font-black text-emerald-600">Rp{{ number_format($total, 0, ',', '.') }}</span>
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@endsection

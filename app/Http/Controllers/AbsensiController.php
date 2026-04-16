@@ -8,67 +8,93 @@ use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
 {
-    // 🔹 halaman absen
     public function index(Request $request)
     {
+        // Default ke hari ini — otomatis reset tiap hari
+        $date = $request->date ?? now()->format('Y-m-d');
+
         $query = Absensi::with('member')->latest();
 
-        // Filter Search (Nama atau Kode Member)
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->whereHas('member', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%")
-                    ->orWhere('kode_member', 'like', "%$search%");
+        $query->whereDate('created_at', $date);
+
+        if ($request->search) {
+            $query->whereHas('member', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->search . '%')
+                    ->orWhere('kode_member', 'like', '%' . $request->search . '%')
+                    ->orWhere('no_wa', 'like', '%' . $request->search . '%'); // tambah no WA
             });
         }
 
-        // Filter Tanggal
-        if ($request->has('tanggal') && $request->tanggal != '') {
-            $query->whereDate('waktu_masuk', $request->tanggal);
+        $absensi = $query->paginate(15);
+        $totalHariIni = Absensi::whereDate('created_at', $date)->count();
+
+        return view('absensi.index', compact('absensi', 'date', 'totalHariIni'));
+    }
+
+    public function cekMember(Request $request)
+    {
+        $keyword = $request->keyword;
+
+        // Cari berdasarkan kode / nama / no WA
+        $member = Member::where('kode_member', $keyword)
+            ->orWhere('nama', 'like', '%' . $keyword . '%')
+            ->orWhere('no_wa', $keyword)
+            ->first();
+
+        if (!$member) {
+            return response()->json(['success' => false, 'message' => 'Member tidak ditemukan']);
         }
 
-        $absensi = $query->paginate(10)->withQueryString();
+        $is_expired = !$member->tanggal_kadaluarsa || now()->gt($member->tanggal_kadaluarsa);
+        $is_nonaktif = $member->status !== 'aktif';
 
-        return view('absensi.index', compact('absensi'));
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id'         => $member->id,
+                'nama'       => $member->nama,
+                'kode'       => $member->kode_member,
+                'status'     => $member->status,
+                'expired_at' => $member->tanggal_kadaluarsa
+                    ? $member->tanggal_kadaluarsa->format('d M Y')
+                    : '-',
+                'is_expired'  => $is_expired,
+                'is_nonaktif' => $is_nonaktif,
+                'can_absen'   => !$is_expired && !$is_nonaktif,
+                'manage_url'  => route('member.show', $member->id), // ← tambah ini
+            ]
+        ]);
     }
-    // 🔹 proses absen
+
     public function store(Request $request)
     {
-        $request->validate([
-            'kode_member' => 'required'
-        ]);
+        $request->validate(['member_id' => 'required|exists:members,id']);
 
-        $member = Member::where('kode_member', $request->kode_member)->first();
+        $member = Member::find($request->member_id);
 
-        // ❌ kalau tidak ditemukan
-        if (!$member) {
-            return back()->with('error', 'Member tidak ditemukan');
-        }
-
-        // cek status aktif
-        if ($member->status != 'aktif') {
+        if ($member->status !== 'aktif') {
             return back()->with('error', 'Member tidak aktif');
         }
 
-        // cek masa berlaku
         if (!$member->tanggal_kadaluarsa || now()->gt($member->tanggal_kadaluarsa)) {
-
-            Absensi::create([
-                'member_id' => $member->id,
-                'waktu_masuk' => now(),
-                'status' => 'kadaluarsa'
-            ]);
-
             return back()->with('error', 'Membership sudah kadaluarsa');
         }
 
-        // ✅ valid
+        // Cegah double absen di hari yang sama
+        $sudahAbsen = Absensi::where('member_id', $member->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->exists();
+
+        if ($sudahAbsen) {
+            return back()->with('error', $member->nama . ' sudah absen hari ini');
+        }
+
         Absensi::create([
-            'member_id' => $member->id,
+            'member_id'   => $member->id,
             'waktu_masuk' => now(),
-            'status' => 'valid'
+            'status'      => 'valid',
         ]);
 
-        return back()->with('success', 'Absensi berhasil');
+        return back()->with('success', 'Absensi ' . $member->nama . ' berhasil dicatat!');
     }
 }

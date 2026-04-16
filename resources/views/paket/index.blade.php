@@ -1,133 +1,227 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Manajemen Paket</h2>
-    </x-slot>
+@extends('layouts.admin')
+@section('title', 'Manajemen Paket')
+@section('page-title', 'Manajemen Paket')
 
-    <div class="p-8 max-w-7xl mx-auto space-y-10">
+@section('content')
 
-        {{-- NOTIFIKASI --}}
-        @if(session('success'))
-            <div class="flex items-center p-4 mb-4 text-green-800 rounded-xl bg-green-50 border border-green-100 animate-fade-in-down">
-                <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                <span class="text-sm font-medium">{{ session('success') }}</span>
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {{-- 🔹 FORM TAMBAH PAKET (Sticky) --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-8">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        </div>
-                        <h3 class="font-bold text-gray-800 text-lg">Tambah Paket</h3>
-                    </div>
-
-                    <form method="POST" action="/paket" class="space-y-4">
-                        @csrf
-                        <div>
-                            <label class="text-xs font-semibold text-gray-400 uppercase ml-1">Nama Paket</label>
-                            <input type="text" name="nama_paket" placeholder="Contoh: Premium Monthly"
-                                class="w-full mt-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-semibold text-gray-400 uppercase ml-1">Harga (Rp)</label>
-                                <input type="number" name="harga" placeholder="0"
-                                    class="w-full mt-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            </div>
-                            <div>
-                                <label class="text-xs font-semibold text-gray-400 uppercase ml-1">Durasi (Hari)</label>
-                                <input type="number" name="durasi_hari" placeholder="30"
-                                    class="w-full mt-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-all" required>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-semibold text-gray-400 uppercase ml-1">Deskripsi</label>
-                            <textarea name="deskripsi" rows="3" placeholder="Opsional..."
-                                class="w-full mt-1 border-gray-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
-                        </div>
-
-                        <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md shadow-indigo-100 transition-all transform active:scale-[0.98]">
-                            Simpan Paket
-                        </button>
-                    </form>
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
+    {{-- Header --}}
+    <div class="p-6 border-b border-gray-50">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-boxes-stacked text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-gray-800">Daftar Paket Layanan</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">{{ $paket->count() }} paket tersedia</p>
                 </div>
             </div>
-
-            {{-- 🔹 TABEL DATA PAKET --}}
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800 text-lg">Daftar Paket Aktif</h3>
-                        <span class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full">{{ count($paket) }} Paket</span>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50/50">
-                                <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Detail Paket</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Harga & Durasi</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                @foreach($paket as $p)
-                                <tr class="hover:bg-gray-50/30 transition-colors group">
-                                    <form method="POST" action="/paket/{{ $p->id }}">
-                                        @csrf
-                                        @method('PUT')
-                                        
-                                        <td class="px-6 py-4">
-                                            <input type="text" name="nama_paket" value="{{ $p->nama_paket }}" 
-                                                class="font-bold text-gray-800 border-transparent bg-transparent focus:border-indigo-500 focus:bg-white rounded-lg p-1 w-full transition-all">
-                                            <span class="text-xs text-gray-400 block mt-1 ml-1">ID: #{{ $p->id }}</span>
-                                        </td>
-
-                                        <td class="px-6 py-4">
-                                            <div class="flex flex-col gap-1">
-                                                <div class="flex items-center text-sm font-bold text-gray-900 leading-none">
-                                                    <span class="text-gray-400 mr-1 text-xs uppercase">Rp</span>
-                                                    <input type="number" name="harga" value="{{ $p->harga }}" 
-                                                        class="border-transparent bg-transparent focus:border-indigo-500 focus:bg-white rounded-lg p-0 w-24 tracking-tight">
-                                                </div>
-                                                <div class="flex items-center text-xs text-gray-500">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    <input type="number" name="durasi_hari" value="{{ $p->durasi_hari }}" 
-                                                        class="border-transparent bg-transparent focus:border-indigo-500 focus:bg-white rounded-lg p-0 w-8 text-xs"> Hari
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td class="px-6 py-4">
-                                            <div class="flex justify-center items-center gap-2">
-                                                <button type="submit" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Update">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                                                </button>
-                                    </form>
-
-                                                <form method="POST" action="/paket/{{ $p->id }}" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button onclick="return confirm('Hapus paket ini?')" class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
+            <button onclick="document.getElementById('modal-tambah-paket').classList.remove('hidden')"
+                class="px-4 py-2.5 text-sm bg-white border border-gray-200 hover:border-gray-300 text-gray-700 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md">
+                <i class="fa-solid fa-plus text-sm"></i>
+                Tambah Paket
+            </button>
         </div>
     </div>
-</x-app-layout>
+
+    {{-- Table --}}
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-100">
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-left">Paket</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-left">Deskripsi</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Durasi</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-left">Harga</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($paket as $p)
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                    <td class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-box text-emerald-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-800">{{ $p->nama_paket }}</span>
+                                <p class="text-xs text-gray-500 mt-0.5">ID: {{ $p->id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="text-sm text-gray-600 line-clamp-2 max-w-md">{{ $p->deskripsi ?? '-' }}</span>
+                    </td>
+                    <td class="px-6 py-5 text-center">
+                        <span class="inline-flex px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full">
+                            {{ $p->durasi_hari }} Hari
+                        </span>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="text-sm font-bold text-gray-900">Rp {{ number_format($p->harga) }}</span>
+                    </td>
+                    <td class="px-6 py-5 text-right">
+                        <div class="flex justify-end gap-1.5">
+                            <button onclick="openEditPaket({{ $p->id }}, '{{ $p->nama_paket }}', {{ $p->harga }}, {{ $p->durasi_hari }}, '{{ $p->deskripsi }}')"
+                                class="p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all duration-200">
+                                <i class="fa-solid fa-pen text-sm"></i>
+                            </button>
+                            <form method="POST" action="{{ route('paket.destroy', $p->id) }}" onsubmit="return confirm('Hapus paket ini?')" class="inline-block">
+                                @csrf @method('DELETE')
+                                <button class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200">
+                                    <i class="fa-solid fa-trash text-sm"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-16 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-box-open text-gray-400 text-lg"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-500 mb-1">Belum ada paket</h3>
+                        <p class="text-sm text-gray-400">Tambahkan paket pertama Anda</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{-- MODAL TAMBAH --}}
+<div id="modal-tambah-paket" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm border border-gray-100 animate-in zoom-in-95 duration-200">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-50">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-plus text-emerald-600 text-sm"></i>
+                </div>
+                <h2 class="font-semibold text-lg text-gray-800">Tambah Paket</h2>
+            </div>
+            <button onclick="document.getElementById('modal-tambah-paket').classList.add('hidden')"
+                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('paket.store') }}" class="p-6 space-y-5">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Nama Paket</label>
+                    <input type="text" name="nama_paket" required
+                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Deskripsi</label>
+                    <input type="text" name="deskripsi"
+                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Harga</label>
+                        <input type="number" name="harga" required
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80 text-right">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Durasi</label>
+                        <input type="number" name="durasi_hari" required
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('modal-tambah-paket').classList.add('hidden')"
+                    class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL EDIT --}}
+<div id="modal-edit-paket" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm border border-gray-100 animate-in zoom-in-95 duration-200">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-50">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-pen text-blue-600 text-sm"></i>
+                </div>
+                <h2 class="font-semibold text-lg text-gray-800">Edit Paket</h2>
+            </div>
+            <button onclick="document.getElementById('modal-edit-paket').classList.add('hidden')"
+                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <form id="form-edit-paket" method="POST" class="p-6 space-y-5">
+            @csrf @method('PUT')
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Nama Paket</label>
+                    <input type="text" name="nama_paket" id="edit-nama" required
+                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Deskripsi</label>
+                    <input type="text" name="deskripsi" id="edit-desc"
+                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Harga</label>
+                        <input type="number" name="harga" id="edit-harga" required
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80 text-right">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Durasi</label>
+                        <input type="number" name="durasi_hari" id="edit-durasi" required
+                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200 bg-gray-50 hover:bg-gray-50/80">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('modal-edit-paket').classList.add('hidden')"
+                    class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2.5 text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+function openEditPaket(id, nama, harga, durasi, desc) {
+    document.getElementById('form-edit-paket').action = `/paket/${id}`;
+    document.getElementById('edit-nama').value = nama;
+    document.getElementById('edit-harga').value = harga;
+    document.getElementById('edit-durasi').value = durasi;
+    document.getElementById('edit-desc').value = desc;
+    document.getElementById('modal-edit-paket').classList.remove('hidden');
+}
+
+// Close modals on escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        document.getElementById('modal-tambah-paket')?.classList.add('hidden');
+        document.getElementById('modal-edit-paket')?.classList.add('hidden');
+    }
+});
+</script>
+@endpush

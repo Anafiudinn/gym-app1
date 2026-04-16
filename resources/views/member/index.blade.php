@@ -1,126 +1,169 @@
-<x-app-layout>
-   <x-slot name="header">
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-        <h2 class="text-2xl font-bold text-gray-800 leading-tight">
-            {{ __('Manajemen Member') }}
-        </h2>
-        
-        <form action="/member" method="GET" class="w-full md:w-72">
-            <div class="relative">
-                <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Cari nama atau kode..." 
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                    <i class="fas fa-search"></i>
-                </div>
-            </div>
-        </form>
+@extends('layouts.admin')
+@section('title', 'Manajemen Member')
+@section('page-title', 'Manajemen Member')
+
+@section('content')
+
+{{-- STAT CARDS --}}
+<div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="bg-gray-50 rounded-xl p-4">
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Member</p>
+       <p class="text-2xl font-semibold text-gray-800">{{ $stats['totalMembers'] }}</p>
     </div>
-</x-slot>
+    <div class="bg-emerald-50 rounded-xl p-4">
+        <p class="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider mb-1">Aktif</p>
+       <p class="text-2xl font-semibold text-emerald-600">{{ $stats['activeMembers'] }}</p>
+    </div>
+    <div class="bg-amber-50 rounded-xl p-4">
+        <p class="text-[10px] font-semibold text-amber-500 uppercase tracking-wider mb-1">Expired</p>
+       <p class="text-2xl font-semibold text-amber-600">{{ $stats['expiredMembers'] }}</p>
+    </div>
+</div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl border border-gray-100">
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50/50 border-b border-gray-100">
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Kode</th>
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Member</th>
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500">No. WhatsApp</th>
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Expired</th>
-                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @forelse($members as $m)
-                            <tr class="hover:bg-blue-50/30 transition-colors duration-200">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="font-mono text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-                                        {{ $m->kode_member }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $m->nama }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $m->no_wa }}
-                                </td>
-                                {{-- Kolom Status --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($m->status == 'aktif')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                        <span class="w-2 h-2 mr-1.5 rounded-full bg-green-500"></span>
-                                        Aktif
-                                    </span>
-                                    @elseif($m->status == 'expired')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                        <span class="w-2 h-2 mr-1.5 rounded-full bg-orange-500"></span>
-                                        Habis Masa Aktif
-                                    </span>
-                                    @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                                        <span class="w-2 h-2 mr-1.5 rounded-full bg-red-500"></span>
-                                        Nonaktif (Banned)
-                                    </span>
-                                    @endif
-                                </td>
-
-                                {{-- Kolom Expired --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    @if($m->tanggal_kadaluarsa)
-                                    <div class="text-gray-900 font-medium">
-                                        {{ \Carbon\Carbon::parse($m->tanggal_kadaluarsa)->format('d M Y') }}
-                                    </div>
-                                    <div class="text-xs text-gray-400">
-                                        {{ \Carbon\Carbon::parse($m->tanggal_kadaluarsa)->diffForHumans() }}
-                                    </div>
-                                    @else
-                                    <span class="text-gray-400 italic">Belum ditentukan</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                    <div class="flex justify-center space-x-2">
-                                        <a href="/member/{{ $m->id }}"
-                                            class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                            Detail
-                                        </a>
-
-                                        <form action="/member/{{ $m->id }}/toggle" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                class="inline-flex items-center px-3 py-1.5 {{ $m->status == 'aktif' ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100' }} border border-transparent rounded-md font-semibold text-xs uppercase tracking-widest transition duration-150">
-                                                {{ $m->status == 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                        </svg>
-                                        <p>Belum ada data member.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if(method_exists($members, 'links'))
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    {{ $members->links() }}
-                </div>
-                @endif
-
-            </div>
+{{-- SEARCH & FILTER --}}
+<div class="mb-4">
+    <form method="GET" action="{{ route('member.index') }}" class="flex flex-col md:flex-row gap-2">
+        <div class="relative flex-1">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Cari nama atau kode member…"
+                class="w-full pl-9 pr-4 py-2 text-[13px] border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none bg-white">
         </div>
+        <div class="flex gap-2">
+            <select name="status" class="flex-1 md:w-40 px-3 py-2 text-[13px] border border-gray-200 rounded-lg bg-white">
+                <option value="">Semua Status</option>
+                <option value="aktif"    {{ request('status') === 'aktif'    ? 'selected' : '' }}>Aktif</option>
+                <option value="expired"  {{ request('status') === 'expired'  ? 'selected' : '' }}>Expired</option>
+                <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+            <button type="submit" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[13px] font-medium transition">Cari</button>
+        </div>
+    </form>
+</div>
+
+{{-- TABLE --}}
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px]">
+            <thead>
+                <tr class="border-b border-gray-100 bg-gray-50/70">
+                    <th class="text-left text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Member</th>
+                    <th class="text-left text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Kode</th>
+                    <th class="text-left text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Telepon</th>
+                    <th class="text-left text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Paket</th>
+                    <th class="text-left text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider whitespace-nowrap">Berlaku s/d</th>
+                    <th class="text-center text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Status</th>
+                    <th class="text-center text-[10.5px] font-semibold text-gray-400 px-4 py-3 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                @forelse($members as $member)
+                @php
+                    $isExpiredSoon = $member->tanggal_kadaluarsa &&
+                        \Carbon\Carbon::parse($member->tanggal_kadaluarsa)->isPast();
+                @endphp
+                <tr class="hover:bg-gray-50/60 transition">
+
+                    {{-- Nama + Avatar --}}
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-[11px] font-semibold flex-shrink-0 border border-emerald-100">
+                                {{ strtoupper(substr($member->nama, 0, 2)) }}
+                            </div>
+                            <span class="text-[13px] font-medium text-gray-800 whitespace-nowrap">{{ $member->nama }}</span>
+                        </div>
+                    </td>
+
+                    {{-- Kode --}}
+                    <td class="px-4 py-3">
+                        <span class="font-mono text-[11.5px] text-gray-500 bg-gray-100 px-2 py-1 rounded-md border border-gray-200">
+                            {{ $member->kode_member }}
+                        </span>
+                    </td>
+
+                    {{-- Telepon --}}
+                    <td class="px-4 py-3 text-[13px] text-gray-500 whitespace-nowrap">{{ $member->no_wa ?? '-' }}</td>
+
+                    {{-- Paket --}}
+                    <td class="px-4 py-3">
+                        @if($member->membership?->paket?->nama_paket)
+                            <span class="inline-flex items-center text-[11.5px] font-medium text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                {{ $member->membership->paket->nama_paket }}
+                            </span>
+                        @else
+                            <span class="text-[12px] text-gray-400">Tanpa Paket</span>
+                        @endif
+                    </td>
+
+                    {{-- Berlaku s/d --}}
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        @if($member->tanggal_kadaluarsa)
+                            <span class="text-[12.5px] {{ $isExpiredSoon ? 'text-amber-600 font-medium' : 'text-gray-500' }}">
+                                {{ \Carbon\Carbon::parse($member->tanggal_kadaluarsa)->format('d M Y') }}
+                            </span>
+                        @else
+                            <span class="text-[12.5px] text-gray-400">-</span>
+                        @endif
+                    </td>
+
+                    {{-- Status --}}
+                    <td class="px-4 py-3 text-center">
+                        @if($member->status === 'aktif')
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                        </span>
+                        @elseif($member->status === 'expired')
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Expired
+                        </span>
+                        @else
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Nonaktif
+                        </span>
+                        @endif
+                    </td>
+
+                    {{-- Aksi --}}
+                    <td class="px-4 py-3">
+                        <div class="flex items-center justify-center gap-1">
+                            <a href="{{ route('member.show', $member->id) }}"
+                                class="w-8 h-8 flex items-center justify-center text-gray-800 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition" title="Detail">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </a>
+                            <form method="POST" action="{{ route('member.toggle', $member->id) }}" onsubmit="return confirm('Ubah status member ini?')">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                    class="w-8 h-8 flex items-center justify-center text-dark hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition"
+                                    title="{{ $member->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="px-4 py-16 text-center text-gray-400">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-10 h-10 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <p class="text-sm">Belum ada data member ditemukan</p>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-</x-app-layout>
+
+    {{-- PAGINATION --}}
+    @if($members->hasPages())
+    <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-4">
+        <p class="text-[12px] text-gray-400">
+            Menampilkan {{ $members->firstItem() }}–{{ $members->lastItem() }} dari {{ $members->total() }} member
+        </p>
+        {{ $members->withQueryString()->links() }}
+    </div>
+    @endif
+</div>
+
+@endsection

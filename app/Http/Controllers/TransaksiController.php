@@ -7,112 +7,173 @@ use App\Models\Membership;
 use App\Models\Paket;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class TransaksiController extends Controller
 {
-    // 📌 tampil data transaksi
-    public function index()
+    public function index(Request $request)
     {
-        $data = Transaksi::with(['member', 'paket'])->latest()->get();
-        $paket = Paket::all();
-        $members = Member::all();
+        $query = Transaksi::with(['member', 'paket'])->latest();
 
-        return view('transaksi.index', compact('data', 'paket', 'members'));
+        // Filter pencarian nama / invoice
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('kode_invoice', 'like', "%{$search}%")
+                    ->orWhere('nama_tamu', 'like', "%{$search}%")
+                    ->orWhereHas('member', fn($q) => $q->where('nama', 'like', "%{$search}%"));
+            });
+        }
+
+        // Filter tanggal
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Filter tipe
+        if ($request->filled('tipe')) {
+            $query->where('tipe', $request->tipe);
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $data    = $query->paginate(15)->withQueryString();
+        // Cari di fungsi index, ubah bagian ini:
+        $members = Member::orderBy('nama')->get();
+        // Mengambil semua paket KECUALI yang namanya 'Harian'
+        $paket = Paket::where('nama_paket', '!=', 'Harian')->get();
+
+        // Summary cards
+        $totalHariIni    = Transaksi::whereDate('created_at', today())->sum('jumlah_bayar');
+        $totalBulanIni   = Transaksi::whereMonth('created_at', now()->month)->sum('jumlah_bayar');
+        $countHariIni    = Transaksi::whereDate('created_at', today())->count();
+
+        $selectedMemberId = $request->member_id;
+        $activeTab        = $request->tab ?? 'tamu';
+
+        return view('transaksi.index', compact(
+            'data',
+            'members',
+            'paket',
+            'selectedMemberId',
+            'activeTab',
+            'totalHariIni',
+            'totalBulanIni',
+            'countHariIni'
+        ));
     }
 
-    // ==============================
-    // 🔹 1. TRANSAKSI HARIAN (TAMU)
-    // ==============================
     public function storeHarian(Request $request)
     {
+        $request->validate(['nama_tamu' => 'required']);
 
-        $request->validate([
-            'nama_tamu' => 'required'
-        ]);
-
-        // ambil paket harian
         $paket = Paket::where('nama_paket', 'Harian')->first();
 
+        if (!$paket) {
+            return back()->with('error', 'Gagal: Paket bernama "Harian" belum dibuat di database!');
+        }
+
         Transaksi::create([
-            'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
-            'nama_tamu' => $request->nama_tamu,
-            'paket_id' => $paket->id,
-            'tipe' => 'harian',
-            'jumlah_bayar' => $paket->harga,
-            'metode_pembayaran' => 'cash',
-            'status' => 'dibayar',
-            'tanggal_pembayaran' => now()
+            'kode_invoice'       => 'INV-' . strtoupper(Str::random(6)),
+            'nama_tamu'          => $request->nama_tamu,
+            'paket_id'           => $paket->id,
+            'tipe'               => 'harian',
+            'jumlah_bayar'       => $paket->harga,
+            'metode_pembayaran'  => 'cash',
+            'status'             => 'dibayar',
+            'tanggal_pembayaran' => now(),
         ]);
 
-        return back()->with('success', 'Transaksi harian berhasil');
+        return back()->with('success', 'Transaksi harian berhasil dicatat');
     }
 
-    // ==================================
-    // 🔹 2. DAFTAR / PERPANJANG MEMBER
-    // ==================================
     public function storeMembership(Request $request)
     {
-        $paket = Paket::findOrFail($request->paket_id);
+        // 1. Validasi Input (Tambah nullable pada member_id)
+        $request->validate([
+            'tipe_member' => 'required|in:baru,perpanjang',
+            'paket_id'    => 'required|exists:pakets,id',
+            'nama'        => 'required_if:tipe_member,baru',
+            'member_id'   => 'nullable|required_if:tipe_member,perpanjang|exists:members,id',
+        ]);
 
-        // =========================
-        // 🔹 MEMBER BARU
-        // =========================
-        if ($request->tipe_member == 'baru') {
+        if ($request->tipe_member === 'perpanjang') {
+        $member = Member::findOrFail($request->member_id);
 
-            $member = Member::create([
-                'kode_member' => 'GYM-' . rand(1000, 9999),
-                'nama' => $request->nama,
-                'no_wa' => $request->no_wa,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'status' => 'aktif',
-                'tanggal_daftar' => now()
-            ]);
-        } else {
-            // =========================
-            // 🔹 PERPANJANGAN
-            // =========================
-            $member = Member::findOrFail($request->member_id);
+        // CEK STATUS: Jika nonaktif, batalkan proses
+        if ($member->status === 'nonaktif') {
+            return back()->with('error', 'Gagal: Member ini sedang dinonaktifkan (bermasalah). Pergi ke halaman management member.');
         }
+    }
 
-        // hitung masa aktif
-        $start = now();
+        try {
+            return DB::transaction(function () use ($request) {
+                $paket = Paket::findOrFail($request->paket_id);
 
-        // kalau masih aktif → lanjut dari expired
-        if ($member->tanggal_kadaluarsa && now()->lt($member->tanggal_kadaluarsa)) {
-            $start = $member->tanggal_kadaluarsa;
+                // 2. Logika Member (Baru atau Ambil yang sudah ada)
+                if ($request->tipe_member === 'baru') {
+                    $member = Member::create([
+                        'kode_member'    => 'GYM-' . rand(1000, 9999),
+                        'nama'           => $request->nama,
+                        'no_wa'          => $request->no_wa,
+                        'jenis_kelamin'  => $request->jenis_kelamin,
+                        'status'         => 'aktif',
+                        'tanggal_daftar' => now(),
+                    ]);
+                } else {
+                    $member = Member::findOrFail($request->member_id);
+                }
+
+                // 3. Hitung Tanggal Mulai & Selesai
+                $start = now();
+                // Jika member masih punya masa aktif (belum kadaluarsa), akumulasikan
+                if ($member->tanggal_kadaluarsa && Carbon::parse($member->tanggal_kadaluarsa)->gt(now())) {
+                    $start = Carbon::parse($member->tanggal_kadaluarsa);
+                }
+
+                $end = Carbon::parse($start)->addDays($paket->durasi_hari);
+
+                // 4. Buat Transaksi
+                $transaksi = Transaksi::create([
+                    'kode_invoice'       => 'INV-' . strtoupper(Str::random(6)),
+                    'member_id'          => $member->id,
+                    'paket_id'           => $paket->id,
+                    'tipe'               => 'membership',
+                    'jumlah_bayar'       => $paket->harga,
+                    'metode_pembayaran'  => 'cash',
+                    'status'             => 'dibayar',
+                    'tanggal_pembayaran' => now(),
+                ]);
+
+                // 5. Catat Log Membership
+                Membership::create([
+                    'member_id'       => $member->id,
+                    'transaksi_id'    => $transaksi->id,
+                    'paket_id'        => $paket->id,
+                    'tanggal_mulai'   => $start,
+                    'tanggal_selesai' => $end,
+                    'status'          => 'aktif',
+                ]);
+
+                // 6. Update Masa Aktif Member
+                $member->update([
+                    'status'             => 'aktif',
+                    'tanggal_kadaluarsa' => $end
+                ]);
+
+                return back()->with('success', 'Membership ' . $member->nama . ' berhasil diproses');
+            });
+        } catch (\Exception $e) {
+            // Jika ada error (DB error/typo), munculkan pesannya
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
-
-        $end = \Carbon\Carbon::parse($start)->addDays($paket->durasi_hari);
-
-        // transaksi
-        $transaksi = Transaksi::create([
-            'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
-            'member_id' => $member->id,
-            'paket_id' => $paket->id,
-            'tipe' => 'membership',
-            'jumlah_bayar' => $paket->harga,
-            'metode_pembayaran' => 'cash',
-            'status' => 'dibayar',
-            'tanggal_pembayaran' => now()
-        ]);
-
-        // membership
-        Membership::create([
-            'member_id' => $member->id,
-            'transaksi_id' => $transaksi->id,
-            'paket_id' => $paket->id,
-            'tanggal_mulai' => $start,
-            'tanggal_selesai' => $end,
-            'status' => 'aktif'
-        ]);
-
-        // update member
-        $member->update([
-            'status' => 'aktif',
-            'tanggal_kadaluarsa' => $end
-        ]);
-
-        return back()->with('success', 'Membership berhasil diproses');
     }
 }

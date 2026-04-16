@@ -33,7 +33,8 @@ class LandingPageController extends Controller
     // 🔹 FORM DAFTAR
     public function create(Request $request)
     {
-        $paket = Paket::all();
+        // Mengambil semua paket KECUALI yang namanya 'Harian'
+        $paket = Paket::where('nama_paket', '!=', 'Harian')->get();
         $selectedPaketId = $request->query('paket_id');
 
         return view('landing.daftar', compact('paket', 'selectedPaketId')); // Tambahkan ini
