@@ -1498,5 +1498,4 @@ $masihAktif = $sisaDetik > 0;
         });
     }
 </script>
-
 @endsection

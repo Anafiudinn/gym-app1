@@ -145,7 +145,7 @@
                class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-[12.5px] text-gray-400 rounded-lg
                       {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cash-register w-4 text-center text-[13px] text-gray-500"></i>
-                Transaksi
+                Transaksi (Onsite)
             </a>
 
             <a href="{{ route('verifikasi.index') }}"

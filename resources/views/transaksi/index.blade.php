@@ -304,8 +304,8 @@
                             </td>
                             <td class="px-4 py-2">
                                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide
-                                    {{ $d->channel === 'online' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600' }}">
-                                    {{ $d->channel }}
+                                    {{ $d->channel === 'online' ? 'bg-purple-50 text-purple-600' : 'bg-green-50 text-green-600' }}">
+                                    {{ $d->channel ?? 'onsite' }}
                                 </span>
                             </td>
                             <td class="px-4 py-3.5 text-[12.5px] text-gray-600">
