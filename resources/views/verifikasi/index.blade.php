@@ -414,6 +414,7 @@
                     <th class="th">Member</th>
                     <th class="th text-center">Tanggal</th>
                     <th class="th text-center">Nominal</th>
+                    <th class="th text-center">Channel</th>
                     <th class="th text-center">Status</th>
                     <th class="th text-right">Catatan Admin</th>
                 </tr>
@@ -421,21 +422,37 @@
             <tbody id="tbody-history">
                 @forelse($data->whereIn('status', ['ditolak', 'diterima']) as $d)
                 <tr class="history-row"
-                    data-invoice="{{ strtolower($d->transaksi->kode_invoice ?? '') }}"
-                    data-nama="{{ strtolower($d->transaksi->member->nama ?? '') }}"
+                    data-invoice="{{ strtolower($d->transaksi?->kode_invoice ?? '') }}"
+                    data-nama="{{ strtolower($d->transaksi?->member?->nama ?? '') }}"
                     data-status="{{ $d->status }}"
                     data-date="{{ $d->created_at->format('Y-m-d') }}">
+                    
                     <td class="td">
-                        <div class="text-[13px] font-semibold text-gray-800">{{ $d->transaksi->member->nama ?? '-' }}</div>
-                        <div class="text-[10.5px] font-mono text-gray-400 mt-0.5">#{{ $d->transaksi->kode_invoice }}</div>
+                        <div class="text-[13px] font-semibold text-gray-800">
+                            {{ $d->transaksi?->member?->nama ?? 'Bukan Member / Terhapus' }}
+                        </div>
+                        <div class="text-[10.5px] font-mono text-gray-400 mt-0.5">
+                            #{{ $d->transaksi?->kode_invoice ?? 'N/A' }}
+                        </div>
                     </td>
+
                     <td class="td text-center">
                         <div class="text-[13px] font-semibold text-gray-800">{{ $d->created_at->format('d M Y') }}</div>
                         <div class="text-[10.5px] text-gray-500 mt-0.5">{{ $d->created_at->format('H:i') }}</div>
                     </td>
+
                     <td class="td text-center">
-                        <span class="text-[13px] font-bold text-gray-800">Rp{{ number_format($d->transaksi->jumlah_bayar, 0, ',', '.') }}</span>
+                        <span class="text-[13px] font-bold text-gray-800">
+                            Rp{{ number_format($d->transaksi?->jumlah_bayar ?? 0, 0, ',', '.') }}
+                        </span>
                     </td>
+
+                    <td class="td text-center">
+                        <span class="text-[13px] font-semibold text-gray-800">
+                            {{ $d->transaksi?->channel ?? '-' }}
+                        </span>
+                    </td>
+
                     <td class="td text-center">
                         @if($d->status === 'diterima')
                             <span class="status-badge status-diterima">Diterima</span>
@@ -443,13 +460,14 @@
                             <span class="status-badge status-ditolak">Ditolak</span>
                         @endif
                     </td>
+
                     <td class="td text-right">
                         <span class="text-[12px] text-gray-400 italic">{{ $d->catatan_admin ?? '—' }}</span>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="td py-12 text-center text-[12px] text-gray-400 italic">Belum ada riwayat.</td>
+                    <td colspan="6" class="td py-12 text-center text-[12px] text-gray-400 italic">Belum ada riwayat.</td>
                 </tr>
                 @endforelse
             </tbody>

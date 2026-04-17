@@ -14,9 +14,11 @@ class Transaksi extends Model
         'nama_tamu',
         'paket_id',
         'tipe',
+        'channel',
         'jumlah_bayar',
         'metode_pembayaran',
         'status',
+        'expired_at',
         'tanggal_pembayaran'
     ];
 

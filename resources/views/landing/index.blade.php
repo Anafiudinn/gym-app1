@@ -821,7 +821,7 @@
                     Bergabunglah dengan komunitas fitness terbaik. Fasilitas lengkap, trainer profesional, dan lingkungan yang mendukung perjalanan kebugaran Anda.
                 </p>
                 <div class="hero-cta">
-                    <a href="/daftar" class="btn-primary">Mulai Sekarang →</a>
+                    <a href="/#layanan" class="btn-primary">Mulai Sekarang →</a>
                     <a href="#harga" class="btn-secondary">Lihat Harga</a>
                 </div>
             </div>

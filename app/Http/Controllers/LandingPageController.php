@@ -42,7 +42,6 @@ class LandingPageController extends Controller
     }
 
     // 🔹 SIMPAN PENDAFTARAN
-    // 🔹 SIMPAN PENDAFTARAN
     public function store(Request $request)
     {
         $request->validate([
@@ -52,61 +51,55 @@ class LandingPageController extends Controller
             'paket_id' => 'required'
         ]);
 
-          try {
+        try {
             return DB::transaction(function () use ($request) {
+                $member = Member::updateOrCreate(
+                    ['no_wa' => $request->no_wa],
+                    [
+                        'nama' => $request->nama,
+                        'jenis_kelamin' => $request->jenis_kelamin,
+                        'kode_member' => 'GYM-' . rand(1000, 9999),
+                        'status' => 'nonaktif',
+                        'tanggal_daftar' => now()
+                    ]
+                );
+
                 $paket = Paket::findOrFail($request->paket_id);
-            
 
-                // 2. LOGIKA SAKTI: Cek apakah ada transaksi pending sebelumnya
+                // Set durasi expired (Misal: 2 menit untuk testing, nanti bisa diubah ke 2 jam atau sesuai kebutuhan)
+                $waktuExpired = now()->addMinutes(5);
 
-        // 1. Update atau Create Member
-        $member = Member::updateOrCreate(
-            ['no_wa' => $request->no_wa],
-            [
-                'nama' => $request->nama,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'kode_member' => 'GYM-' . rand(1000, 9999), // Hanya diisi jika baru
-                'status' => 'nonaktif',
-                'tanggal_daftar' => now()
-            ]
-        );
+                $transaksi = Transaksi::where('member_id', $member->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
 
-        $paket = Paket::findOrFail($request->paket_id);
+                if (!$transaksi) {
+                    $transaksi = Transaksi::create([
+                        'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
+                        'member_id' => $member->id,
+                        'paket_id' => $paket->id,
+                        'tipe' => 'membership',
+                        'channel' => 'online',
+                        'jumlah_bayar' => $paket->harga,
+                        'metode_pembayaran' => 'transfer',
+                        'status' => 'pending',
+                        'expired_at' => $waktuExpired // SIMPAN DISINI
+                    ]);
+                } else {
+                    $transaksi->update([
+                        'paket_id' => $paket->id,
+                        'jumlah_bayar' => $paket->harga,
+                        'expired_at' => $waktuExpired // UPDATE WAKTU JIKA DAFTAR ULANG
+                    ]);
+                }
 
-        // 2. LOGIKA SAKTI: Cek apakah ada transaksi pending sebelumnya
-        $transaksi = Transaksi::where('member_id', $member->id)
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
-
-        if (!$transaksi) {
-            // Jika tidak ada transaksi pending, baru buat invoice baru
-            $transaksi = Transaksi::create([
-                'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
-                'member_id' => $member->id,
-                'paket_id' => $paket->id,
-                'tipe' => 'membership',
-                'jumlah_bayar' => $paket->harga,
-                'metode_pembayaran' => 'transfer',
-                'status' => 'pending'
-            ]);
-        } else {
-            // Jika ada, update paketnya (siapa tau user ganti pilihan paket)
-            $transaksi->update([
-                'paket_id' => $paket->id,
-                'jumlah_bayar' => $paket->harga
-            ]);
-        }
-
-        return redirect('/pembayaran/' . $transaksi->kode_invoice);
+                return redirect('/pembayaran/' . $transaksi->kode_invoice);
             });
         } catch (\Exception $e) {
-            // Log error jika perlu
-            return back()->with('error', 'Terjadi kesalahan saat memproses pendaftaran. Silakan coba lagi.');
+            return back()->with('error', 'Terjadi kesalahan saat memproses pendaftaran.');
         }
-
     }
-
     // 🔹 FORM UPLOAD
 
     public function pembayaran($kode)
@@ -115,8 +108,11 @@ class LandingPageController extends Controller
             ->with(['member', 'paket', 'verifikasi'])
             ->firstOrFail();
 
-        // Kalau statusnya lunas/dibayar, kita bisa kasih view khusus atau 
-        // tetep di halaman ini tapi dengan tampilan "Lunas" (lebih disarankan)
+        // Logika Auto-Reject jika diakses saat sudah expired
+        if ($transaksi->status == 'pending' && $transaksi->expired_at && now()->gt($transaksi->expired_at)) {
+            $transaksi->update(['status' => 'ditolak']);
+        }
+
         return view('landing.pembayaran', compact('transaksi'));
     }
     // 🔹 PROSES SIMPAN BUKTI TRANSFER (POST)
@@ -124,9 +120,15 @@ class LandingPageController extends Controller
     {
         $transaksi = Transaksi::where('kode_invoice', $kode)->firstOrFail();
 
-        // Proteksi: Jika sudah lunas, jangan boleh upload lagi
+        // 1. Cek apakah sudah dibayar
         if ($transaksi->status == 'dibayar') {
             return redirect()->back()->with('error', 'Pembayaran ini sudah tervalidasi.');
+        }
+
+        // 2. Cek apakah sudah expired
+        if ($transaksi->expired_at && now()->gt($transaksi->expired_at)) {
+            $transaksi->update(['status' => 'ditolak']); // Pastikan statusnya update
+            return redirect()->back()->with('error', 'Maaf, waktu pembayaran sudah habis. Silahkan daftar ulang.');
         }
 
         $request->validate([
@@ -135,27 +137,22 @@ class LandingPageController extends Controller
             'bukti' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        // 3. Simpan File ke Storage (Folder: public/bukti)
         $file = $request->file('bukti')->store('bukti', 'public');
 
-        // 4. Gunakan updateOrCreate agar data tidak duplikat di tabel verifikasi
-        // Ini berguna kalau user upload ulang karena ditolak sebelumnya
-        \App\Models\VerifikasiPembayaran::updateOrCreate(
+        VerifikasiPembayaran::updateOrCreate(
             ['transaksi_id' => $transaksi->id],
             [
                 'nama_rekening' => $request->nama_rekening,
                 'nama_bank' => $request->nama_bank,
                 'bukti_pembayaran' => $file,
-                'status' => 'pending', // Set balik ke pending buat dicek admin
-                'catatan_admin' => null // Hapus catatan lama jika ada
+                'status' => 'pending',
+                'catatan_admin' => null
             ]
         );
 
-        // 5. Pastikan status transaksi tetap pending (biar admin tau ada update)
         $transaksi->update(['status' => 'pending']);
 
-        // 6. Redirect balik ke halaman pembayaran (Single Dynamic Page tadi)
-        return redirect('/pembayaran/' . $kode)->with('success', 'Bukti berhasil dikirim!, tunggu konfirmasi dari admin.');
+        return redirect('/pembayaran/' . $kode)->with('success', 'Bukti berhasil dikirim!');
     }
     public function batal($kode)
     {
@@ -223,4 +220,5 @@ class LandingPageController extends Controller
 
         return view('landing.cek_membership', compact('member'));
     }
+
 }

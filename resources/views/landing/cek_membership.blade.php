@@ -308,7 +308,12 @@
 
                 <div class="mc-field">
                     <div class="mc-label">Nama</div>
-                    <div class="mc-value">{{ $member->nama }}</div>
+                    <div class="mc-value" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ $member->nama }}</span>
+                        <span style="font-size: 0.75rem; color: var(--muted); font-weight: 400;">
+                            <i class="fab fa-whatsapp"></i> {{ $member->no_wa }}
+                        </span>
+                    </div>
                 </div>
 
                 <div class="mc-footer">
@@ -325,23 +330,62 @@
                 </div>
             </div>
 
-            @if($riwayat->count() > 0)
-            <div class="riwayat-list">
-                <div class="riwayat-title">Riwayat Pembelian</div>
-                @foreach($riwayat as $r)
-                <div class="riwayat-item">
-                    <div class="ri-left">
-                        <div class="ri-paket">{{ $r->paket?->nama ?? 'Paket' }}</div>
-                        <div class="ri-tgl">{{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</div>
-                    </div>
-                    <div class="ri-harga">Rp {{ number_format($r->jumlah_bayar, 0, ',', '.') }}</div>
-                </div>
-                @endforeach
-            </div>
-            @endif
-
-            @endisset
+        
+        <div style="margin-top: 1rem; text-align: center;">
+            <button id="downloadCard" class="btn-cari" style="background: var(--lime); color: #000; width: 100%; max-width: 600px; height: 1.5rem;">
+                Download Kartu Digital
+            </button>
         </div>
+
+        @if($riwayat->count() > 0)
+        <div class="riwayat-list">
+            <div class="riwayat-title">Riwayat Pembelian</div>
+            @foreach($riwayat as $r)
+            <div class="riwayat-item">
+                <div class="ri-left">
+                    <div class="ri-paket">{{ $r->paket?->nama_paket ?? 'Paket' }}</div>
+                    <div class="ri-tgl">{{ \Carbon\Carbon::parse($r->created_at)->format('d/m/Y') }}</div>
+                </div>
+                <div class="ri-harga">Rp {{ number_format($r->jumlah_bayar, 0, ',', '.') }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        @endisset
     </div>
 </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    document.getElementById('downloadCard').addEventListener('click', function() {
+        const card = document.querySelector('.member-card');
+        const btn = this;
+        
+        // Ubah teks tombol saat proses
+        const originalText = btn.textContent;
+        btn.textContent = '⏳ Memproses...';
+        btn.disabled = true;
+
+        html2canvas(card, {
+            scale: 2, // Biar hasil gambar lebih tajam/HD
+            backgroundColor: null, // Background transparan jika border-radius ada
+            useCORS: true // Jaga-jaga kalau ada gambar dari URL luar
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Member-{{ $member->kode_member }}.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Kembalikan tombol
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error('Gagal download kartu:', err);
+            btn.textContent = '❌ Gagal Download';
+            btn.disabled = false;
+        });
+    });
+</script>
 @endsection

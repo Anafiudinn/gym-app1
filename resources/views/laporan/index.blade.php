@@ -251,6 +251,7 @@
                     <th class="th">Pelanggan</th>
                     <th class="th text-center">Tipe</th>
                     <th class="th text-center">Paket</th>
+                    <th class="th text-center">Channel</th>
                     <th class="th text-right">Jumlah</th>
                     <th class="th text-center">Status</th>
                 </tr>
@@ -272,6 +273,9 @@
                     </td>
                     <td class="td text-center">
                         <span class="text-[12.5px] text-gray-600">{{ $d->paket->nama_paket ?? '—' }}</span>
+                    </td>
+                    <td class="td text-center">
+                        <span class="text-[12.5px] text-gray-600">{{ $d->channel ?? '—' }}</span>
                     </td>
                     <td class="td text-right">
                         <span class="text-[13px] font-bold text-gray-900">Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}</span>

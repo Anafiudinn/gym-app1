@@ -15,9 +15,18 @@ class TransaksiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Transaksi::with(['member', 'paket'])->latest();
+        // 1. Inisialisasi Query dengan Filter Default: Onsite & Hari Ini
+        $query = Transaksi::with(['member', 'paket'])
+            ->where('channel', 'onsite') // Hanya menampilkan yang Onsite
+            ->latest();
 
-        // Filter pencarian nama / invoice
+        // 2. Logika Auto-Reset Harian
+        // Jika user TIDAK sedang mencari berdasarkan tanggal, maka otomatis filter 'hari ini'
+        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+            $query->whereDate('created_at', today());
+        }
+
+        // 3. Filter Pencarian (Nama/Invoice) - Tetap berfungsi jika ingin cari data hari ini
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -27,7 +36,7 @@ class TransaksiController extends Controller
             });
         }
 
-        // Filter tanggal
+        // 4. Filter Tanggal Manual (Jika ingin melihat history hari lain)
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -35,31 +44,32 @@ class TransaksiController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // Filter tipe
+        // 5. Filter Tipe & Status
         if ($request->filled('tipe')) {
             $query->where('tipe', $request->tipe);
         }
-
-        // Filter status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        // 6. Eksekusi Data
         $data    = $query->paginate(15)->withQueryString();
-        // Cari di fungsi index, ubah bagian ini:
         $members = Member::orderBy('nama')->get();
-        // Mengambil semua paket KECUALI yang namanya 'Harian'
-        $paket = Paket::where('nama_paket', '!=', 'Harian')->get();
-         $paketDefault = Paket::where('nama_paket', 'Harian')->first(); // khusus default
 
-        // Summary cards
-        $totalHariIni    = Transaksi::whereDate('created_at', today())->sum('jumlah_bayar');
-        $totalBulanIni   = Transaksi::whereMonth('created_at', now()->month)->sum('jumlah_bayar');
-        $countHariIni    = Transaksi::whereDate('created_at', today())->count();
+        // Ambil paket selain harian untuk dropdown membership
+        $paket = Paket::where('nama_paket', '!=', 'Harian')->get();
+        // Ambil paket harian sebagai default
+        $paketDefault = Paket::where('nama_paket', 'Harian')->first();
+
+        // 7. Data untuk Summary Cards (Statistik)
+        $totalHariIni  = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->sum('jumlah_bayar');
+        $totalBulanIni = Transaksi::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('jumlah_bayar');
+        $countHariIni  = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->count();
 
         $selectedMemberId = $request->member_id;
         $activeTab        = $request->tab ?? 'tamu';
 
+        // 8. Kirim ke View
         return view('transaksi.index', compact(
             'data',
             'members',
@@ -69,8 +79,7 @@ class TransaksiController extends Controller
             'totalHariIni',
             'totalBulanIni',
             'countHariIni',
-            'paketDefault' // ✅ TAMBAHKAN INI
-
+            'paketDefault'
         ));
     }
 
@@ -79,7 +88,7 @@ class TransaksiController extends Controller
         $request->validate(['nama_tamu' => 'required']);
 
         $paket = Paket::where('nama_paket', 'Harian')->first();
-        
+
 
         if (!$paket) {
             return back()->with('error', 'Gagal: Paket bernama "Harian" belum dibuat di database!');
@@ -90,6 +99,7 @@ class TransaksiController extends Controller
             'nama_tamu'          => $request->nama_tamu,
             'paket_id'           => $paket->id,
             'tipe'               => 'harian',
+            'channel'            => 'onsite',
             'jumlah_bayar'       => $paket->harga,
             'metode_pembayaran'  => 'cash',
             'status'             => 'dibayar',
@@ -110,13 +120,13 @@ class TransaksiController extends Controller
         ]);
 
         if ($request->tipe_member === 'perpanjang') {
-        $member = Member::findOrFail($request->member_id);
+            $member = Member::findOrFail($request->member_id);
 
-        // CEK STATUS: Jika nonaktif, batalkan proses
-        if ($member->status === 'nonaktif') {
-            return back()->with('error', 'Gagal: Member ini sedang dinonaktifkan (bermasalah). Pergi ke halaman management member.');
+            // CEK STATUS: Jika nonaktif, batalkan proses
+            if ($member->status === 'nonaktif') {
+                return back()->with('error', 'Gagal: Member ini sedang dinonaktifkan (bermasalah). Pergi ke halaman management member.');
+            }
         }
-    }
 
         try {
             return DB::transaction(function () use ($request) {
@@ -151,6 +161,7 @@ class TransaksiController extends Controller
                     'member_id'          => $member->id,
                     'paket_id'           => $paket->id,
                     'tipe'               => 'membership',
+                    'channel'            => 'onsite',
                     'jumlah_bayar'       => $paket->harga,
                     'metode_pembayaran'  => 'cash',
                     'status'             => 'dibayar',
