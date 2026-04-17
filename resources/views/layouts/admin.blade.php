@@ -160,6 +160,12 @@
                     </span>
                 @endif
             </a>
+           <a href="{{ route('riwayat.index') }}"
+               class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-[12.5px] text-gray-400 rounded-lg
+                      {{ request()->routeIs('riwayat.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-clock-rotate-left w-4 text-center text-[13px] text-gray-500"></i>
+                Riwayat Transaksi
+            </a>
 
             {{-- LAPORAN --}}
             <p class="nav-label mt-3">Analitik</p>

@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\{ AbsensiController, DashboardController, LandingPageController, LaporanController, MemberController, PaketController, ProfileController, TransaksiController, VerifikasiPembayaranController };
+use App\Http\Controllers\{AbsensiController, DashboardController, LandingPageController, LaporanController, MemberController, PaketController, ProfileController, TransaksiController, VerifikasiPembayaranController};
+use App\Http\Controllers\RiwayatTransaksiController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -9,11 +10,12 @@ use Illuminate\Support\Facades\Route;
 | Public Routes (Tanpa Login)
 |--------------------------------------------------------------------------
 */
+
 Route::controller(LandingPageController::class)->group(function () {
     Route::get('/', 'index')->name('landing');
     Route::get('/daftar', 'create')->name('daftar.index');
     Route::post('/daftar', 'store')->name('daftar.store');
-    
+
     // Fitur Pembayaran & Cek Status
     Route::get('/pembayaran/{kode}', 'pembayaran')->name('pembayaran');
     Route::post('/pembayaran/{kode}/upload', 'uploadBukti')->name('pembayaran.upload');
@@ -61,6 +63,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{id}/terima', 'terima')->name('terima');
         Route::post('/{id}/tolak', 'tolak')->name('tolak');
     });
+
+    //Riwayat Transaksi
+    Route::get('/riwayat', [RiwayatTransaksiController::class, 'index'])->name('riwayat.index');
+    Route::get('/riwayat/excel', [RiwayatTransaksiController::class, 'exportExcel'])->name('riwayat.excel');
+    Route::get('/riwayat/pdf', [RiwayatTransaksiController::class, 'exportPdf'])->name('riwayat.pdf');
 
     // Absensi Member
     Route::controller(AbsensiController::class)->prefix('absensi')->name('absensi.')->group(function () {

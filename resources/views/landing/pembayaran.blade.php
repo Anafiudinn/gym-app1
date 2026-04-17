@@ -1420,33 +1420,48 @@ $masihAktif = $sisaDetik > 0;
         });
     }
 
-    // ── Countdown timer ───────────────────────────────────────────────────
-    @if($masihAktif && $sisaDetik !== null)
+ {{-- ── Countdown timer ── --}}
+    @php
+        $now = time(); // Ambil timestamp sekarang (detik)
+        $expired = strtotime($transaksi->expired_at); // Ubah expired_at jadi detik
+        
+        $sisaDetik = $expired - $now; // Hitung selisihnya
+        
+        // Pastikan angka tidak negatif dan hanya tampil jika status pending
+        if ($sisaDetik < 0 || $transaksi->status !== 'pending') {
+            $sisaDetik = 0;
+        }
+        
+        $masihAktif = $sisaDetik > 0;
+    @endphp
+
+    @if($masihAktif)
         (function() {
-            let sisa = {
-                {
-                    (int) $sisaDetik
-                }
-            };
+            // Gunakan Number() dan bungkus dengan petik untuk keamanan ekstra
+            let sisa = Number("{{ $sisaDetik }}"); 
+
             const timerEl = document.getElementById('countdownTimer');
             const boxEl = document.getElementById('countdownBox');
 
+            if (!timerEl) return;
+
             function format(s) {
+                if (s <= 0) return "00:00:00";
                 const h = String(Math.floor(s / 3600)).padStart(2, '0');
                 const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
                 const sc = String(s % 60).padStart(2, '0');
-                return `${h}:${m}:${sc}`;
+                return h + ":" + m + ":" + sc;
             }
 
             function tick() {
                 if (sisa <= 0) {
-                    // Waktu habis: reload biar controller auto-reject
-                    location.reload();
+                    timerEl.textContent = "00:00:00";
+                    setTimeout(function() { location.reload(); }, 1000);
                     return;
                 }
+
                 timerEl.textContent = format(sisa);
 
-                // Ubah warna jadi merah jika < 5 menit
                 if (sisa <= 300 && boxEl) {
                     boxEl.classList.add('danger');
                 }
@@ -1457,9 +1472,12 @@ $masihAktif = $sisaDetik > 0;
 
             tick();
         })();
-    @endif
+    @else
 
-    // ── Upload zone interactions ──────────────────────────────────────────
+          const el = document.getElementById('countdownTimer');
+            if(el) el.textContent = "00:00:00";
+       
+    @endif
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
@@ -1498,4 +1516,5 @@ $masihAktif = $sisaDetik > 0;
         });
     }
 </script>
+
 @endsection

@@ -25,7 +25,9 @@
         width: 100%;
     }
 
-    .back-link:hover { color: var(--lime); }
+    .back-link:hover {
+        color: var(--lime);
+    }
 
     .daftar-card {
         background: var(--card);
@@ -78,9 +80,9 @@
         border-color: var(--lime);
     }
 
-    .paket-option input[type="radio"]:checked + .paket-label {
+    .paket-option input[type="radio"]:checked+.paket-label {
         border-color: var(--lime);
-        background: rgba(170,255,0,0.07);
+        background: rgba(170, 255, 0, 0.07);
     }
 
     .paket-name {
@@ -126,12 +128,15 @@
         transition: 0.2s;
     }
 
-    .gender-label:hover { border-color: var(--lime); color: var(--lime); }
-
-    .gender-option input[type="radio"]:checked + .gender-label {
+    .gender-label:hover {
         border-color: var(--lime);
         color: var(--lime);
-        background: rgba(170,255,0,0.07);
+    }
+
+    .gender-option input[type="radio"]:checked+.gender-label {
+        border-color: var(--lime);
+        color: var(--lime);
+        background: rgba(170, 255, 0, 0.07);
     }
 
     .form-control-plain {
@@ -147,8 +152,13 @@
         outline: none;
     }
 
-    .form-control-plain:focus { border-color: var(--lime); }
-    .form-control-plain::placeholder { color: #444; }
+    .form-control-plain:focus {
+        border-color: var(--lime);
+    }
+
+    .form-control-plain::placeholder {
+        color: #444;
+    }
 
     .error-msg {
         color: var(--danger);
@@ -175,21 +185,27 @@
         margin-top: 0.5rem;
     }
 
-    .btn-submit:hover { background: var(--lime-dark); transform: translateY(-1px); }
+    .btn-submit:hover {
+        background: var(--lime-dark);
+        transform: translateY(-1px);
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="page-wrapper">
-    <div class="daftar-page">
-        <div style="width:100%;max-width:600px;">
-            <div style="text-align:center;margin-bottom:2rem;">
-                <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;">Layanan <span style="color:var(--lime);">Kami</span></h1>
-                <p style="color:var(--muted);font-size:0.875rem;margin-top:0.3rem;">Pilih layanan yang kamu butuhkan</p>
-            </div>
+
+<div class="daftar-page">
+    <div style="width:100%;max-width:600px;"> 
+        <div style="text-align:center;margin-bottom:2rem;">
+            <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;">Layanan <span style="color:var(--lime);">Kami</span></h1>
+            <p style="color:var(--muted);font-size:0.875rem;margin-top:0.3rem;">Pilih layanan yang kamu butuhkan</p>
         </div>
 
-        <a href="/#layanan" class="back-link">← Kembali ke layanan</a>
+        <div class="steps" style="margin-bottom:2rem;">
+            ...
+        </div>
+
+    
 
         <!-- Step Indicator -->
         <div class="steps" style="margin-bottom:2rem;">
@@ -199,17 +215,36 @@
             <div class="step-line"></div>
             <div class="step-circle">3</div>
         </div>
+          {{-- BACK LINK --}}
+       
+        <a href="/" class="back-link">← Kembali ke beranda</a>
 
         <div class="daftar-card">
             <h2>Data Diri</h2>
             <p class="subtitle">Lengkapi data diri kamu untuk mendaftar</p>
 
-            @if($errors->any())
-                <div class="alert alert-error">
-                    @foreach($errors->all() as $err) {{ $err }}<br> @endforeach
+            {{-- Alert Error Session --}}
+            @if(session('error'))
+            <div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.2rem;">⚠️</span>
+                <div>
+                    <strong style="display: block; font-size: 0.9rem;">Pendaftaran Gagal</strong>
+                    <span style="font-size: 0.8rem; opacity: 0.9;">{{ session('error') }}</span>
                 </div>
+            </div>
             @endif
 
+            {{-- Alert Error Validasi (Input Kosong/Salah) --}}
+            @if($errors->any())
+            <div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                <strong style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;">Periksa kembali inputan Anda:</strong>
+                <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.8rem;">
+                    @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
             <form method="POST" action="/daftar">
                 @csrf
 

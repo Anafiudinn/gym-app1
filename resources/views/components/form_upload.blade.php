@@ -11,44 +11,45 @@
     method="POST"
     action="/pembayaran/{{ $kode }}/upload"
     enctype="multipart/form-data"
-    id="uploadForm"
->
+    id="uploadForm">
     @csrf
 
     @if($errors->any())
-        <div class="alert alert-error" style="margin-bottom:1rem;">
-            @foreach($errors->all() as $e)
-                {{ $e }}<br>
-            @endforeach
-        </div>
+    <div class="alert alert-error" style="margin-bottom:1rem;">
+        @foreach($errors->all() as $e)
+        {{ $e }}<br>
+        @endforeach
+    </div>
     @endif
 
-    {{-- Nama Rekening --}}
-    <div style="margin-bottom:0.875rem;">
-        <label class="field-label">Nama Rekening Pengirim</label>
-        <input
-            type="text"
-            name="nama_rekening"
-            class="field-input"
-            placeholder="Sesuai nama di rekening bank"
-            value="{{ old('nama_rekening', $verifikasi->nama_rekening ?? '') }}"
-            required
-            autocomplete="name"
-        >
+    <div class="form-field">
+        <label class="field-label">Bank / Dompet Pengirim</label>
+        <div class="bank-select-wrap">
+            <select name="nama_bank" class="field-input" required>
+                <option value="">— Pilih bank —</option>
+                <optgroup label="Bank ">
+                    @foreach(['Bank BRI','Bank BNI','Bank Mandiri','Bank BTN','Bank BCA','Bank CIMB Niaga'] as $b)
+                    <option {{ old('nama_bank') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                    @endforeach
+                </optgroup>
+                <optgroup label="E-Wallet / Dompet Digital">
+                    @foreach(['GoPay','OVO','DANA','ShopeePay','LinkAja','ShopeePay'] as $b)
+                    <option {{ old('nama_bank') == $b ? 'selected' : '' }}>{{ $b }}</option>
+                    @endforeach
+                </optgroup>
+            </select>
+        </div>
     </div>
 
-    {{-- Nama Bank --}}
-    <div style="margin-bottom:0.875rem;">
-        <label class="field-label">Nama Bank</label>
-        <input
-            type="text"
-            name="nama_bank"
+
+    <div class="form-field">
+        <label class="field-label">Nama Pemilik Rekening</label>
+        <input type="text"
+            name="nama_rekening"
             class="field-input"
-            placeholder="Contoh: BCA, BNI, Mandiri, GoPay"
-            value="{{ old('nama_bank', $verifikasi->nama_bank ?? '') }}"
-            required
-            autocomplete="off"
-        >
+            placeholder="Sesuai nama di rekening"
+            value="{{ old('nama_rekening') }}"
+            required>
     </div>
 
     {{-- Upload bukti --}}
@@ -68,9 +69,9 @@
 
         {{-- Kalau sudah ada bukti lama (state ditolak) --}}
         @if($verifikasi && $verifikasi->bukti_pembayaran)
-            <p style="font-size:0.73rem;color:var(--muted);margin-top:0.5rem;">
-                Bukti sebelumnya sudah tersimpan. Upload baru untuk mengganti.
-            </p>
+        <p style="font-size:0.73rem;color:var(--muted);margin-top:0.5rem;">
+            Bukti sebelumnya sudah tersimpan. Upload baru untuk mengganti.
+        </p>
         @endif
     </div>
 

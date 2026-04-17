@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\LaporanExport;
+use App\Models\Member;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -11,38 +12,48 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Transaksi::with(['member', 'paket'])
-            ->where('status', 'dibayar');
+        $from = $request->from ?? now()->startOfMonth()->toDateString();
+        $to = $request->to ?? now()->endOfMonth()->toDateString();
 
-        // 🔍 SEARCH (nama member / tamu)
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->whereHas('member', function ($m) use ($request) {
-                    $m->where('nama', 'like', '%' . $request->search . '%');
-                })
-                    ->orWhere('nama_tamu', 'like', '%' . $request->search . '%');
-            });
-        }
+        // --- TAB KEUANGAN ---
+        $queryKeuangan = Transaksi::whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])->where('status', 'dibayar');
 
-        // 📅 FILTER TANGGAL
-        if ($request->tanggal_awal && $request->tanggal_akhir) {
-            $query->whereBetween('tanggal_pembayaran', [
-                $request->tanggal_awal,
-                $request->tanggal_akhir
-            ]);
-        }
+        $totalPendapatan = (clone $queryKeuangan)->sum('jumlah_bayar');
+        $transaksiTerbaru = (clone $queryKeuangan)->with(['member', 'paket'])->latest()->take(10)->get();
 
+        // --- TAB KEHADIRAN ---
+        // 1. Member Terajin (Berdasarkan Absensi)
+        $memberTerajin = Member::withCount(['absensi' => function ($q) use ($from, $to) {
+            $q->whereBetween('waktu_masuk', [$from, $to])->where('status', 'valid');
+        }])
+            ->orderBy('absensi_count', 'desc')
+            ->take(5)
+            ->get();
 
-        $data = $query->latest()->get();
+        // 2. Total Tamu Harian (Dari Transaksi)
+        $totalTamuHarian = Transaksi::where('tipe', 'Harian')
+            ->where('status', 'dibayar')
+            ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+            ->count();
 
-        // 💰 TOTAL PEMASUKAN
-        $total = $data->where('status', 'dibayar')->sum('jumlah_bayar');
+        // --- TAB MEMBER ---
+        // Member yang paling lama bergabung (Loyal)
+        $memberLoyal = Member::orderBy('tanggal_daftar', 'asc')->take(5)->get();
 
-        return view('laporan.index', compact('data', 'total'));
-    }
-    public function export(Request $request)
-    {
-        // Pastikan request dikirim agar filter (tanggal_awal, dsb) ikut terbawa
-        return Excel::download(new LaporanExport($request), 'laporan-keuangan-' . now()->format('Y-m-d') . '.xlsx');
+        // Member yang akan expired dalam 7 hari
+        $memberAkanExpired = Member::whereHas('membership', function ($q) {
+            $q->whereBetween('tanggal_selesai', [now(), now()->addDays(7)]);
+        })->with('membership')->get();
+
+        return view('laporan.index', compact(
+            'totalPendapatan',
+            'transaksiTerbaru',
+            'memberTerajin',
+            'totalTamuHarian',
+            'memberLoyal',
+            'memberAkanExpired',
+            'from',
+            'to'
+        ));
     }
 }

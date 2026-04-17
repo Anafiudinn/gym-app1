@@ -62,7 +62,8 @@ class TransaksiController extends Controller
         $paketDefault = Paket::where('nama_paket', 'Harian')->first();
 
         // 7. Data untuk Summary Cards (Statistik)
-        $totalHariIni  = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->sum('jumlah_bayar');
+        // total hari ini ambil data status di bayar dan chanlenya onsite
+        $totalHariIni = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->where('channel', 'onsite')->sum('jumlah_bayar');
         $totalBulanIni = Transaksi::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('jumlah_bayar');
         $countHariIni  = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->count();
 

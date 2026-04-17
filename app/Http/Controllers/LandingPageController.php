@@ -45,30 +45,43 @@ class LandingPageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required',
+            'nama' => 'required|string|max:255',
             'no_wa' => 'required',
             'jenis_kelamin' => 'required',
-            'paket_id' => 'required'
+            'paket_id' => 'required|exists:pakets,id'
         ]);
 
         try {
             return DB::transaction(function () use ($request) {
-                $member = Member::updateOrCreate(
-                    ['no_wa' => $request->no_wa],
-                    [
+                // 1. Cari apakah member sudah pernah terdaftar berdasarkan nomor WA
+                $member = Member::where('no_wa', $request->no_wa)->first();
+
+                if ($member) {
+                    // PROTEKSI: Jika status member masih AKTIF, cegah pendaftaran ulang
+                    if ($member->status === 'aktif') {
+                        return redirect()->back()
+                            ->withInput() // Agar data di form tidak hilang
+                            ->with('error', 'Pendaftaran Gagal: Member dengan nomor ' . $request->no_wa . ' saat ini masih berstatus AKTIF.');
+                    }
+
+                    // Jika sudah ada tapi NONAKTIF (pendaftaran lama), update namanya
+                    $member->update(['nama' => $request->nama]);
+                } else {
+                    // 2. Jika benar-benar member baru, buat datanya
+                    $member = Member::create([
+                        'no_wa' => $request->no_wa,
                         'nama' => $request->nama,
                         'jenis_kelamin' => $request->jenis_kelamin,
-                        'kode_member' => 'GYM-' . rand(1000, 9999),
-                        'status' => 'nonaktif',
+                        'kode_member' => 'GYM-' . rand(10000, 99999),
+                        'status' => 'nonaktif', // Default nonaktif sampai pembayaran diverifikasi
                         'tanggal_daftar' => now()
-                    ]
-                );
+                    ]);
+                }
 
                 $paket = Paket::findOrFail($request->paket_id);
+                $waktuExpired = now()->addMinutes(30);
 
-                // Set durasi expired (Misal: 2 menit untuk testing, nanti bisa diubah ke 2 jam atau sesuai kebutuhan)
-                $waktuExpired = now()->addMinutes(5);
-
+                // 3. Cek apakah ada transaksi pending yang belum expired
                 $transaksi = Transaksi::where('member_id', $member->id)
                     ->where('status', 'pending')
                     ->latest()
@@ -76,7 +89,7 @@ class LandingPageController extends Controller
 
                 if (!$transaksi) {
                     $transaksi = Transaksi::create([
-                        'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
+                        'kode_invoice' => 'INV-' . strtoupper(Str::random(8)),
                         'member_id' => $member->id,
                         'paket_id' => $paket->id,
                         'tipe' => 'membership',
@@ -84,20 +97,21 @@ class LandingPageController extends Controller
                         'jumlah_bayar' => $paket->harga,
                         'metode_pembayaran' => 'transfer',
                         'status' => 'pending',
-                        'expired_at' => $waktuExpired // SIMPAN DISINI
+                        'expired_at' => $waktuExpired
                     ]);
                 } else {
+                    // Update transaksi yang ada (misal dia ganti paket saat mau bayar)
                     $transaksi->update([
                         'paket_id' => $paket->id,
                         'jumlah_bayar' => $paket->harga,
-                        'expired_at' => $waktuExpired // UPDATE WAKTU JIKA DAFTAR ULANG
+                        'expired_at' => $waktuExpired
                     ]);
                 }
 
                 return redirect('/pembayaran/' . $transaksi->kode_invoice);
             });
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat memproses pendaftaran.');
+            return back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
     // 🔹 FORM UPLOAD
@@ -108,12 +122,16 @@ class LandingPageController extends Controller
             ->with(['member', 'paket', 'verifikasi'])
             ->firstOrFail();
 
-        // Logika Auto-Reject jika diakses saat sudah expired
+        // Logika Auto-Reject
         if ($transaksi->status == 'pending' && $transaksi->expired_at && now()->gt($transaksi->expired_at)) {
             $transaksi->update(['status' => 'ditolak']);
         }
 
-        return view('landing.pembayaran', compact('transaksi'));
+        // Tambahkan ini agar Blade tidak bingung
+        $sisaDetik = $transaksi->expired_at ? now()->diffInSeconds($transaksi->expired_at, false) : 0;
+        $masihAktif = $sisaDetik > 0 && $transaksi->status == 'pending';
+
+        return view('landing.pembayaran', compact('transaksi', 'sisaDetik', 'masihAktif'));
     }
     // 🔹 PROSES SIMPAN BUKTI TRANSFER (POST)
     public function uploadBukti(Request $request, $kode)
@@ -220,5 +238,4 @@ class LandingPageController extends Controller
 
         return view('landing.cek_membership', compact('member'));
     }
-
 }

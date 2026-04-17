@@ -268,6 +268,8 @@
             <span id="pending-count-info" class="filter-label"></span>
         </div>
 
+        {{-- Table --}}
+       <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
         <table class="w-full">
             <thead>
                 <tr>
@@ -363,6 +365,7 @@
         </div>
     </div>
 </div>
+</div>
 
 {{-- ============================================================ --}}
 {{-- SECTION: HISTORY --}}
@@ -408,6 +411,7 @@
             <span id="history-count-info" class="filter-label"></span>
         </div>
 
+        <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
         <table class="w-full">
             <thead>
                 <tr>
@@ -482,6 +486,7 @@
             <p>Tidak ada hasil yang cocok</p>
         </div>
     </div>
+</div>
 </div>
 
 @endsection
