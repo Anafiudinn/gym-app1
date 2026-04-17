@@ -1,17 +1,8 @@
 <?php
 
+use App\Http\Controllers\{ AbsensiController, DashboardController, LandingPageController, LaporanController, MemberController, PaketController, ProfileController, TransaksiController, VerifikasiPembayaranController };
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    AbsensiController,
-    DashboardController,
-    LandingPageController,
-    LaporanController,
-    MemberController,
-    PaketController,
-    ProfileController,
-    TransaksiController,
-    VerifikasiPembayaranController
-};
 
 /*
 |--------------------------------------------------------------------------
@@ -93,3 +84,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::get('/debug-link-storage', function () {
+    Artisan::call('storage:link');
+    return "Storage link created successfully!";
+});
