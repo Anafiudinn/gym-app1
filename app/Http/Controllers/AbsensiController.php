@@ -36,10 +36,24 @@ class AbsensiController extends Controller
         $keyword = $request->keyword;
 
         // Cari berdasarkan kode / nama / no WA
-        $member = Member::where('kode_member', $keyword)
+        // ... di dalam controller
+        $members = Member::where('kode_member', $keyword)
             ->orWhere('nama', 'like', '%' . $keyword . '%')
             ->orWhere('no_wa', $keyword)
-            ->first();
+            ->get();
+
+        if ($members->count() > 1) {
+            return response()->json([
+                'success' => false,
+                'multiple' => true, // Flag baru
+                'data' => $members
+            ]);
+        }
+
+        $member = $members->first();
+        // ... dst
+
+        $member = $members->first();
 
         if (!$member) {
             return response()->json(['success' => false, 'message' => 'Member tidak ditemukan']);

@@ -18,8 +18,15 @@
         transition: all 0.15s;
         white-space: nowrap;
     }
-    .tab-btn:hover { color: #374151; }
-    .tab-btn.active { color: #10b981; border-bottom-color: #10b981; }
+
+    .tab-btn:hover {
+        color: #374151;
+    }
+
+    .tab-btn.active {
+        color: #10b981;
+        border-bottom-color: #10b981;
+    }
 
     .form-input {
         width: 100%;
@@ -33,9 +40,10 @@
         transition: border-color 0.15s, box-shadow 0.15s;
         box-sizing: border-box;
     }
+
     .form-input:focus {
         border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
     .form-label {
@@ -60,8 +68,14 @@
         cursor: pointer;
         transition: background 0.15s, transform 0.1s;
     }
-    .btn-green:hover { background: #059669; }
-    .btn-green:active { transform: scale(0.985); }
+
+    .btn-green:hover {
+        background: #059669;
+    }
+
+    .btn-green:active {
+        transform: scale(0.985);
+    }
 
     .btn-outline-green {
         width: 100%;
@@ -75,9 +89,14 @@
         cursor: pointer;
         transition: all 0.15s;
     }
-    .btn-outline-green:hover { background: #dcfce7; }
 
-    .member-search-wrapper { position: relative; }
+    .btn-outline-green:hover {
+        background: #dcfce7;
+    }
+
+    .member-search-wrapper {
+        position: relative;
+    }
 
     .member-search-input {
         width: 100%;
@@ -91,9 +110,10 @@
         transition: border-color 0.15s, box-shadow 0.15s;
         box-sizing: border-box;
     }
+
     .member-search-input:focus {
         border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
     .member-search-icon {
@@ -109,17 +129,21 @@
     .member-dropdown {
         position: absolute;
         top: calc(100% + 4px);
-        left: 0; right: 0;
+        left: 0;
+        right: 0;
         background: #fff;
         border: 1px solid #e5e7eb;
         border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         z-index: 50;
         max-height: 200px;
         overflow-y: auto;
         display: none;
     }
-    .member-dropdown.show { display: block; }
+
+    .member-dropdown.show {
+        display: block;
+    }
 
     .member-option {
         padding: 9px 13px;
@@ -128,17 +152,44 @@
         transition: background 0.1s;
         border-bottom: 1px solid #f3f4f6;
     }
-    .member-option:last-child { border-bottom: none; }
-    .member-option:hover { background: #f0fdf4; }
-    .member-option .member-name { font-weight: 600; color: #111827; }
-    .member-option .member-code { font-size: 11px; color: #9ca3af; margin-top: 1px; }
-    .member-option .member-status {
-        font-size: 10px; font-weight: 700;
-        padding: 1px 6px; border-radius: 4px;
-        float: right; margin-top: 2px;
+
+    .member-option:last-child {
+        border-bottom: none;
     }
-    .member-option .member-status.aktif { background: #d1fae5; color: #065f46; }
-    .member-option .member-status.expired { background: #fee2e2; color: #991b1b; }
+
+    .member-option:hover {
+        background: #f0fdf4;
+    }
+
+    .member-option .member-name {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .member-option .member-code {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-top: 1px;
+    }
+
+    .member-option .member-status {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        float: right;
+        margin-top: 2px;
+    }
+
+    .member-option .member-status.aktif {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .member-option .member-status.expired {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
     .member-selected-card {
         background: #f0fdf4;
@@ -148,9 +199,22 @@
         margin-top: 8px;
         display: none;
     }
-    .member-selected-card.show { display: block; }
-    .member-selected-card .ms-name { font-size: 13px; font-weight: 700; color: #065f46; }
-    .member-selected-card .ms-meta { font-size: 11px; color: #34d399; margin-top: 2px; }
+
+    .member-selected-card.show {
+        display: block;
+    }
+
+    .member-selected-card .ms-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #065f46;
+    }
+
+    .member-selected-card .ms-meta {
+        font-size: 11px;
+        color: #34d399;
+        margin-top: 2px;
+    }
 
     .no-member-found {
         padding: 12px 13px;
@@ -163,14 +227,23 @@
 
 @section('content')
 
-@if ($errors->any())
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-    <ul class="list-disc list-inside text-sm">
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
+{{-- Cek Error Validasi (Nomor Duplikat, dll) --}}
+@if($errors->any())
+    <div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+        <span style="font-size: 1.5rem;">⚠️</span>
+        <div style="font-size: 0.9rem;">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
+{{-- Cek Error Sistem (dari session error) --}}
+@if(session('error'))
+    <div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+        {{ session('error') }}
+    </div>
 @endif
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -184,25 +257,23 @@
             <p class="text-[22px] font-bold text-gray-800 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
             <p class="text-[11px] text-gray-400 mt-1">{{ $countHariIni }} transaksi</p>
         </div>
-{{-- Form dengan 3 Tab --}}
-<div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-    <div class="flex items-center border-b border-gray-100 w-full">
-        
-        <button type="button" onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active flex-1 py-3 text-center">
-            <i class="fa-solid fa-person-walking text-[10px] mr-1"></i>Tamu
-        </button>
-        
-        <button type="button" onclick="switchTab('member-baru')" id="btn-member-baru" class="tab-btn flex-1 py-3 text-center border-x border-gray-50">
-            <i class="fa-solid fa-user-plus text-[10px] mr-1"></i>Member Baru
-        </button>
-        
-        <button type="button" onclick="switchTab('perpanjang')" id="btn-perpanjang" class="tab-btn flex-1 py-3 text-center">
-            <i class="fa-solid fa-rotate-right text-[10px] mr-1"></i>Perpanjang
-        </button>
-        
-    </div>
+        {{-- Form dengan 3 Tab --}}
+        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div class="flex items-center border-b border-gray-100 w-full">
 
+                <button type="button" onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active flex-1 py-3 text-center">
+                    <i class="fa-solid fa-person-walking text-[10px] mr-1"></i>Tamu
+                </button>
 
+                <button type="button" onclick="switchTab('member-baru')" id="btn-member-baru" class="tab-btn flex-1 py-3 text-center border-x border-gray-50">
+                    <i class="fa-solid fa-user-plus text-[10px] mr-1"></i>Member Baru
+                </button>
+
+                <button type="button" onclick="switchTab('perpanjang')" id="btn-perpanjang" class="tab-btn flex-1 py-3 text-center">
+                    <i class="fa-solid fa-rotate-right text-[10px] mr-1"></i>Perpanjang
+                </button>
+
+            </div>
             <div class="p-5">
 
                 {{-- TAB 1: TAMU HARIAN --}}
@@ -224,6 +295,29 @@
                             <label class="form-label">Nama Pengunjung</label>
                             <input type="text" name="nama_tamu" placeholder="Masukkan nama tamu..." class="form-input" required>
                         </div>
+                     <div>
+    <label class="form-label">Metode Pembayaran</label>
+    <div class="grid grid-cols-2 gap-3 mt-2">
+        {{-- Opsi Cash --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                <span class="font-bold text-sm">CASH</span>
+            </div>
+        </label>
+
+        {{-- Opsi Transfer --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                <i class="fa-solid fa-mobile-screen mr-2"></i>
+                <span class="font-bold text-sm">TRANSFER</span>
+            </div>
+        </label>
+    </div>
+</div>
+                      
                         <button type="submit" class="btn-green">
                             <i class="fa-solid fa-cash-register mr-1.5"></i> Bayar Sekarang
                         </button>
@@ -241,10 +335,19 @@
                                 <label class="form-label">Nama Lengkap</label>
                                 <input type="text" name="nama" placeholder="Nama lengkap member baru" class="form-input" required>
                             </div>
-                            <div>
-                                <label class="form-label">No. WhatsApp</label>
-                                <input type="text" name="no_wa" placeholder="628..." class="form-input">
-                            </div>
+                          {{-- Ganti bagian input no_wa kamu dengan ini --}}
+<div>
+    <label class="form-label">No. WhatsApp</label>
+    <input type="tel" 
+           name="no_wa" 
+           placeholder="Contoh: 08123456789" 
+           class="form-input"
+           {{-- Script ini memaksa hanya angka yang bisa diketik --}}
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+           {{-- required_if di controller, tapi di view kita kasih required agar admin tidak lupa --}}
+           required>
+    <p class="text-[10px] text-gray-400 mt-1">Gunakan format angka saja (08...)</p>
+</div>
                             <div>
                                 <label class="form-label">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" class="form-input">
@@ -264,10 +367,32 @@
                                 @endforeach
                             </select>
                         </div>
+                         <div>
+    <label class="form-label">Metode Pembayaran</label>
+    <div class="grid grid-cols-2 gap-3 mt-2">
+        {{-- Opsi Cash --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                <span class="font-bold text-sm">CASH</span>
+            </div>
+        </label>
 
-                        <button type="submit" class="btn-outline-green">
-                            <i class="fa-solid fa-id-card mr-1.5"></i> Daftarkan Member
-                        </button>
+        {{-- Opsi Transfer --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                <i class="fa-solid fa-mobile-screen mr-2"></i>
+                <span class="font-bold text-sm">TRANSFER</span>
+            </div>
+        </label>
+    </div>
+</div>
+
+                       <button type="submit" class="btn-outline-green w-full py-3" onclick="this.disabled=true;this.form.submit();">
+    <i class="fa-solid fa-id-card mr-1.5"></i> Daftarkan Member
+</button>
                     </form>
                 </div>
 
@@ -288,8 +413,7 @@
                                     id="member_search_input"
                                     class="member-search-input"
                                     placeholder="Ketik nama atau kode member..."
-                                    autocomplete="off"
-                                >
+                                    autocomplete="off">
                                 <div class="member-dropdown" id="member_dropdown"></div>
                             </div>
 
@@ -316,6 +440,29 @@
                                 @endforeach
                             </select>
                         </div>
+
+                     <div>
+    <label class="form-label">Metode Pembayaran</label>
+    <div class="grid grid-cols-2 gap-3 mt-2">
+        {{-- Opsi Cash --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                <span class="font-bold text-sm">CASH</span>
+            </div>
+        </label>
+
+        {{-- Opsi Transfer --}}
+        <label class="cursor-pointer group">
+            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                <i class="fa-solid fa-mobile-screen mr-2"></i>
+                <span class="font-bold text-sm">TRANSFER</span>
+            </div>
+        </label>
+    </div>
+</div>
 
                         <button type="submit" class="btn-outline-green">
                             <i class="fa-solid fa-rotate-right mr-1.5"></i> Perpanjang Membership
@@ -400,7 +547,7 @@
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Invoice</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tanggal</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pelanggan</th>
-                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Channel</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pembayaran</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Paket</th>
                             <th class="px-4 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total</th>
                         </tr>
@@ -433,8 +580,8 @@
                             </td>
                             <td class="px-4 py-2">
                                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide
-                                    {{ $d->channel === 'online' ? 'bg-purple-50 text-purple-600' : 'bg-green-50 text-green-600' }}">
-                                    {{ $d->channel ?? 'onsite' }}
+                                    {{ $d->metode_pembayaran === 'transfer' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600' }}">
+                                    {{ $d->metode_pembayaran ?? 'cash' }}
                                 </span>
                             </td>
                             <td class="px-4 py-3.5 text-[12.5px] text-gray-600">
@@ -478,125 +625,133 @@
 
 @push('scripts')
 <script>
-(function () {
+    (function() {
 
-    @php
-        $membersJson = $members->map(function($m) {
-            return [
-                'id'                 => $m->id,
-                'nama'               => $m->nama,
-                'kode_member'        => $m->kode_member,
-                'no_wa'              => $m->no_wa ?? '',
-                'tanggal_kadaluarsa' => $m->tanggal_kadaluarsa,
-                'status'             => $m->status,
-            ];
-        })->values();
-    @endphp
+@php
+    // Pastikan tidak ada spasi di antara - dan >
+    $membersJson = $members->map(function($m) {
+        return [
+            'id' => $m->id,
+            'nama' => $m->nama,
+            'kode_member' => $m->kode_member,
+            'no_wa' => $m->no_wa ?? '',
+            'tanggal_kadaluarsa' => $m->tanggal_kadaluarsa,
+            'status' => $m->status,
+        ];
+    });
+@endphp
 
-    var allMembers    = @json($membersJson);
-    var defaultTab    = @js($activeTab ?? 'tamu');
-    var preSelectedId = @js($selectedMemberId ?? null);
+        var allMembers = @json($membersJson);
+        var defaultTab = @js($activeTab ?? 'tamu');
+        var preSelectedId = @js($selectedMemberId ?? null);
 
-    var TABS = ['tamu', 'member-baru', 'perpanjang'];
+        var TABS = ['tamu', 'member-baru', 'perpanjang'];
 
-    function switchTab(tab) {
-        TABS.forEach(function(t) {
-            var pane = document.getElementById('pane-' + t);
-            var btn  = document.getElementById('btn-' + t);
-            if (pane) pane.classList.toggle('hidden', t !== tab);
-            if (btn)  btn.classList.toggle('active', t === tab);
-        });
-    }
-    window.switchTab = switchTab;
-
-    var searchInput  = document.getElementById('member_search_input');
-    var dropdown     = document.getElementById('member_dropdown');
-    var hiddenInput  = document.getElementById('member_id_hidden');
-    var selectedCard = document.getElementById('member_selected_card');
-    var msName       = document.getElementById('ms-name');
-    var msMeta       = document.getElementById('ms-meta');
-
-    function formatTgl(tgl) {
-        if (!tgl) return 'Belum ada data';
-        var d   = new Date(tgl);
-        var bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
-    }
-
-    function renderDropdown(results) {
-        dropdown.innerHTML = '';
-        if (!results.length) {
-            dropdown.innerHTML = '<div class="no-member-found"><i class="fa-solid fa-user-slash mr-1"></i> Member tidak ditemukan</div>';
-        } else {
-            results.forEach(function(m) {
-                var expired     = m.tanggal_kadaluarsa && new Date(m.tanggal_kadaluarsa) < new Date();
-                var statusLabel = expired ? 'expired' : m.status;
-                var statusClass = (m.status === 'aktif' && !expired) ? 'aktif' : 'expired';
-                var el          = document.createElement('div');
-                el.className    = 'member-option';
-                el.innerHTML    =
-                    '<span class="member-status ' + statusClass + '">' + statusLabel + '</span>' +
-                    '<div class="member-name">' + m.nama + '</div>' +
-                    '<div class="member-code">' + m.kode_member + (m.no_wa ? ' \u00b7 ' + m.no_wa : '') + '</div>';
-                el.addEventListener('mousedown', function(e) {
-                    e.preventDefault();
-                    selectMember(m);
-                });
-                dropdown.appendChild(el);
+        function switchTab(tab) {
+            TABS.forEach(function(t) {
+                var pane = document.getElementById('pane-' + t);
+                var btn = document.getElementById('btn-' + t);
+                if (pane) pane.classList.toggle('hidden', t !== tab);
+                if (btn) btn.classList.toggle('active', t === tab);
             });
         }
-        dropdown.classList.add('show');
-    }
+        window.switchTab = switchTab;
 
-    function selectMember(m) {
-        hiddenInput.value         = m.id;
-        msName.textContent        = m.nama + ' \u2014 ' + m.kode_member;
-        msMeta.textContent        = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
-        selectedCard.classList.add('show');
-        searchInput.style.display = 'none';
-        dropdown.classList.remove('show');
-    }
+        var searchInput = document.getElementById('member_search_input');
+        var dropdown = document.getElementById('member_dropdown');
+        var hiddenInput = document.getElementById('member_id_hidden');
+        var selectedCard = document.getElementById('member_selected_card');
+        var msName = document.getElementById('ms-name');
+        var msMeta = document.getElementById('ms-meta');
 
-    window.clearMember = function() {
-        hiddenInput.value         = '';
-        searchInput.value         = '';
-        searchInput.style.display = '';
-        selectedCard.classList.remove('show');
-        dropdown.classList.remove('show');
-        searchInput.focus();
-    };
+        function formatTgl(tgl) {
+            if (!tgl) return 'Belum ada data';
+            var d = new Date(tgl);
+            var bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
+        }
 
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            var q = this.value.trim().toLowerCase();
-            if (q.length < 1) { dropdown.classList.remove('show'); return; }
-            var results = allMembers.filter(function(m) {
-                return m.nama.toLowerCase().includes(q)
-                    || m.kode_member.toLowerCase().includes(q)
-                    || (m.no_wa && m.no_wa.includes(q));
-            }).slice(0, 8);
-            renderDropdown(results);
-        });
+        function renderDropdown(results) {
+            dropdown.innerHTML = '';
+            if (!results.length) {
+                dropdown.innerHTML = '<div class="no-member-found"><i class="fa-solid fa-user-slash mr-1"></i> Member tidak ditemukan</div>';
+            } else {
+                results.forEach(function(m) {
+                    var expired = m.tanggal_kadaluarsa && new Date(m.tanggal_kadaluarsa) < new Date();
+                    var statusLabel = expired ? 'expired' : m.status;
+                    var statusClass = (m.status === 'aktif' && !expired) ? 'aktif' : 'expired';
+                    var el = document.createElement('div');
+                    el.className = 'member-option';
+                    el.innerHTML =
+                        '<span class="member-status ' + statusClass + '">' + statusLabel + '</span>' +
+                        '<div class="member-name">' + m.nama + '</div>' +
+                        '<div class="member-code">' + m.kode_member + (m.no_wa ? ' \u00b7 ' + m.no_wa : '') + '</div>';
+                    el.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        selectMember(m);
+                    });
+                    dropdown.appendChild(el);
+                });
+            }
+            dropdown.classList.add('show');
+        }
 
-        searchInput.addEventListener('blur', function() {
-            setTimeout(function() { dropdown.classList.remove('show'); }, 150);
-        });
+        function selectMember(m) {
+            hiddenInput.value = m.id;
+            msName.textContent = m.nama + ' \u2014 ' + m.kode_member;
+            msMeta.textContent = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
+            selectedCard.classList.add('show');
+            searchInput.style.display = 'none';
+            dropdown.classList.remove('show');
+        }
 
-        searchInput.addEventListener('focus', function() {
-            if (this.value.trim().length > 0) {
-                this.dispatchEvent(new Event('input'));
+        window.clearMember = function() {
+            hiddenInput.value = '';
+            searchInput.value = '';
+            searchInput.style.display = '';
+            selectedCard.classList.remove('show');
+            dropdown.classList.remove('show');
+            searchInput.focus();
+        };
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                var q = this.value.trim().toLowerCase();
+                if (q.length < 1) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+                var results = allMembers.filter(function(m) {
+                    return m.nama.toLowerCase().includes(q) ||
+                        m.kode_member.toLowerCase().includes(q) ||
+                        (m.no_wa && m.no_wa.includes(q));
+                }).slice(0, 8);
+                renderDropdown(results);
+            });
+
+            searchInput.addEventListener('blur', function() {
+                setTimeout(function() {
+                    dropdown.classList.remove('show');
+                }, 150);
+            });
+
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length > 0) {
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            switchTab(defaultTab);
+            if (defaultTab === 'perpanjang' && preSelectedId && searchInput) {
+                var found = allMembers.find(function(m) {
+                    return m.id == preSelectedId;
+                });
+                if (found) selectMember(found);
             }
         });
-    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        switchTab(defaultTab);
-        if (defaultTab === 'perpanjang' && preSelectedId && searchInput) {
-            var found = allMembers.find(function(m) { return m.id == preSelectedId; });
-            if (found) selectMember(found);
-        }
-    });
-
-})();
+    })();
 </script>
 @endpush

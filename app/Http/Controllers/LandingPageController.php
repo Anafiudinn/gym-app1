@@ -42,78 +42,90 @@ class LandingPageController extends Controller
     }
 
     // 🔹 SIMPAN PENDAFTARAN
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'no_wa' => 'required',
-            'jenis_kelamin' => 'required',
-            'paket_id' => 'required|exists:pakets,id'
-        ]);
+  public function store(Request $request)
+{
+    // A. Bersihkan nomor WA dari karakter aneh (spasi, strip, plus) sebelum divalidasi
+    $request->merge([
+        'no_wa' => str_replace([' ', '-', '+'], '', $request->no_wa),
+    ]);
 
-        try {
-            return DB::transaction(function () use ($request) {
-                // 1. Cari apakah member sudah pernah terdaftar berdasarkan nomor WA
-                $member = Member::where('no_wa', $request->no_wa)->first();
+    // B. Validasi Ketat
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'no_wa' => [
+            'required',
+            'numeric',
+            'regex:/^(08|628)[0-9]{8,13}$/', // Awalan 08/628, total 10-15 digit
+        ],
+        'jenis_kelamin' => 'required|in:L,P',
+        'paket_id' => 'required|exists:pakets,id'
+    ], [
+        'no_wa.regex' => 'Format nomor WhatsApp tidak valid (Gunakan format 08xxx atau 628xxx).',
+        'no_wa.numeric' => 'Nomor WhatsApp harus berupa angka saja.',
+    ]);
 
-                if ($member) {
-                    // PROTEKSI: Jika status member masih AKTIF, cegah pendaftaran ulang
-                    if ($member->status === 'aktif') {
-                        return redirect()->back()
-                            ->withInput() // Agar data di form tidak hilang
-                            ->with('error', 'Pendaftaran Gagal: Member dengan nomor ' . $request->no_wa . ' saat ini masih berstatus AKTIF.');
-                    }
+    try {
+        return DB::transaction(function () use ($request) {
+            $member = Member::where('no_wa', $request->no_wa)->first();
 
-                    // Jika sudah ada tapi NONAKTIF (pendaftaran lama), update namanya
-                    $member->update(['nama' => $request->nama]);
-                } else {
-                    // 2. Jika benar-benar member baru, buat datanya
-                    $member = Member::create([
-                        'no_wa' => $request->no_wa,
-                        'nama' => $request->nama,
-                        'jenis_kelamin' => $request->jenis_kelamin,
-                        'kode_member' => 'GYM-' . rand(10000, 99999),
-                        'status' => 'nonaktif', // Default nonaktif sampai pembayaran diverifikasi
-                        'tanggal_daftar' => now()
-                    ]);
+            if ($member) {
+                // Jika masih AKTIF, tendang balik
+                if ($member->status === 'aktif') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Pendaftaran Gagal: Nomor ' . $request->no_wa . ' masih berstatus AKTIF.');
                 }
+                $member->update(['nama' => $request->nama]);
+            } else {
+                $member = Member::create([
+                    'no_wa' => $request->no_wa,
+                    'nama' => $request->nama,
+                    'jenis_kelamin' => $request->jenis_kelamin,
+                    'kode_member' => 'GYM-' . rand(10000, 99999),
+                    'status' => 'nonaktif',
+                    'tanggal_daftar' => now()
+                ]);
+            }
 
-                $paket = Paket::findOrFail($request->paket_id);
-                $waktuExpired = now()->addMinutes(30);
+            $paket = Paket::findOrFail($request->paket_id);
+            $waktuExpired = now()->addMinutes(30);
 
-                // 3. Cek apakah ada transaksi pending yang belum expired
-                $transaksi = Transaksi::where('member_id', $member->id)
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->first();
+            // Cari transaksi pending yang benar-benar belum expired
+            $transaksi = Transaksi::where('member_id', $member->id)
+                ->where('status', 'pending')
+                ->where('expired_at', '>', now()) // Tambahkan kondisi ini
+                ->latest()
+                ->first();
 
-                if (!$transaksi) {
-                    $transaksi = Transaksi::create([
-                        'kode_invoice' => 'INV-' . strtoupper(Str::random(8)),
-                        'member_id' => $member->id,
-                        'paket_id' => $paket->id,
-                        'tipe' => 'membership',
-                        'channel' => 'online',
-                        'jumlah_bayar' => $paket->harga,
-                        'metode_pembayaran' => 'transfer',
-                        'status' => 'pending',
-                        'expired_at' => $waktuExpired
-                    ]);
-                } else {
-                    // Update transaksi yang ada (misal dia ganti paket saat mau bayar)
-                    $transaksi->update([
-                        'paket_id' => $paket->id,
-                        'jumlah_bayar' => $paket->harga,
-                        'expired_at' => $waktuExpired
-                    ]);
-                }
+            if (!$transaksi) {
+                $transaksi = Transaksi::create([
+                    'kode_invoice' => 'INV-' . strtoupper(Str::random(8)),
+                    'member_id' => $member->id,
+                    'paket_id' => $paket->id,
+                    'tipe' => 'membership',
+                    'channel' => 'online',
+                    'jumlah_bayar' => $paket->harga,
+                    'metode_pembayaran' => 'transfer',
+                    'status' => 'pending',
+                    'expired_at' => $waktuExpired
+                ]);
+            } else {
+                // Update jika dia pilih paket berbeda saat pendaftaran ulang
+                $transaksi->update([
+                    'paket_id' => $paket->id,
+                    'jumlah_bayar' => $paket->harga,
+                    'expired_at' => $waktuExpired
+                ]);
+            }
 
-                return redirect('/pembayaran/' . $transaksi->kode_invoice);
-            });
-        } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan sistem.');
-        }
+            return redirect('/pembayaran/' . $transaksi->kode_invoice);
+        });
+    } catch (\Exception $e) {
+        // Log error untuk debug internal
+        \Log::error($e->getMessage());
+        return back()->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.')->withInput();
     }
+}
     // 🔹 FORM UPLOAD
 
     public function pembayaran($kode)
@@ -177,11 +189,11 @@ class LandingPageController extends Controller
         $transaksi = Transaksi::where('kode_invoice', $kode)->firstOrFail();
 
         // Opsi A: Hapus data (Jika tidak ingin menumpuk sampah)
-        // $transaksi->member()->delete();
-        // $transaksi->delete();
+        $transaksi->member()->delete();
+        $transaksi->delete();
 
         // Opsi B: Ubah status jadi Batal (Lebih aman untuk audit)
-        $transaksi->update(['status' => 'batal']);
+        // $transaksi->update(['status' => 'batal']);
 
         return redirect('/')->with('success', 'Pendaftaran berhasil dibatalkan.');
     }

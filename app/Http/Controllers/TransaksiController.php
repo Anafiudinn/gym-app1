@@ -86,7 +86,14 @@ class TransaksiController extends Controller
 
     public function storeHarian(Request $request)
     {
-        $request->validate(['nama_tamu' => 'required']);
+        $request->validate(['nama_tamu' => 'required', 
+                            'metode_pembayaran' => 'required|in:cash,transfer'],
+        [
+            'nama_tamu.required' => 'Nama pengunjung wajib diisi untuk transaksi harian.',
+            'metode_pembayaran.required' => 'Metode pembayaran wajib dipilih untuk transaksi harian.',            
+            'metode_pembayaran.in' => 'Metode pembayaran yang dipilih tidak ditemukan. Silahkan pilih salah satu metode pembayaran yang tersedia.',
+        
+        ]);
 
         $paket = Paket::where('nama_paket', 'Harian')->first();
 
@@ -102,7 +109,7 @@ class TransaksiController extends Controller
             'tipe'               => 'harian',
             'channel'            => 'onsite',
             'jumlah_bayar'       => $paket->harga,
-            'metode_pembayaran'  => 'cash',
+            'metode_pembayaran'  => $request->metode_pembayaran,
             'status'             => 'dibayar',
             'tanggal_pembayaran' => now(),
         ]);
@@ -112,13 +119,33 @@ class TransaksiController extends Controller
 
     public function storeMembership(Request $request)
     {
-        // 1. Validasi Input (Tambah nullable pada member_id)
-        $request->validate([
-            'tipe_member' => 'required|in:baru,perpanjang',
-            'paket_id'    => 'required|exists:pakets,id',
-            'nama'        => 'required_if:tipe_member,baru',
-            'member_id'   => 'nullable|required_if:tipe_member,perpanjang|exists:members,id',
-        ]);
+        // 1. Bersihkan input no_wa dari spasi, strip, atau tanda + sebelum divalidasi
+    $request->merge([
+        'no_wa' => $request->no_wa ? str_replace([' ', '-', '+'], '', $request->no_wa) : null,
+    ]);
+
+    // 2. Validasi Input
+    $request->validate([
+        'tipe_member'       => 'required|in:baru,perpanjang',
+        'paket_id'          => 'required|exists:pakets,id',
+        'metode_pembayaran' => 'required|in:cash,transfer', // Tambahkan validasi metode bayar
+        
+        // Validasi HP Indonesia: Wajib angka, awalan 08/628, panjang 10-15 digit
+        'no_wa' => [
+            'required_if:tipe_member,baru',
+            'nullable',
+            'unique:members,no_wa',
+            'regex:/^(08|628)[0-9]{8,13}$/',
+        ],
+        'nama'          => 'required_if:tipe_member,baru',
+        'jenis_kelamin' => 'required_if:tipe_member,baru',
+        'member_id'     => 'nullable|required_if:tipe_member,perpanjang|exists:members,id',
+    ], [
+        'no_wa.unique'      => 'Waduh, nomor WhatsApp ini sudah terdaftar sebagai member! Silakan pilih menu perpanjang.',
+        'no_wa.required_if' => 'Nomor WhatsApp wajib diisi untuk pendaftaran member baru.',
+        'no_wa.regex'       => 'Format nomor tidak valid. Gunakan awalan 08 atau 628.',
+        'metode_pembayaran.required' => 'Pilih metode pembayaran (Cash/Transfer) dulu gess.',
+    ]);
 
         if ($request->tipe_member === 'perpanjang') {
             $member = Member::findOrFail($request->member_id);
@@ -164,7 +191,7 @@ class TransaksiController extends Controller
                     'tipe'               => 'membership',
                     'channel'            => 'onsite',
                     'jumlah_bayar'       => $paket->harga,
-                    'metode_pembayaran'  => 'cash',
+                    'metode_pembayaran'  => $request->metode_pembayaran,
                     'status'             => 'dibayar',
                     'tanggal_pembayaran' => now(),
                 ]);
@@ -188,8 +215,8 @@ class TransaksiController extends Controller
                 return back()->with('success', 'Membership ' . $member->nama . ' berhasil diproses');
             });
         } catch (\Exception $e) {
-            // Jika ada error (DB error/typo), munculkan pesannya
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            // Jangan tampilkan $e->getMessage() kalau tidak mau lihat tulisan SQL yang rumit
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data. Pastikan semua input benar.')->withInput();
         }
     }
 }

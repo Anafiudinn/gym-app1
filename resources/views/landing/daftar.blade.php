@@ -223,46 +223,51 @@
             <h2>Data Diri</h2>
             <p class="subtitle">Lengkapi data diri kamu untuk mendaftar</p>
 
-            {{-- Alert Error Session --}}
-            @if(session('error'))
-            <div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
-                <span style="font-size: 1.2rem;">⚠️</span>
-                <div>
-                    <strong style="display: block; font-size: 0.9rem;">Pendaftaran Gagal</strong>
-                    <span style="font-size: 0.8rem; opacity: 0.9;">{{ session('error') }}</span>
-                </div>
-            </div>
-            @endif
+        {{-- Alert Error (General/System Error) --}}
+@if(session('error'))
+<div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+    {{ session('error') }}
+</div>
+@endif
 
-            {{-- Alert Error Validasi (Input Kosong/Salah) --}}
-            @if($errors->any())
-            <div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-                <strong style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;">Periksa kembali inputan Anda:</strong>
-                <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.8rem;">
-                    @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-            <form method="POST" action="/daftar">
-                @csrf
+{{-- Alert Error Validasi (Input Salah) --}}
+@if($errors->any())
+<div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+    <strong style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;">⚠️ Periksa kembali inputan Anda:</strong>
+    <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.8rem;">
+        @foreach($errors->all() as $err)
+        <li>{{ $err }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-                <div class="form-group">
-                    <label>Nama Lengkap</label>
-                    <div class="input-wrap">
-                        <span class="icon">👤</span>
-                        <input type="text" name="nama" class="form-control" placeholder="Masukkan nama lengkap" value="{{ old('nama') }}" required>
-                    </div>
-                </div>
+<form method="POST" action="/daftar">
+    @csrf
 
-                <div class="form-group">
-                    <label>No. WhatsApp</label>
-                    <div class="input-wrap">
-                        <span class="icon">📱</span>
-                        <input type="text" name="no_wa" class="form-control" placeholder="08xxxxxxxxxx" value="{{ old('no_wa') }}" required>
-                    </div>
-                </div>
+    <div class="form-group">
+        <label>Nama Lengkap</label>
+        <div class="input-wrap">
+            <span class="icon">👤</span>
+            <input type="text" name="nama" class="form-control" placeholder="Masukkan nama lengkap" value="{{ old('nama') }}" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>No. WhatsApp</label>
+        <div class="input-wrap">
+            <span class="icon">📱</span>
+            {{-- type="tel" dan oninput mencegah karakter selain angka --}}
+            <input type="tel" 
+                   name="no_wa" 
+                   class="form-control" 
+                   placeholder="Contoh: 08123456789" 
+                   value="{{ old('no_wa') }}" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                   required>
+        </div>
+        <small style="color: #888; font-size: 0.75rem;">Gunakan format angka saja (08xxxxxxxx)</small>
+    </div>
 
                 <div class="form-group">
                     <label>Gender</label>

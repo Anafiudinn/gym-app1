@@ -24,43 +24,80 @@
         </a>
     </div>
 
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-        <form action="{{ route('riwayat.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-                <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Cari Transaksi</label>
-                <input type="text" name="search" value="{{ request('search') }}"
-                    placeholder="Invoice, Nama Tamu..."
-                    class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <div>
-                <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Dari Tanggal</label>
-                <input type="date" name="date_from" value="{{ request('date_from') }}"
-                    class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <div>
-                <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Sampai Tanggal</label>
-                <input type="date" name="date_to" value="{{ request('date_to') }}"
-                    class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
+    <div class="mb-4">
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex justify-between items-center">
+        <div>
+            <p class="text-xs font-bold text-emerald-600 uppercase">Total Pendapatan Terfilter</p>
+            <p class="text-2xl font-black text-emerald-900">
+                Rp {{ number_format($totalNominal, 0, ',', '.') }}
+            </p>
+        </div>
+        <div class="text-emerald-500">
+            <i class="fa-solid fa-wallet fa-2xl"></i>
+        </div>
+    </div>
+     <p class="text-[10px] text-gray-500 mt-1">*Hanya menghitung transaksi dengan status <strong>Dibayar</strong></p>
+</div>
+<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+    {{-- Pastikan grid-cols diset md:grid-cols-5 agar semua sejajar ke samping --}}
+    <form action="{{ route('riwayat.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        
+        {{-- 1. Cari Transaksi --}}
+        <div>
+            <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Cari Transaksi</label>
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Invoice, Nama Tamu..."
+                class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        {{-- 2. Dari Tanggal --}}
+        <div>
+            <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Dari Tanggal</label>
+            <input type="date" name="date_from" value="{{ request('date_from') }}"
+                class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        {{-- 3. Sampai Tanggal --}}
+        <div>
+            <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Sampai Tanggal</label>
+            <input type="date" name="date_to" value="{{ request('date_to') }}"
+                class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        {{-- 4. Tipe Paket --}}
+        <div>
+            <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Tipe Paket</label>
+            <select name="tipe" class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                <option value="">Semua Tipe</option>
+                <option value="membership" {{ request('tipe') == 'membership' ? 'selected' : '' }}>Membership</option>
+                <option value="harian" {{ request('tipe') == 'harian' ? 'selected' : '' }}>Harian</option>
+            </select>
+        </div>
+
+        {{-- 5. Status & Tombol (Digabung dalam satu kolom terakhir agar hemat tempat) --}}
+        <div class="flex flex-col gap-4">
             <div>
                 <label class="text-[11px] font-bold text-gray-400 uppercase mb-1 block">Status Pembayaran</label>
                 <select name="status" class="w-full bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
                     <option value="">Semua Status</option>
                     <option value="dibayar" {{ request('status') == 'dibayar' ? 'selected' : '' }}>Dibayar</option>
-                    <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                 </select>
             </div>
-            <div class="flex items-end gap-2">
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all flex-1">
-                    <i class="fa-solid fa-magnifying-glass mr-2"></i> Filter
+            
+            <div class="flex items-center gap-2 mt-auto">
+                <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all flex-1">
+                    <i class="fa-solid fa-magnifying-glass mr-1"></i> Filter
                 </button>
-                <a href="{{ route('riwayat.index') }}" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all text-center">
+                <a href="{{ route('riwayat.index') }}" class="bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all text-center">
                     Reset
                 </a>
             </div>
-        </form>
-    </div>
+        </div>
+
+    </form>
+</div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">

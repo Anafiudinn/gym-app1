@@ -6,38 +6,47 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     {{-- KIRI: SCANNER & PREVIEW --}}
-    <div class="lg:col-span-4 space-y-6">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div class="mb-5">
-                <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Quick Absen</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Kode member · nama · no WA</p>
-            </div>
+  {{-- KIRI: SCANNER & PREVIEW --}}
+<div class="lg:col-span-4 space-y-6">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div class="mb-5">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Quick Absen</h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">Kode member · nama · no WA</p>
+        </div>
 
-            <div class="space-y-3">
-                <input type="text" id="input_kode" autofocus
-                    class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-center text-base font-mono font-bold text-emerald-600 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition uppercase placeholder:text-gray-300 placeholder:font-normal placeholder:not-italic"
-                    placeholder="Cari kode / nama / no WA">
+        <div class="space-y-3">
+            <input type="text" id="input_kode" autofocus
+                class="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-center text-base font-mono font-bold text-emerald-600 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition uppercase placeholder:text-gray-300 placeholder:font-normal placeholder:not-italic"
+                placeholder="Cari kode / nama / no WA">
 
-                <button type="button" onclick="cekMember()" id="btn-cek"
-                    class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    Cek Status
-                </button>
-            </div>
+            <button type="button" onclick="cekMember()" id="btn-cek"
+                class="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                Cek Status
+            </button>
+        </div>
 
-            {{-- PREVIEW CARD --}}
-            <div id="preview-member" class="hidden mt-5 pt-5 border-t border-dashed border-gray-200">
-                <div id="status-container" class="rounded-xl p-4 border">
+        {{-- SISIPKAN KODE INI DI SINI --}}
+        <div id="list-multiple" class="hidden mt-4 p-4 border rounded-xl bg-white shadow-sm border-dashed border-gray-300">
+            <h3 class="mb-3 font-bold text-gray-700 text-sm">Pilih Member:</h3>
+            <div id="container-pilihan"></div>
+        </div>
+        {{-- AKHIR SISIPAN --}}
 
-                    <div class="flex items-center gap-3 mb-4">
-                        <div id="p-avatar" class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                            <span id="p-initial">--</span>
-                        </div>
-                        <div>
-                            <h4 id="p-nama" class="font-bold text-gray-800 text-sm leading-tight">--</h4>
-                            <p id="p-kode" class="text-[10px] font-mono text-emerald-600 mt-0.5">--</p>
-                        </div>
+        {{-- PREVIEW CARD --}}
+        <div id="preview-member" class="hidden mt-5 pt-5 border-t border-dashed border-gray-200">
+            <div id="status-container" class="rounded-xl p-4 border">
+                {{-- ... (Isi preview member tetap sama) ... --}}
+                
+                <div class="flex items-center gap-3 mb-4">
+                    <div id="p-avatar" class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                        <span id="p-initial">--</span>
                     </div>
+                    <div>
+                        <h4 id="p-nama" class="font-bold text-gray-800 text-sm leading-tight">--</h4>
+                        <p id="p-kode" class="text-[10px] font-mono text-emerald-600 mt-0.5">--</p>
+                    </div>
+                </div>
 
                     <div class="space-y-1.5 mb-4 pt-3 border-t border-dashed border-gray-200/70">
                         <div class="flex justify-between text-[11px]">
@@ -177,98 +186,110 @@
     function cekMember() {
         const kode = document.getElementById('input_kode').value.trim();
         const btn = document.getElementById('btn-cek');
+        const listContainer = document.getElementById('list-multiple');
+        const containerPilihan = document.getElementById('container-pilihan');
+        const preview = document.getElementById('preview-member');
 
         if (!kode) return;
 
+        // Reset UI
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-sm"></i>';
+        listContainer.classList.add('hidden');
+        preview.classList.add('hidden');
 
-        // ✅ Fix untuk ngrok: tambah header bypass warning page
         fetch(`{{ route('absensi.cek') }}?keyword=${encodeURIComponent(kode)}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'ngrok-skip-browser-warning': 'true' // ✅ bypass ngrok warning page
-                }
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(res => {
-                const preview = document.getElementById('preview-member');
-                const formAbsen = document.getElementById('form-absen');
-                const btnManage = document.getElementById('btn-manage');
-                const msgDouble = document.getElementById('msg-double');
-                const container = document.getElementById('status-container');
-                const avatar = document.getElementById('p-avatar');
-                const statusEl = document.getElementById('p-status');
-
-                msgDouble.classList.add('hidden');
-                formAbsen.classList.add('hidden');
-                btnManage.classList.add('hidden');
-
-                if (!res.success) {
-                    // ✅ Ganti alert() dengan toast inline — aman di mobile
-                    showToast(res.message, 'error');
-                    preview.classList.add('hidden');
-                    return;
-                }
-
-                const d = res.data;
-                document.getElementById('p-nama').innerText = d.nama;
-                document.getElementById('p-kode').innerText = d.kode;
-                document.getElementById('p-initial').innerText = d.nama.substring(0, 2).toUpperCase();
-                document.getElementById('p-id').value = d.id;
-                document.getElementById('p-expired').innerText = d.expired_at;
-
-                if (!d.can_absen) {
-                    const label = d.is_expired ? 'Membership Expired' : 'Non-Aktif';
-                    statusEl.innerText = label;
-                    statusEl.className = 'font-bold uppercase tracking-wide text-red-600';
-                    container.className = 'rounded-xl p-4 border bg-red-50 border-red-100';
-                    avatar.className = 'w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm bg-red-400';
-                    btnManage.classList.remove('hidden');
-                    btnManage.href = d.manage_url;
-                } else {
-                    statusEl.innerText = 'Aktif';
-                    statusEl.className = 'font-bold uppercase tracking-wide text-emerald-600';
-                    container.className = 'rounded-xl p-4 border bg-emerald-50/60 border-emerald-100';
-                    avatar.className = 'w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm bg-emerald-500';
-
-                    if (d.sudah_absen) {
-                        msgDouble.classList.remove('hidden');
-                        document.getElementById('msg-double-text').innerText = d.nama + ' sudah absen hari ini';
-                    } else {
-                        formAbsen.classList.remove('hidden');
-                    }
-                }
-
-                preview.classList.remove('hidden');
-
-                // ✅ Scroll ke preview di mobile (layar kecil)
-                preview.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        })
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(res => {
+            // 1. Handle JIKA HASIL GANDA (Multiple)
+            if (res.multiple) {
+                listContainer.classList.remove('hidden');
+                containerPilihan.innerHTML = ''; 
+                
+                res.data.forEach(m => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-3 border rounded-lg mb-2 hover:bg-gray-50 flex justify-between items-center transition";
+                    btn.innerHTML = `<div><div class="font-bold">${m.nama}</div><div class="text-xs text-gray-500">${m.kode_member}</div></div>`;
+                    
+                    btn.onclick = () => {
+                        document.getElementById('input_kode').value = m.kode_member;
+                        cekMember(); // Trigger ulang
+                    };
+                    containerPilihan.appendChild(btn);
                 });
-            })
-            .catch(err => {
-                showToast('Gagal menghubungi server: ' + err.message, 'error');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-magnifying-glass text-xs"></i> Cek Status';
-            });
+                return;
+            }
+
+            // 2. Handle GAGAL / TIDAK DITEMUKAN
+            if (!res.success) {
+                showToast(res.message, 'error');
+                return;
+            }
+
+            // 3. Handle SUKSES
+            const d = res.data;
+            const formAbsen = document.getElementById('form-absen');
+            const btnManage = document.getElementById('btn-manage');
+            const msgDouble = document.getElementById('msg-double');
+            const container = document.getElementById('status-container');
+            const avatar = document.getElementById('p-avatar');
+            const statusEl = document.getElementById('p-status');
+
+            msgDouble.classList.add('hidden');
+            formAbsen.classList.add('hidden');
+            btnManage.classList.add('hidden');
+
+            document.getElementById('p-nama').innerText = d.nama;
+            document.getElementById('p-kode').innerText = d.kode;
+            document.getElementById('p-initial').innerText = d.nama.substring(0, 2).toUpperCase();
+            document.getElementById('p-id').value = d.id;
+            document.getElementById('p-expired').innerText = d.expired_at;
+
+            if (!d.can_absen) {
+                const label = d.is_expired ? 'Membership Expired' : 'Non-Aktif';
+                statusEl.innerText = label;
+                statusEl.className = 'font-bold uppercase tracking-wide text-red-600';
+                container.className = 'rounded-xl p-4 border bg-red-50 border-red-100';
+                avatar.className = 'w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm bg-red-400';
+                btnManage.classList.remove('hidden');
+                btnManage.href = d.manage_url;
+            } else {
+                statusEl.innerText = 'Aktif';
+                statusEl.className = 'font-bold uppercase tracking-wide text-emerald-600';
+                container.className = 'rounded-xl p-4 border bg-emerald-50/60 border-emerald-100';
+                avatar.className = 'w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm bg-emerald-500';
+
+                if (d.sudah_absen) {
+                    msgDouble.classList.remove('hidden');
+                    document.getElementById('msg-double-text').innerText = d.nama + ' sudah absen hari ini';
+                } else {
+                    formAbsen.classList.remove('hidden');
+                }
+            }
+            preview.classList.remove('hidden');
+            preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        })
+        .catch(err => {
+            showToast('Gagal: ' + err.message, 'error');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-magnifying-glass text-xs"></i> Cek Status';
+        });
     }
 
-    // ✅ Toast ringan pengganti alert() — aman di semua browser + mobile
     function showToast(msg, type = 'info') {
         const existing = document.getElementById('toast-notif');
         if (existing) existing.remove();
-
-        const colors = type === 'error' ?
-            'bg-red-600 text-white' :
-            'bg-emerald-600 text-white';
-
+        const colors = type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white';
         const toast = document.createElement('div');
         toast.id = 'toast-notif';
         toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold ${colors} transition-all`;
@@ -280,13 +301,5 @@
     document.getElementById('input_kode').addEventListener('keypress', e => {
         if (e.key === 'Enter') cekMember();
     });
-
-    @if(session('success'))
-    document.getElementById('input_kode').focus();
-    document.getElementById('preview-member').classList.add('hidden');
-    document.getElementById('input_kode').value = '';
-    showToast('{{ session('
-        success ') }}', 'success');
-    @endif
 </script>
 @endpush
