@@ -260,17 +260,18 @@
             <p style="color:var(--muted);font-size:0.875rem;margin-top:0.3rem;">Pilih layanan yang kamu butuhkan</p>
         </div>
 
+     
 
-        <a href="/#layanan" style="display:inline-flex;align-items:center;gap:0.4rem;color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;margin-bottom:1.75rem;transition:color 0.2s;align-self:flex-start;width:100%;max-width:520px;">
+        <div class="layanan-container">
+               <a href="/#layanan" style="display:inline-flex;align-items:center;gap:0.4rem;color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;margin-bottom:1.75rem;transition:color 0.2s;align-self:flex-start;width:100%;max-width:520px;">
             ← Kembali ke layanan
         </a>
         <div class="cek-card">
             <h2>Cek Membership</h2>
             <p class="subtitle">Masukkan kode member atau nomor WhatsApp</p>
 
-            @if(session('error'))
-            <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ session('error') }}</div>
-            @endif
+           {{--back link --}}
+          
 
             <form method="GET" action="/cek-membership">
                 <div class="search-row">

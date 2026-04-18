@@ -827,7 +827,7 @@
             </div>
         </div>
 
-        <div class="hero-stats">
+        <!-- <div class="hero-stats">
             <div class="stat-item">
                 <div class="stat-val">500+</div>
                 <div class="stat-label">Member Aktif</div>
@@ -840,7 +840,7 @@
                 <div class="stat-val">10+</div>
                 <div class="stat-label">Trainer Pro</div>
             </div>
-        </div>
+        </div> -->
     </div>
 </section>
 
@@ -862,7 +862,7 @@
 
             $perLabel = match(true) {
             str_contains($namaPaketClean, 'harian') => '/hari',
-            str_contains($namaPaketClean, 'bulanan') => '/bulan',
+            str_contains($namaPaketClean, '1 bulan') => '/bulan',
             str_contains($namaPaketClean, '3 bulan') => '/3 bulan',
             str_contains($namaPaketClean, 'tahunan') => '/tahun',
             default => ''
@@ -872,21 +872,17 @@
             $features = match(true) {
             str_contains($namaPaketClean, 'harian') => [
             'Akses semua alat',
-            'Locker room',
-            'Free air minum'
             ],
-            str_contains($namaPaketClean, 'bulanan') => [
+            str_contains($namaPaketClean, '1 bulan') => [
             'Akses semua alat',
             'Locker room',
             'Free air minum',
-            '1x Konsultasi trainer',
             'Member card'
             ],
             str_contains($namaPaketClean, '3 bulan') => [
             'Akses semua alat',
             'Locker room',
             'Free air minum',
-            '3x Konsultasi trainer',
             'Member card',
             'Free 1 Kaos'
             ],
@@ -1041,7 +1037,7 @@
         <div class="galeri-item">
             <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Locker Room" loading="lazy">
         </div>
-         <div class="galeri-item">
+        <div class="galeri-item">
             <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Locker Room" loading="lazy">
         </div>
     </div>
@@ -1059,7 +1055,7 @@
                 <div class="info-icon">📍</div>
                 <div>
                     <div class="info-label">Alamat</div>
-                    <div class="info-value">Jl. Fitness No. 123, Kelurahan Sehat,<br>Kecamatan Bugar, Kota Gym, 12345</div>
+                    <div class="info-value">{{ \App\Models\Setting::getValue('alamat_gym', 'Belum diisi') }}</div>
                 </div>
             </div>
             <div class="info-row">
@@ -1067,23 +1063,21 @@
                 <div>
                     <div class="info-label">Jam Operasional</div>
                     <div class="info-value">
-                        Senin - Jumat: 06:00 - 22:00<br>
-                        Sabtu: 07:00 - 20:00<br>
-                        Minggu: 08:00 - 18:00
+                        {!! nl2br(e(\App\Models\Setting::getValue('jam_operasional', "Senin - Jumat: 08:00 - 21:00"))) !!}
                     </div>
                 </div>
             </div>
-            <a href="https://maps.google.com" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;">
+            <a href="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;">
                 ✈ Buka di Google Maps
             </a>
         </div>
 
         <div class="map-container">
             <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322!2d106.8195613!3d-6.194741099999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5390917b759%3A0x6b45e67356080477!2sJakarta%20Design%20Center!5e0!3m2!1sen!2sid!4v1620000000000"
+                src="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}"
                 allowfullscreen loading="lazy">
             </iframe>
-            <a href="https://maps.google.com" target="_blank" rel="noopener" class="map-overlay-btn">
+            <a href="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}" target="_blank" rel="noopener" class="map-overlay-btn">
                 Buka di Maps ↗
             </a>
         </div>
@@ -1098,18 +1092,18 @@
     </div>
 
     <div class="kontak-grid">
-        <a href="tel:08123456789" class="kontak-card">
-            <div class="kontak-icon">📞</div>
+        <a href="https://instagram.com/{{ \App\Models\Setting::getValue('instagram') }}" target="_blank" class="kontak-card">
+            <div class="kontak-icon">📸</div>
             <div>
-                <div class="kontak-label">Telepon</div>
-                <div class="kontak-val">0812-3456-7890</div>
+                <div class="kontak-label">Instagram</div>
+                <div class="kontak-val">{{ \App\Models\Setting::getValue('instagram', '@anafiudinn') }}</div>
             </div>
         </a>
-        <a href="https://wa.me/628123456789" target="_blank" rel="noopener" class="kontak-card">
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\Setting::getValue('no_telp')) }}" target="_blank" class="kontak-card">
             <div class="kontak-icon">💬</div>
             <div>
                 <div class="kontak-label">WhatsApp</div>
-                <div class="kontak-val">0812-3456-7890</div>
+                <div class="kontak-val">{{ \App\Models\Setting::getValue('no_telp', '0812-xxxx') }}</div>
             </div>
         </a>
         <a href="mailto:info@jefrygym.com" class="kontak-card">
@@ -1129,9 +1123,9 @@
                 <path d="M6 4v16M18 4v16M3 8h3M18 8h3M3 16h3M18 16h3M6 12h12" stroke="#000" stroke-width="2" stroke-linecap="round" />
             </svg>
         </div>
-        <span style="font-weight:700;letter-spacing:1px;">JEFRYGYM</span>
+        <span style="font-weight:700;letter-spacing:1px;">{{ \App\Models\Setting::getValue('nama_gym',) }}</span>
     </div>
-    <span>© {{ date('Y') }} JefryGym. All rights reserved.</span>
+    <span>© {{ date('Y') }} {{ \App\Models\Setting::getValue('nama_gym',) }}. All rights reserved.</span>
 </footer>
 
 <script>

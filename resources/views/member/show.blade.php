@@ -2,171 +2,595 @@
 @section('title', 'Detail Member')
 @section('page-title', 'Detail Member')
 
+@push('styles')
+<style>
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-up {
+        animation: fadeUp .32s ease both;
+    }
+
+    .delay-1 {
+        animation-delay: .04s;
+    }
+
+    .delay-2 {
+        animation-delay: .09s;
+    }
+
+    .delay-3 {
+        animation-delay: .14s;
+    }
+
+    /* ── CARD BASE ── */
+    .ui-card {
+        background: #fff;
+        border: 1px solid #eaecf4;
+        border-radius: 14px;
+        box-shadow: 0 1px 4px rgba(30, 33, 57, .04);
+        overflow: hidden;
+    }
+
+    .ui-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f2f9;
+    }
+
+    .ui-card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e2139;
+    }
+
+    .ui-card-icon {
+        font-size: 16px;
+        color: #d1d5f0;
+    }
+
+    /* ── MEMBERSHIP HERO CARD ── */
+    .hero-card {
+        border-radius: 16px;
+        padding: 26px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+        box-shadow: 0 8px 28px rgba(99, 102, 241, .30);
+        color: #fff;
+    }
+
+    .hero-card::before {
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, .06);
+        border-radius: 50%;
+        top: -60px;
+        right: -40px;
+    }
+
+    .hero-card::after {
+        content: '';
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, .05);
+        border-radius: 50%;
+        bottom: -30px;
+        left: 20px;
+    }
+
+    /* ── STAT MINI INSIDE HERO ── */
+    .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 22px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-item {}
+
+    .hero-item-label {
+        font-size: 10px;
+        font-weight: 600;
+        opacity: .65;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .hero-item-val {
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
+    /* ── BADGE STATUS ── */
+    .hero-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        background: rgba(255, 255, 255, .2);
+        backdrop-filter: blur(6px);
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255, 255, 255, .25);
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 9px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        cursor: pointer;
+        transition: all .16s;
+        text-decoration: none;
+        line-height: 1;
+    }
+
+    .action-btn.primary {
+        background: #6366f1;
+        color: #fff;
+    }
+
+    .action-btn.primary:hover {
+        background: #4f46e5;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, .30);
+    }
+
+    .action-btn.success {
+        background: #22c55e;
+        color: #fff;
+    }
+
+    .action-btn.success:hover {
+        background: #16a34a;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, .25);
+    }
+
+    .action-btn.ghost {
+        background: #fff;
+        color: #4b5066;
+        border: 1px solid #eaecf4;
+    }
+
+    .action-btn.ghost:hover {
+        background: #f5f6fa;
+        border-color: #d1d5f0;
+    }
+
+    /* ── TIMELINE ROWS ── */
+    .timeline-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-bottom: 1px solid #f5f6fa;
+        transition: background .12s;
+    }
+
+    .timeline-row:last-child {
+        border-bottom: none;
+    }
+
+    .timeline-row:hover {
+        background: #fafbff;
+    }
+
+    .timeline-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 13px;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 30px;
+        color: #e2e4f0;
+    }
+
+    .empty-state p {
+        font-size: 13px;
+        color: #a0a3b8;
+        margin-top: 8px;
+        font-weight: 500;
+    }
+
+    /* ── MODAL ── */
+    .modal-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 20, 50, .45);
+        backdrop-filter: blur(4px);
+        animation: fadeIn .18s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 20, 50, .18);
+        width: 100%;
+        max-width: 420px;
+        margin: 16px;
+        overflow: hidden;
+        animation: fadeUp .2s ease;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f2f9;
+        background: #fafbff;
+    }
+
+    .modal-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e2139;
+    }
+
+    .modal-close {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        color: #8b8fa8;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .14s;
+    }
+
+    .modal-close:hover {
+        background: #f0f2f9;
+        color: #1e2139;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    /* ── FORM ELEMENTS (MODAL) ── */
+    .form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: #8b8fa8;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        margin-bottom: 5px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 13px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        border: 1px solid #eaecf4;
+        border-radius: 8px;
+        color: #1e2139;
+        background: #f5f6fa;
+        outline: none;
+        transition: border-color .15s, background .15s;
+    }
+
+    .form-input:focus {
+        border-color: #6366f1;
+        background: #fff;
+    }
+
+    /* Back link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #8b8fa8;
+        text-decoration: none;
+        transition: color .14s;
+        margin-bottom: 18px;
+    }
+
+    .back-link:hover {
+        color: #6366f1;
+    }
+</style>
+@endpush
+
 @section('content')
 
-<div class="mb-4">
-    <a href="{{ route('member.index') }}" class="inline-flex items-center gap-2 text-[13px] text-gray-500 hover:text-gray-700 transition">
-        <i class="fa-solid fa-chevron-left text-[11px]"></i> Kembali
-    </a>
-</div>
+{{-- Back --}}
+<a href="{{ route('member.index') }}" class="back-link">
+    <i class="fa-solid fa-chevron-left" style="font-size:10px;"></i> Kembali ke Daftar Member
+</a>
 
-{{-- Grid Utama: 1 Kolom di HP, 3 Kolom di Laptop --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+<div style="display:grid; grid-template-columns:280px 1fr; gap:18px; align-items:start;" class="fade-up delay-1">
 
-    {{-- LEFT COL --}}
-    <div class="space-y-4">
-        {{-- MEMBERSHIP CARD (Info Lengkap) --}}
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg shadow-emerald-200 relative overflow-hidden">
-            {{-- Watermark Icon --}}
-            <i class="fa-solid fa-id-card absolute -right-4 -bottom-4 text-white/10 text-8xl rotate-12"></i>
+    {{-- ════════════════════════════════════════ --}}
+    {{-- LEFT COLUMN                              --}}
+    {{-- ════════════════════════════════════════ --}}
+    <div style="display:flex; flex-direction:column; gap:14px;">
 
-            <div class="flex items-center justify-between mb-6 relative z-10">
-                <div class="text-[10px] font-bold tracking-[0.2em] opacity-80 uppercase">GymPro Membership</div>
-                <span class="text-[11px] font-semibold bg-white/20 px-2.5 py-1 rounded-full backdrop-blur-sm">
-                    {{ strtoupper($member->status) }}
+        {{-- ── HERO / MEMBERSHIP CARD ── --}}
+        <div class="hero-card">
+            {{-- Top row --}}
+            <div style="display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;">
+                <span style="font-size:10px; font-weight:700; opacity:.7; text-transform:uppercase; letter-spacing:.14em;">
+                    GymPro · Membership
                 </span>
+                <span class="hero-status">{{ strtoupper($member->status) }}</span>
             </div>
 
-            <div class="mb-6 relative z-10">
-                <div class="text-2xl font-bold leading-tight">{{ $member->nama }}</div>
-                <div class="text-[13px] opacity-80 font-mono tracking-wider">{{ $member->kode_member }}</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-y-4 relative z-10">
-                <div>
-                    <div class="text-[10px] opacity-60 uppercase tracking-wide mb-0.5">Paket</div>
-                    <div class="text-[13px] font-semibold">{{ $member->membership?->paket?->nama_paket ?? '-' }}</div>
+            {{-- Avatar + Name --}}
+            @php
+            $colors = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f59e0b','#10b981','#06b6d4','#3b82f6'];
+            $avatarBg = $colors[ord(strtoupper($member->nama[0])) % count($colors)];
+            @endphp
+            <div style="display:flex; align-items:center; gap:14px; margin-top:20px; position:relative; z-index:1;">
+                <div style="width:50px; height:50px; border-radius:14px; background:rgba(255,255,255,.2);
+                            border:2px solid rgba(255,255,255,.35);
+                            display:flex; align-items:center; justify-content:center;
+                            font-size:18px; font-weight:800; flex-shrink:0;">
+                    {{ strtoupper(substr($member->nama, 0, 2)) }}
                 </div>
                 <div>
-                    <div class="text-[10px] opacity-60 uppercase tracking-wide mb-0.5">WhatsApp</div>
-                    <div class="text-[13px] font-semibold">{{ $member->no_wa ?? '-' }}</div>
-                </div>
-                <div>
-                    <div class="text-[10px] opacity-60 uppercase tracking-wide mb-0.5">Berlaku s/d</div>
-                    <div class="text-[13px] font-semibold">
-                        {{ $member->tanggal_kadaluarsa ? \Carbon\Carbon::parse($member->tanggal_kadaluarsa)->format('d M Y') : '-' }}
+                    <div style="font-size:17px; font-weight:800; line-height:1.2;">{{ $member->nama }}</div>
+                    <div style="font-family:'Courier New',monospace; font-size:11px; opacity:.7; margin-top:3px;">
+                        {{ $member->kode_member }}
                     </div>
                 </div>
-                <div>
-                    <div class="text-[10px] opacity-60 uppercase tracking-wide mb-0.5">Gender</div>
-                    <div class="text-[13px] font-semibold">{{ ucfirst($member->jenis_kelamin ?? '-') }}</div>
+            </div>
+
+            {{-- Info Grid --}}
+            <div class="hero-grid">
+                <div class="hero-item">
+                    <div class="hero-item-label">Paket</div>
+                    <div class="hero-item-val">{{ $member->membership?->paket?->nama_paket ?? '—' }}</div>
+                </div>
+                <div class="hero-item">
+                    <div class="hero-item-label">WhatsApp</div>
+                    <div class="hero-item-val">{{ $member->no_wa ?? '—' }}</div>
+                </div>
+                <div class="hero-item">
+                    <div class="hero-item-label">Berlaku s/d</div>
+                    <div class="hero-item-val">
+                        {{ $member->tanggal_kadaluarsa
+                            ? \Carbon\Carbon::parse($member->tanggal_kadaluarsa)->format('d M Y')
+                            : '—' }}
+                    </div>
+                </div>
+                <div class="hero-item">
+                    <div class="hero-item-label">Gender</div>
+                    <div class="hero-item-val">{{ ucfirst($member->jenis_kelamin ?? '—') }}</div>
                 </div>
             </div>
         </div>
 
-        {{-- QUICK ACTIONS --}}
-        <div class="grid grid-cols-1 gap-2">
-            <button onclick="document.getElementById('modal-edit-member').classList.remove('hidden')"
-                class="w-full py-2.5 text-[13px] bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-pen-to-square text-[11px]"></i> Edit Profil Member
+        {{-- ── QUICK ACTIONS ── --}}
+        <div class="ui-card" style="padding:16px; display:flex; flex-direction:column; gap:8px;">
+            <p style="font-size:11px; font-weight:700; color:#a0a3b8; text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">
+                Tindakan Cepat
+            </p>
+
+            <button onclick="document.getElementById('modal-edit').classList.remove('hidden')"
+                class="action-btn primary">
+                <i class="fa-solid fa-pen-to-square" style="font-size:11px;"></i> Edit Profil Member
             </button>
 
-            {{-- TOMBOL BARU: Perpanjang --}}
-            <a href="{{ route('transaksi.index', ['tab' => 'perpanjang', 'member' => $member->id]) }}"
-                class="w-full py-2.5 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-2 text-center">
-                <i class="fa-solid fa-rotate text-[11px]"></i> Perpanjang Membership
+            <a href="{{ route('transaksi.index', ['tab'=>'perpanjang','member'=>$member->id]) }}"
+                class="action-btn success">
+                <i class="fa-solid fa-rotate" style="font-size:11px;"></i> Perpanjang Membership
             </a>
 
             <form method="POST" action="{{ route('member.toggle', $member->id) }}">
                 @csrf @method('PATCH')
-                <button type="submit"
-                    class="w-full py-2.5 text-[13px] border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-power-off text-[11px]"></i>
+                <button type="submit" class="action-btn ghost" style="width:100%;">
+                    <i class="fa-solid fa-power-off" style="font-size:11px;"></i>
                     {{ $member->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }} Member
                 </button>
             </form>
         </div>
+
     </div>
 
-    {{-- RIGHT COL --}}
-    <div class="lg:col-span-2 space-y-4">
-        {{-- RIWAYAT TRANSAKSI (Limit 5) --}}
-        <div class="bg-white rounded-xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-[13px] font-semibold text-gray-700">5 Transaksi Terakhir</h3>
-                <i class="fa-solid fa-clock-rotate-left text-gray-300"></i>
+    {{-- ════════════════════════════════════════ --}}
+    {{-- RIGHT COLUMN                             --}}
+    {{-- ════════════════════════════════════════ --}}
+    <div style="display:flex; flex-direction:column; gap:14px;">
+
+        {{-- ── RIWAYAT TRANSAKSI ── --}}
+        <div class="ui-card fade-up delay-2">
+            <div class="ui-card-header">
+                <span class="ui-card-title">
+                    <i class="fa-solid fa-receipt" style="color:#6366f1; margin-right:7px; font-size:13px;"></i>
+                    5 Transaksi Terakhir
+                </span>
+                <i class="fa-solid fa-clock-rotate-left ui-card-icon"></i>
             </div>
-            <div class="divide-y divide-gray-50">
+            <div>
                 @forelse($transaksi->take(5) as $trx)
-                <div class="flex items-center justify-between py-3">
-                    <div>
-                        <div class="text-[13px] font-medium text-gray-800">{{ $trx->tipe }}</div>
-                        <div class="text-[11px] text-gray-400 mt-0.5">
-                            {{ \Carbon\Carbon::parse($trx->tanggal_pembayaran)->format('d M Y') }} · {{ $trx->paket->nama_paket ?? '-' }}
+                <div class="timeline-row">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="timeline-icon" style="background:#eef2ff; color:#6366f1;">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:13px; font-weight:600; color:#1e2139;">{{ $trx->tipe }}</div>
+                            <div style="font-size:11px; color:#a0a3b8; margin-top:2px;">
+                                {{ \Carbon\Carbon::parse($trx->tanggal_pembayaran)->format('d M Y') }}
+                                @if($trx->paket?->nama_paket)
+                                · {{ $trx->paket->nama_paket }}
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-[13px] font-semibold text-gray-800">Rp {{ number_format($trx->jumlah_bayar) }}</div>
-                        <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">LUNAS</span>
+                    <div style="text-align:right;">
+                        <div style="font-size:13px; font-weight:700; color:#1e2139;">
+                            Rp {{ number_format($trx->jumlah_bayar, 0, ',', '.') }}
+                        </div>
+                        <span style="font-size:10px; font-weight:700; color:#22c55e; text-transform:uppercase; letter-spacing:.06em;">
+                            LUNAS
+                        </span>
                     </div>
                 </div>
                 @empty
-                <div class="py-8 text-center text-gray-400 text-[13px]">Belum ada transaksi</div>
+                <div class="empty-state">
+                    <i class="fa-solid fa-receipt"></i>
+                    <p>Belum ada riwayat transaksi</p>
+                </div>
                 @endforelse
             </div>
         </div>
 
-        {{-- RIWAYAT ABSENSI (Limit 5) --}}
-        <div class="bg-white rounded-xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-[13px] font-semibold text-gray-700">5 Absensi Terakhir</h3>
-                <i class="fa-solid fa-fingerprint text-gray-300"></i>
+        {{-- ── RIWAYAT ABSENSI ── --}}
+        <div class="ui-card fade-up delay-3">
+            <div class="ui-card-header">
+                <span class="ui-card-title">
+                    <i class="fa-solid fa-fingerprint" style="color:#6366f1; margin-right:7px; font-size:13px;"></i>
+                    5 Absensi Terakhir
+                </span>
+                <i class="fa-solid fa-calendar-check ui-card-icon"></i>
             </div>
-            <div class="divide-y divide-gray-50">
-                {{-- Gunakan variabel $absensi yang baru dikirim dari controller --}}
+            <div>
                 @forelse($absensi as $absen)
-                <div class="flex items-center justify-between py-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                            <i class="fa-solid fa-calendar-day text-gray-400 text-[12px]"></i>
+                <div class="timeline-row">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="timeline-icon" style="background:#f0fdf4; color:#22c55e;">
+                            <i class="fa-solid fa-calendar-day"></i>
                         </div>
                         <div>
-                            <div class="text-[13px] text-gray-700 font-medium">
-                                {{-- Gunakan created_at atau kolom tanggal di tabel absensimu --}}
-                                {{ \Carbon\Carbon::parse($absen->created_at)->translatedFormat('d M Y') }}
+                            <div style="font-size:13px; font-weight:600; color:#1e2139;">
+                                {{ \Carbon\Carbon::parse($absen->created_at)->translatedFormat('d M Y, l') }}
                             </div>
-                            <div class="text-[11px] text-gray-400">Hadir pada sesi latihan</div>
+                            <div style="font-size:11px; color:#a0a3b8; margin-top:2px;">Hadir pada sesi latihan</div>
                         </div>
                     </div>
-                    <span class="text-[12px] font-mono text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                    <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:600;
+                                 background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;
+                                 padding:3px 10px; border-radius:7px;">
                         {{ \Carbon\Carbon::parse($absen->created_at)->format('H:i') }}
                     </span>
                 </div>
                 @empty
-                <div class="py-8 text-center text-gray-400 text-[13px]">Belum ada riwayat absensi</div>
+                <div class="empty-state">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    <p>Belum ada riwayat absensi</p>
+                </div>
                 @endforelse
             </div>
         </div>
-    </div>
 
-    {{-- MODAL EDIT PROFILE --}}
-    <div id="modal-edit-member" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h2 class="font-bold text-gray-800 text-[15px]">Edit Profil</h2>
-                <button onclick="document.getElementById('modal-edit-member').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form method="POST" action="{{ route('member.update', $member->id) }}" class="p-6 space-y-4">
-                @csrf @method('PUT')
-                <div>
-                    <label class="block text-[12px] font-semibold text-gray-600 mb-1">NAMA LENGKAP</label>
-                    <input type="text" name="nama" value="{{ $member->nama }}" required
-                        class="w-full px-3 py-2 text-[13px] border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-semibold text-gray-600 mb-1">NO. WHATSAPP</label>
-                    <input type="text" name="no_wa" value="{{ $member->no_wa }}" required
-                        class="w-full px-3 py-2 text-[13px] border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="document.getElementById('modal-edit-member').classList.add('hidden')"
-                        class="flex-1 py-2 text-[13px] font-semibold text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition">BATAL</button>
-                    <button type="submit"
-                        class="flex-1 py-2 text-[13px] font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 shadow-md shadow-blue-100 transition">SIMPAN</button>
-                </div>
-            </form>
+    </div>{{-- /right col --}}
+
+</div>{{-- /grid --}}
+
+{{-- ════════════════════════════════════════════════════════ --}}
+{{-- MODAL EDIT PROFILE                                       --}}
+{{-- ════════════════════════════════════════════════════════ --}}
+<div id="modal-edit" class="modal-bg hidden">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">Edit Profil Member</span>
+            <button class="modal-close" onclick="document.getElementById('modal-edit').classList.add('hidden')">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
+        <form method="POST" action="{{ route('member.update', $member->id) }}" class="modal-body">
+            @csrf @method('PUT')
+            <div style="display:flex; flex-direction:column; gap:14px;">
+
+                <div>
+                    <label class="form-label">Nama Lengkap</label>
+                    <input class="form-input" type="text" name="nama" value="{{ $member->nama }}" required>
+                </div>
+
+                <div>
+                    <label class="form-label">No. WhatsApp</label>
+                    <input class="form-input" type="text" name="no_wa" value="{{ $member->no_wa }}">
+                </div>
+
+                <div style="display:flex; gap:8px; padding-top:4px;">
+                    <button type="button"
+                        onclick="document.getElementById('modal-edit').classList.add('hidden')"
+                        class="action-btn ghost" style="flex:1;">
+                        Batal
+                    </button>
+                    <button type="submit" class="action-btn primary" style="flex:1;">
+                        <i class="fa-solid fa-floppy-disk" style="font-size:12px;"></i> Simpan
+                    </button>
+                </div>
+
+            </div>
+        </form>
     </div>
-    @endsection
+</div>
+
+@push('scripts')
+<script>
+    // Close modal on backdrop click
+    document.getElementById('modal-edit').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+    // ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') document.getElementById('modal-edit').classList.add('hidden');
+    });
+</script>
+@endpush
+
+@endsection

@@ -270,6 +270,8 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with(['member', 'paket'])->findOrFail($id);
 
         // Kita return view khusus struk yang ukurannya kecil (thermal)
-        return view('transaksi.struk', compact('transaksi'));
+        $safeInvoice = str_replace(['/', '\\'], '-', $transaksi->kode_invoice);
+        $filename = 'STRUK-' . $safeInvoice . '.pdf';
+        return view('transaksi.struk', compact('transaksi','filename'));
     }
 }

@@ -21,17 +21,19 @@
 
 $state = 'upload'; // default
 
+// GANTI INI (sekitar baris 20-40)
 if ($transaksi->status === 'dibayar') {
-$state = 'sukses';
+    $state = 'sukses';
+} elseif ($transaksi->verifikasi) {
+    // ✅ PRIORITAS VERIFIKASI
+    if ($transaksi->verifikasi->status === 'pending') {
+        $state = 'menunggu';
+    } elseif ($transaksi->verifikasi->status === 'ditolak') {
+        $state = 'ditolak'; // ← INI YANG FIX BUG
+    }
 } elseif ($transaksi->status === 'ditolak' || $transaksi->status === 'batal') {
-// Bisa karena expired (tanpa verifikasi) atau dibatalkan user
-if ($transaksi->verifikasi && $transaksi->verifikasi->status === 'ditolak') {
-// Admin reject setelah upload
-$state = 'ditolak';
-} else {
-// Auto-reject karena expired / batal sebelum upload
-$state = 'expired';
-}
+    $state = 'expired';
+
 } elseif ($transaksi->verifikasi) {
 if ($transaksi->verifikasi->status === 'pending') {
 $state = 'menunggu';
@@ -1287,6 +1289,16 @@ $masihAktif = $sisaDetik > 0;
 
             {{-- Info invoice --}}
             <div class="invoice-box">
+                
+                <div class="inv-row">
+                    <span class="lbl">Nama</span>
+                    <span class="val">{{ $transaksi->member->nama }}</span>
+                </div>
+           
+                <div class="inv-row">
+                    <span class="lbl">No. WA</span>
+                    <span class="val">{{ $transaksi->member->no_wa }}</span>
+                </div>
                 <div class="inv-row">
                     <span class="lbl">Invoice</span>
                     <span class="val code">{{ $transaksi->kode_invoice }}</span>

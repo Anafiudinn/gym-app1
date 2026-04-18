@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JefryGym - Transform Your Body & Mind</title>
+    <title>{{ \App\Models\Setting::getValue('nama_gym') }}- Transform Your Body & Mind</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -392,7 +392,7 @@
                 <path d="M6 4v16M18 4v16M3 8h3M18 8h3M3 16h3M18 16h3M6 12h12" stroke="#000" stroke-width="2" stroke-linecap="round"/>
             </svg>
         </div>
-        JEFRYGYM
+        {{ \App\Models\Setting::getValue('nama_gym',) }}
     </a>
 
     <ul class="nav-links">

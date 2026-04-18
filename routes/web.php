@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\{AbsensiController, DashboardController, LandingPageController, LaporanController, MemberController, PaketController, ProfileController, TransaksiController, VerifikasiPembayaranController};
 use App\Http\Controllers\RiwayatTransaksiController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -84,6 +85,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/export', 'export')->name('export');
     });
+
+    // Setting Aplikasi
+    Route::controller(SettingController::class)->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'update')->name('update');
+    });
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 
     // Profile Settings
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
