@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SWEETALERT2 ✅ -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -246,7 +248,23 @@
         {{-- CONTENT --}}
         <main class="flex-1 overflow-y-auto p-4 lg:p-6">
 
-            {{-- Flash Messages --}}
+            {{-- Flash Messages - Dikonversi ke SweetAlert2 ✅ --}}
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        GymProAlert.success('Berhasil!', '{{ session('success') }}');
+                    });
+                </script>
+            @endif
+            @if(session('error'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        GymProAlert.error('Oops!', '{{ session('error') }}');
+                    });
+                </script>
+            @endif
+
+            {{-- Flash Messages Fallback (untuk browser lama) --}}
             @if(session('success'))
                 <div class="flash-msg mb-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
@@ -266,6 +284,60 @@
     </div>
 </div>
 
+{{-- =========================================== --}}
+{{-- ✅ GYM PRO ALERT SYSTEM - SWEETALERT2 ✅ --}}
+<script>
+class GymProAlert {
+    static async confirm(title, text, confirmText = 'Ya, lanjutkan', cancelText = 'Batal') {
+        const result = await Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: confirmText,
+            cancelButtonText: cancelText,
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium text-sm shadow-sm transition-all ml-2',
+                cancelButton: 'px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium text-sm shadow-sm transition-all'
+            },
+            reverseButtons: true,
+            heightAuto: false
+        });
+        return result.isConfirmed;
+    }
+
+    static async success(title, message) {
+        await Swal.fire({
+            title: title,
+            text: message,
+            icon: 'success',
+            confirmButtonColor: '#10b981',
+            customClass: {
+                confirmButton: 'px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium text-sm shadow-sm'
+            },
+            timer: 3000,
+            timerProgressBar: true
+        });
+    }
+
+    static async error(title, message) {
+        await Swal.fire({
+            title: title,
+            text: message,
+            icon: 'error',
+            confirmButtonColor: '#ef4444',
+            customClass: {
+                confirmButton: 'px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium text-sm shadow-sm'
+            }
+        });
+    }
+}
+</script>
+
+{{-- Sidebar Toggle --}}
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');

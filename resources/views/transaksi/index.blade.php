@@ -222,12 +222,21 @@
         color: #9ca3af;
         text-align: center;
     }
+
+    /* BARU: Auto-selected member banner */
+    .auto-selected-banner {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 8px;
+    }
 </style>
 @endpush
 
 @section('content')
 
-{{-- Cek Error Validasi (Nomor Duplikat, dll) --}}
+{{-- Cek Error Validasi --}}
 @if($errors->any())
     <div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
         <span style="font-size: 1.5rem;">⚠️</span>
@@ -239,7 +248,6 @@
     </div>
 @endif
 
-{{-- Cek Error Sistem (dari session error) --}}
 @if(session('error'))
     <div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
         {{ session('error') }}
@@ -257,25 +265,22 @@
             <p class="text-[22px] font-bold text-gray-800 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
             <p class="text-[11px] text-gray-400 mt-1">{{ $countHariIni }} transaksi</p>
         </div>
+
         {{-- Form dengan 3 Tab --}}
         <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
             <div class="flex items-center border-b border-gray-100 w-full">
-
                 <button type="button" onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active flex-1 py-3 text-center">
                     <i class="fa-solid fa-person-walking text-[10px] mr-1"></i>Tamu
                 </button>
-
                 <button type="button" onclick="switchTab('member-baru')" id="btn-member-baru" class="tab-btn flex-1 py-3 text-center border-x border-gray-50">
                     <i class="fa-solid fa-user-plus text-[10px] mr-1"></i>Member Baru
                 </button>
-
                 <button type="button" onclick="switchTab('perpanjang')" id="btn-perpanjang" class="tab-btn flex-1 py-3 text-center">
                     <i class="fa-solid fa-rotate-right text-[10px] mr-1"></i>Perpanjang
                 </button>
-
             </div>
-            <div class="p-5">
 
+            <div class="p-5">
                 {{-- TAB 1: TAMU HARIAN --}}
                 <div id="pane-tamu">
                     <div class="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
@@ -295,29 +300,25 @@
                             <label class="form-label">Nama Pengunjung</label>
                             <input type="text" name="nama_tamu" placeholder="Masukkan nama tamu..." class="form-input" required>
                         </div>
-                     <div>
-    <label class="form-label">Metode Pembayaran</label>
-    <div class="grid grid-cols-2 gap-3 mt-2">
-        {{-- Opsi Cash --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                <span class="font-bold text-sm">CASH</span>
-            </div>
-        </label>
-
-        {{-- Opsi Transfer --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                <i class="fa-solid fa-mobile-screen mr-2"></i>
-                <span class="font-bold text-sm">TRANSFER</span>
-            </div>
-        </label>
-    </div>
-</div>
-                      
+                        <div>
+                            <label class="form-label">Metode Pembayaran</label>
+                            <div class="grid grid-cols-2 gap-3 mt-2">
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                                        <span class="font-bold text-sm">CASH</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
+                                        <span class="font-bold text-sm">TRANSFER</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                         <button type="submit" class="btn-green">
                             <i class="fa-solid fa-cash-register mr-1.5"></i> Bayar Sekarang
                         </button>
@@ -329,25 +330,17 @@
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
                         <input type="hidden" name="tipe_member" value="baru">
-
                         <div class="space-y-2.5 p-3.5 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                             <div>
                                 <label class="form-label">Nama Lengkap</label>
                                 <input type="text" name="nama" placeholder="Nama lengkap member baru" class="form-input" required>
                             </div>
-                          {{-- Ganti bagian input no_wa kamu dengan ini --}}
-<div>
-    <label class="form-label">No. WhatsApp</label>
-    <input type="tel" 
-           name="no_wa" 
-           placeholder="Contoh: 08123456789" 
-           class="form-input"
-           {{-- Script ini memaksa hanya angka yang bisa diketik --}}
-           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-           {{-- required_if di controller, tapi di view kita kasih required agar admin tidak lupa --}}
-           required>
-    <p class="text-[10px] text-gray-400 mt-1">Gunakan format angka saja (08...)</p>
-</div>
+                            <div>
+                                <label class="form-label">No. WhatsApp</label>
+                                <input type="tel" name="no_wa" placeholder="Contoh: 08123456789" class="form-input"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                                <p class="text-[10px] text-gray-400 mt-1">Gunakan format angka saja (08...)</p>
+                            </div>
                             <div>
                                 <label class="form-label">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" class="form-input">
@@ -357,7 +350,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div>
                             <label class="form-label">Paket</label>
                             <select name="paket_id" class="form-input" required>
@@ -367,32 +359,28 @@
                                 @endforeach
                             </select>
                         </div>
-                         <div>
-    <label class="form-label">Metode Pembayaran</label>
-    <div class="grid grid-cols-2 gap-3 mt-2">
-        {{-- Opsi Cash --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                <span class="font-bold text-sm">CASH</span>
-            </div>
-        </label>
-
-        {{-- Opsi Transfer --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                <i class="fa-solid fa-mobile-screen mr-2"></i>
-                <span class="font-bold text-sm">TRANSFER</span>
-            </div>
-        </label>
-    </div>
-</div>
-
-                       <button type="submit" class="btn-outline-green w-full py-3" onclick="this.disabled=true;this.form.submit();">
-    <i class="fa-solid fa-id-card mr-1.5"></i> Daftarkan Member
-</button>
+                        <div>
+                            <label class="form-label">Metode Pembayaran</label>
+                            <div class="grid grid-cols-2 gap-3 mt-2">
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                                        <span class="font-bold text-sm">CASH</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
+                                        <span class="font-bold text-sm">TRANSFER</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-outline-green w-full py-3" onclick="this.disabled=true;this.form.submit();">
+                            <i class="fa-solid fa-id-card mr-1.5"></i> Daftarkan Member
+                        </button>
                     </form>
                 </div>
 
@@ -401,19 +389,14 @@
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
                         <input type="hidden" name="tipe_member" value="perpanjang">
+                        <input type="hidden" name="member_id" id="member_id_hidden">
 
                         <div>
                             <label class="form-label">Cari Member</label>
-                            <input type="hidden" name="member_id" id="member_id_hidden">
-
                             <div class="member-search-wrapper">
-                                <i class="fa-solid fa-magnifying-glass member-search-icon"></i>
-                                <input
-                                    type="text"
-                                    id="member_search_input"
-                                    class="member-search-input"
-                                    placeholder="Ketik nama atau kode member..."
-                                    autocomplete="off">
+                              
+                                <input type="text" id="member_search_input" class="member-search-input"
+                                       placeholder="Ketik nama atau kode member..." autocomplete="off">
                                 <div class="member-dropdown" id="member_dropdown"></div>
                             </div>
 
@@ -424,52 +407,63 @@
                                         <div class="ms-meta" id="ms-meta"></div>
                                     </div>
                                     <button type="button" onclick="clearMember()"
-                                        class="text-[10px] text-red-400 hover:text-red-600 font-semibold ml-2 flex-shrink-0">
+                                            class="text-[10px] text-red-400 hover:text-red-600 font-semibold ml-2 flex-shrink-0">
                                         <i class="fa-solid fa-xmark"></i> Ganti
                                     </button>
                                 </div>
                             </div>
                         </div>
 
+                        {{-- BARU: Auto-selected banner --}}
+                        @if($selectedMemberId && isset($selectedMemberData))
+                        <div class="auto-selected-banner">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wide">Auto-selected</p>
+                                    <p class="text-[13px] font-semibold text-amber-900 mt-0.5">
+                                        {{ $selectedMemberData['nama'] }} — {{ $selectedMemberData['kode_member'] }}
+                                    </p>
+                                </div>
+                                <span class="text-sm font-bold text-amber-700">✅ Ready</span>
+                            </div>
+                        </div>
+                        @endif
+
                         <div>
                             <label class="form-label">Paket</label>
                             <select name="paket_id" class="form-input" required>
-                                <option value="">— Pilih Durasi Paket —</option>
+                                                             <option value="">— Pilih Durasi Paket —</option>
                                 @foreach($paket as $p)
                                 <option value="{{ $p->id }}">{{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                     <div>
-    <label class="form-label">Metode Pembayaran</label>
-    <div class="grid grid-cols-2 gap-3 mt-2">
-        {{-- Opsi Cash --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                <span class="font-bold text-sm">CASH</span>
-            </div>
-        </label>
-
-        {{-- Opsi Transfer --}}
-        <label class="cursor-pointer group">
-            <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-            <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                <i class="fa-solid fa-mobile-screen mr-2"></i>
-                <span class="font-bold text-sm">TRANSFER</span>
-            </div>
-        </label>
-    </div>
-</div>
+                        <div>
+                            <label class="form-label">Metode Pembayaran</label>
+                            <div class="grid grid-cols-2 gap-3 mt-2">
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
+                                        <span class="font-bold text-sm">CASH</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer group">
+                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
+                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
+                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
+                                        <span class="font-bold text-sm">TRANSFER</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
 
                         <button type="submit" class="btn-outline-green">
                             <i class="fa-solid fa-rotate-right mr-1.5"></i> Perpanjang Membership
                         </button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
@@ -481,19 +475,19 @@
         <div class="bg-white rounded-xl border border-gray-100 p-4">
             <form action="{{ route('transaksi.index') }}" method="GET">
                 @if(request('tab')) <input type="hidden" name="tab" value="{{ request('tab') }}"> @endif
+                @if(request('member')) <input type="hidden" name="member" value="{{ request('member') }}"> @endif
                 <div class="flex flex-wrap gap-2.5">
                     <div class="flex-1 min-w-[160px]">
                         <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama / invoice..."
-                            class="form-input text-[12px]" style="padding: 8px 12px;">
+                               placeholder="Cari nama / invoice..." class="form-input text-[12px]" style="padding: 8px 12px;">
                     </div>
                     <div>
                         <input type="date" name="date_from" value="{{ request('date_from') }}"
-                            class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
+                               class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
                     </div>
                     <div>
                         <input type="date" name="date_to" value="{{ request('date_to') }}"
-                            class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
+                               class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
                     </div>
                     <div>
                         <select name="tipe" class="form-input text-[12px]" style="padding: 8px 12px; width: 130px;">
@@ -511,12 +505,12 @@
                         </select>
                     </div>
                     <button type="submit"
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition">
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition">
                         <i class="fa-solid fa-filter text-[10px] mr-1"></i> Filter
                     </button>
                     @if(request()->hasAny(['search','date_from','date_to','tipe','status']))
                     <a href="{{ route('transaksi.index') }}"
-                        class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center">
+                       class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center">
                         Reset
                     </a>
                     @endif
@@ -550,6 +544,7 @@
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pembayaran</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Paket</th>
                             <th class="px-4 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                            <th class="px-4 py-3 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -596,10 +591,36 @@
                                     {{ $d->status }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('transaksi.struk', $d->id) }}" 
+                                       target="_blank"
+                                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm"
+                                       title="Cetak Struk">
+                                        <i class="fa-solid fa-print text-xs"></i>
+                                    </a>
+                                    @if($d->status !== 'batal')
+                                    <form action="{{ route('transaksi.batalkan', $d->id) }}" method="POST" 
+                                          onsubmit="return confirm('Apakah Anda yakin ingin membatalkan transaksi ini? Pendapatan akan dikurangi.')">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" 
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm"
+                                                title="Batalkan Transaksi">
+                                            <i class="fa-solid fa-ban text-xs"></i>
+                                        </button>
+                                    </form>
+                                    @else
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </div>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-14 text-center">
+                            <td colspan="8" class="px-5 py-14 text-center">
                                 <i class="fa-solid fa-receipt text-3xl text-gray-200 mb-3 block"></i>
                                 <p class="text-[12px] text-gray-400">Tidak ada transaksi ditemukan</p>
                             </td>
@@ -619,16 +640,10 @@
             @endif
         </div>
     </div>
-
 </div>
-@endsection
-
-@push('scripts')
-<script>
-    (function() {
 
 @php
-    // Pastikan tidak ada spasi di antara - dan >
+    // Data members untuk dropdown
     $membersJson = $members->map(function($m) {
         return [
             'id' => $m->id,
@@ -639,39 +654,135 @@
             'status' => $m->status,
         ];
     });
+
+    // Data member terpilih untuk auto-fill
+    $selectedMemberData = null;
+    if ($selectedMemberId) {
+        $foundMember = $members->find($selectedMemberId);
+        if ($foundMember) {
+            $selectedMemberData = [
+                'id' => $foundMember->id,
+                'nama' => $foundMember->nama,
+                'kode_member' => $foundMember->kode_member,
+                'no_wa' => $foundMember->no_wa ?? '',
+                'tanggal_kadaluarsa' => $foundMember->tanggal_kadaluarsa,
+                'status' => $foundMember->status,
+            ];
+        }
+    }
 @endphp
 
-        var allMembers = @json($membersJson);
-        var defaultTab = @js($activeTab ?? 'tamu');
-        var preSelectedId = @js($selectedMemberId ?? null);
+@push('scripts')
+<script>
+(function() {
+    var allMembers = @js($membersJson);
+    var selectedMemberData = @js($selectedMemberData);
+    var defaultTab = @js($activeTab) || new URLSearchParams(window.location.search).get('tab') || 'tamu';
+    var preSelectedId = @js($selectedMemberId) || new URLSearchParams(window.location.search).get('member');
 
-        var TABS = ['tamu', 'member-baru', 'perpanjang'];
+    var TABS = ['tamu', 'member-baru', 'perpanjang'];
 
-        function switchTab(tab) {
-            TABS.forEach(function(t) {
-                var pane = document.getElementById('pane-' + t);
-                var btn = document.getElementById('btn-' + t);
-                if (pane) pane.classList.toggle('hidden', t !== tab);
-                if (btn) btn.classList.toggle('active', t === tab);
-            });
-        }
-        window.switchTab = switchTab;
+    // *** FIX: Global functions ***
+    window.switchTab = function(tab) {
+        TABS.forEach(function(t) {
+            var pane = document.getElementById('pane-' + t);
+            var btn = document.getElementById('btn-' + t);
+            if (pane) pane.classList.toggle('hidden', t !== tab);
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+    };
 
-        var searchInput = document.getElementById('member_search_input');
-        var dropdown = document.getElementById('member_dropdown');
+    // Tunggu DOM FULLY ready + extra delay untuk CSS animation
+    function initApp() {
+        // Delay lebih lama untuk pastikan semua elemen rendered
+        setTimeout(function() {
+            console.log('🔥 INIT - Tab:', defaultTab, 'Member:', preSelectedId);
+            
+            // 1. HARUS switch tab DULU
+            if (typeof window.switchTab === 'function') {
+                window.switchTab(defaultTab);
+            }
+
+            // 2. BARU auto-fill member (khusus tab perpanjang)
+            if (defaultTab === 'perpanjang' && selectedMemberData && typeof window.selectMember === 'function') {
+                setTimeout(function() {
+                    window.selectMember(selectedMemberData);
+                    console.log('✅ Member auto-selected:', selectedMemberData.nama);
+                }, 300); // Extra delay untuk member card animation
+            }
+        }, 250); // Initial delay lebih panjang
+    }
+
+    // Multiple trigger untuk pastikan jalan
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
+
+    // Fallback: window load
+    window.addEventListener('load', function() {
+        setTimeout(initApp, 100);
+    });
+
+    // *** FUNGSI LAINNYA - Buat global juga ***
+    window.formatTgl = function(tgl) {
+        if (!tgl) return 'Belum ada data';
+        var d = new Date(tgl);
+        var bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
+    };
+
+    window.selectMember = function(m) {
         var hiddenInput = document.getElementById('member_id_hidden');
-        var selectedCard = document.getElementById('member_selected_card');
         var msName = document.getElementById('ms-name');
         var msMeta = document.getElementById('ms-meta');
+        var selectedCard = document.getElementById('member_selected_card');
+        var searchInput = document.getElementById('member_search_input');
+        var dropdown = document.getElementById('member_dropdown');
 
-        function formatTgl(tgl) {
-            if (!tgl) return 'Belum ada data';
-            var d = new Date(tgl);
-            var bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
+        if (hiddenInput) hiddenInput.value = m.id;
+        if (msName) msName.textContent = m.nama + ' — ' + m.kode_member;
+        if (msMeta) msMeta.textContent = 'Aktif s/d: ' + window.formatTgl(m.tanggal_kadaluarsa);
+        if (selectedCard) selectedCard.classList.add('show');
+        if (searchInput) searchInput.style.display = 'none';
+        if (dropdown) dropdown.classList.remove('show');
+    };
+
+    window.clearMember = function() {
+        var hiddenInput = document.getElementById('member_id_hidden');
+        var searchInput = document.getElementById('member_search_input');
+        var selectedCard = document.getElementById('member_selected_card');
+        var dropdown = document.getElementById('member_dropdown');
+
+        if (hiddenInput) hiddenInput.value = '';
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.style.display = '';
+            searchInput.focus();
         }
+        if (selectedCard) selectedCard.classList.remove('show');
+        if (dropdown) dropdown.classList.remove('show');
+    };
 
-        function renderDropdown(results) {
+    // Search functionality
+    function initSearch() {
+        var searchInput = document.getElementById('member_search_input');
+        var dropdown = document.getElementById('member_dropdown');
+        if (!searchInput || !dropdown) return;
+
+        searchInput.addEventListener('input', function() {
+            var q = this.value.trim().toLowerCase();
+            if (q.length < 1) {
+                dropdown.classList.remove('show');
+                return;
+            }
+            var results = allMembers.filter(function(m) {
+                return m.nama.toLowerCase().includes(q) ||
+                    m.kode_member.toLowerCase().includes(q) ||
+                    (m.no_wa && m.no_wa.includes(q));
+            }).slice(0, 8);
+            
             dropdown.innerHTML = '';
             if (!results.length) {
                 dropdown.innerHTML = '<div class="no-member-found"><i class="fa-solid fa-user-slash mr-1"></i> Member tidak ditemukan</div>';
@@ -685,73 +796,39 @@
                     el.innerHTML =
                         '<span class="member-status ' + statusClass + '">' + statusLabel + '</span>' +
                         '<div class="member-name">' + m.nama + '</div>' +
-                        '<div class="member-code">' + m.kode_member + (m.no_wa ? ' \u00b7 ' + m.no_wa : '') + '</div>';
+                        '<div class="member-code">' + m.kode_member + (m.no_wa ? ' · ' + m.no_wa : '') + '</div>';
                     el.addEventListener('mousedown', function(e) {
                         e.preventDefault();
-                        selectMember(m);
+                        window.selectMember(m);
                     });
                     dropdown.appendChild(el);
                 });
             }
             dropdown.classList.add('show');
-        }
-
-        function selectMember(m) {
-            hiddenInput.value = m.id;
-            msName.textContent = m.nama + ' \u2014 ' + m.kode_member;
-            msMeta.textContent = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
-            selectedCard.classList.add('show');
-            searchInput.style.display = 'none';
-            dropdown.classList.remove('show');
-        }
-
-        window.clearMember = function() {
-            hiddenInput.value = '';
-            searchInput.value = '';
-            searchInput.style.display = '';
-            selectedCard.classList.remove('show');
-            dropdown.classList.remove('show');
-            searchInput.focus();
-        };
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                var q = this.value.trim().toLowerCase();
-                if (q.length < 1) {
-                    dropdown.classList.remove('show');
-                    return;
-                }
-                var results = allMembers.filter(function(m) {
-                    return m.nama.toLowerCase().includes(q) ||
-                        m.kode_member.toLowerCase().includes(q) ||
-                        (m.no_wa && m.no_wa.includes(q));
-                }).slice(0, 8);
-                renderDropdown(results);
-            });
-
-            searchInput.addEventListener('blur', function() {
-                setTimeout(function() {
-                    dropdown.classList.remove('show');
-                }, 150);
-            });
-
-            searchInput.addEventListener('focus', function() {
-                if (this.value.trim().length > 0) {
-                    this.dispatchEvent(new Event('input'));
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            switchTab(defaultTab);
-            if (defaultTab === 'perpanjang' && preSelectedId && searchInput) {
-                var found = allMembers.find(function(m) {
-                    return m.id == preSelectedId;
-                });
-                if (found) selectMember(found);
-            }
         });
 
-    })();
+        searchInput.addEventListener('blur', function() {
+            setTimeout(function() {
+                dropdown.classList.remove('show');
+            }, 150);
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    // Init search setelah DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearch);
+    } else {
+        initSearch();
+    }
+
+})();
 </script>
 @endpush
+
+@endsection

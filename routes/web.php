@@ -55,6 +55,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/harian', 'storeHarian')->name('harian');
         Route::post('/membership', 'storeMembership')->name('membership');
+        // Perbaikan di sini: Cukup tulis 'batalkan' dan 'struk' saja
+        Route::patch('/{id}/batalkan', 'batalkan')->name('batalkan'); // Menjadi: transaksi.batalkan
+        Route::get('/{id}/struk', 'struk')->name('struk'); // Menjadi: transaksi.struk
     });
 
     // Verifikasi Pembayaran Online

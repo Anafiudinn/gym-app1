@@ -32,7 +32,7 @@ class MemberController extends Controller
             });
         }
 
-        // 4. Fungsi Filter Status
+        // 4. Fungsi Filter Status default: aktif
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }

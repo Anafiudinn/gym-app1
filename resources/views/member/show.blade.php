@@ -62,7 +62,7 @@
             </button>
 
             {{-- TOMBOL BARU: Perpanjang --}}
-            <a href="{{ route('transaksi.index', ['tab' => 'membership', 'member_id' => $member->id]) }}"
+            <a href="{{ route('transaksi.index', ['tab' => 'perpanjang', 'member' => $member->id]) }}"
                 class="w-full py-2.5 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-2 text-center">
                 <i class="fa-solid fa-rotate text-[11px]"></i> Perpanjang Membership
             </a>
