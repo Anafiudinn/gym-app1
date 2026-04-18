@@ -202,7 +202,7 @@
         </div>
 
         <div class="steps" style="margin-bottom:2rem;">
-            ...
+         
         </div>
 
     

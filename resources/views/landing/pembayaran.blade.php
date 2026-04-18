@@ -982,7 +982,8 @@ $masihAktif = $sisaDetik > 0;
         {{-- HEADER --}}
         <div class="pem-header">
             <h1>Pendaftaran <span>Member</span></h1>
-            <p>JefryGym — Selesaikan pembayaran untuk mengaktifkan membership</p>
+            <p>{{\App\Models\Setting::getValue('nama_gym')}} 
+            <br>Selesaikan pembayaran untuk mengaktifkan membership</p>
         </div>
 
         {{-- STEP INDICATOR --}}
@@ -1317,8 +1318,8 @@ $masihAktif = $sisaDetik > 0;
             <div class="transfer-box">
                 <div class="transfer-box-left">
                     <div class="t-lbl">Transfer ke</div>
-                    <div class="t-bank">Bank BCA · 1234567890</div>
-                    <div class="t-an">a/n JEFRY GYM</div>
+                    <div class="t-bank">{{\App\Models\Setting::getValue('payment_rekening')}}</div>
+                    <div class="t-an">a/n {{\App\Models\Setting::getValue('payment_bank')}}</div>
                 </div>
                 <button class="copy-btn" onclick="copyText('1234567890', this)">Salin No.</button>
             </div>
@@ -1381,8 +1382,8 @@ $masihAktif = $sisaDetik > 0;
             <div class="transfer-box">
                 <div class="transfer-box-left">
                     <div class="t-lbl">Transfer ke</div>
-                    <div class="t-bank">Bank BCA · 1234567890</div>
-                    <div class="t-an">a/n JEFRY GYM</div>
+                    <div class="t-bank">{{\App\Models\Setting::getValue('payment_rekening')}}</div>
+                    <div class="t-an">a/n {{\App\Models\Setting::getValue('payment_bank')}}</div>
                 </div>
                 <button class="copy-btn" onclick="copyText('1234567890', this)">Salin No.</button>
             </div>

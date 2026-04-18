@@ -8,10 +8,6 @@
 
     {{-- ===== HEADER ===== --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-gray-800 leading-tight">Riwayat Transaksi</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Pantau semua arus kas masuk dari Onsite maupun Online</p>
-        </div>
         <div class="flex gap-2">
             <a href="{{ route('riwayat.excel', request()->query()) }}"
                class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors shadow-sm">

@@ -52,6 +52,24 @@
                     </div>
                 </div>
             </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mt-6">
+                <div class="flex items-center gap-2 mb-4 text-emerald-600">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <h3 class="font-bold">Informasi Pembayaran (Transfer)</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nama Bank & Atas Nama</label>
+                        <input type="text" name="payment_bank" value="{{ \App\Models\Setting::getValue('payment_bank') }}"
+                            class="w-full mt-1 p-2.5 border rounded-lg focus:ring-emerald-500" placeholder="BCA a/n Ahmad Gym">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nomor Rekening</label>
+                        <input type="text" name="payment_rekening" value="{{ \App\Models\Setting::getValue('payment_rekening') }}"
+                            class="w-full mt-1 p-2.5 border rounded-lg focus:ring-emerald-500" placeholder="1234567890">
+                    </div>
+                </div>
+            </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div class="flex items-center gap-2 mb-4 text-emerald-600">

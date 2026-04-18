@@ -447,11 +447,10 @@
                     <i class="fa-solid fa-bars-staggered text-base"></i>
                 </button>
 
-                {{-- Search --}}
-                <div class="relative hidden sm:block">
-                    <i class="fa-solid fa-magnifying-glass text-xs absolute left-3 top-1/2 -translate-y-1/2" style="color:#a0a3b8;"></i>
-                    <input id="search-input" type="text" placeholder="Cari sesuatu..." autocomplete="off">
-                </div>
+                {{-- page title (mobile) --}}
+                <div class="text-lg font-semibold text-gray-800 lg:hidden">@yield('page-title', 'Dashboard')</div>
+
+                {{-- Search bar --}}
             </div>
 
             {{-- Right: date · notif · avatar --}}
@@ -492,10 +491,10 @@
                             <div class="text-xs text-gray-400 mt-0.5">{{ auth()->user()->email ?? 'admin@gympro.com' }}</div>
                         </div>
                         <div class="p-1.5">
-                            <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <i class="fa-regular fa-user w-4 text-center text-gray-400 text-xs"></i> Profil
                             </a>
-                            <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+                            <a href="{{ route('settings.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
                                 <i class="fa-solid fa-gear w-4 text-center text-gray-400 text-xs"></i> Pengaturan
                             </a>
                             <div class="border-t my-1" style="border-color:#eaecf4;"></div>
