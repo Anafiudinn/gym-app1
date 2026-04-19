@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WhatsappHelper;
 use App\Models\Member;
 use App\Models\Membership;
 use App\Models\Transaksi;
@@ -15,64 +16,76 @@ class VerifikasiPembayaranController extends Controller
     public function index()
     {
         $data = VerifikasiPembayaran::with('transaksi.member', 'transaksi.paket')
-                    ->latest()
-                    ->get();
+            ->latest()
+            ->get();
 
         return view('verifikasi.index', compact('data'));
     }
 
     // 🔹 TERIMA
     public function terima($id)
-{
-    $verif = VerifikasiPembayaran::findOrFail($id);
-    $transaksi = $verif->transaksi;
+    {
+        $verif = VerifikasiPembayaran::findOrFail($id);
+        // Load relasi member dan paket biar datanya siap dipakai
+        $transaksi = $verif->transaksi->load('member', 'paket');
 
-    // Gunakan Transaction agar data konsisten
-    return DB::transaction(function () use ($verif, $transaksi) {
-        // update verifikasi
-        $verif->update([
-            'status' => 'diterima',
-            'diverifikasi_oleh' => auth()->id(),
-            'tanggal_verifikasi' => now()
-            
-        ]);
+        return DB::transaction(function () use ($verif, $transaksi) {
+            // 1. Update status verifikasi
+            $verif->update([
+                'status' => 'diterima',
+                'diverifikasi_oleh' => auth()->id(),
+                'tanggal_verifikasi' => now()
+            ]);
 
-        // update transaksi
-        $transaksi->update([
-            'status' => 'dibayar',
-            'tanggal_pembayaran' => now()
-        ]);
+            // 2. Update status transaksi
+            $transaksi->update([
+                'status' => 'dibayar',
+                'tanggal_pembayaran' => now()
+            ]);
 
-        // aktifkan membership (hanya jika tipe transaksi adalah membership)
-        if ($transaksi->tipe === 'membership' && $transaksi->member_id) {
-            $member = Member::lockForUpdate()->find($transaksi->member_id);
-            $paket = $transaksi->paket;
+            // --- MULAI SIAPKAN PESAN WA ---
+            // Buat variabel awal di sini biar nggak "Undefined"
+            $pesanWA = "Halo {$transaksi->member->nama},\n\nPembayaran Anda untuk paket *{$transaksi->paket->nama_paket}* telah diverifikasi dan **DITERIMA**. ✅";
 
-            $start = now();
-            if ($member->tanggal_kadaluarsa && now()->lt($member->tanggal_kadaluarsa)) {
-                $start = $member->tanggal_kadaluarsa;
+            // Aktifkan membership (jika tipe membership)
+            if ($transaksi->tipe === 'membership' && $transaksi->member_id) {
+                $member = Member::lockForUpdate()->find($transaksi->member_id);
+                $paket = $transaksi->paket;
+
+                $start = now();
+                if ($member->tanggal_kadaluarsa && now()->lt($member->tanggal_kadaluarsa)) {
+                    $start = $member->tanggal_kadaluarsa;
+                }
+
+                $end = \Carbon\Carbon::parse($start)->addDays($paket->durasi_hari);
+
+                Membership::create([
+                    'member_id' => $member->id,
+                    'transaksi_id' => $transaksi->id,
+                    'paket_id' => $paket->id,
+                    'tanggal_mulai' => $start,
+                    'tanggal_selesai' => $end,
+                    'status' => 'aktif'
+                ]);
+
+                $member->update([
+                    'status' => 'aktif',
+                    'tanggal_kadaluarsa' => $end
+                ]);
+
+                // Tambahkan info kadaluarsa ke variabel pesan yang sudah ada
+                $pesanWA .= "\n\nMembership Anda sekarang *AKTIF* hingga: *" . \Carbon\Carbon::parse($end)->format('d M Y') . "*.\nSilakan gunakan Member Card Anda untuk absensi kedtangan.";
             }
 
-            $end = \Carbon\Carbon::parse($start)->addDays($paket->durasi_hari);
+            $pesanWA .= "\n\nTerima kasih telah bergabung dengan Ahmad GYM! 💪";
 
-            Membership::create([
-                'member_id' => $member->id,
-                'transaksi_id' => $transaksi->id,
-                'paket_id' => $paket->id,
-                'tanggal_mulai' => $start,
-                'tanggal_selesai' => $end,
-                'status' => 'aktif'
-            ]);
+            // 3. KIRIM WA (Gunakan no_wa)
+            \App\Helpers\WhatsappHelper::send($transaksi->member->no_wa, $pesanWA);
 
-            $member->update([
-                'status' => 'aktif',
-                'tanggal_kadaluarsa' => $end
-            ]);
-        }
+            return back()->with('success', 'Pembayaran berhasil diverifikasi & Notifikasi terkirim!');
+        });
 
-        return back()->with('success', 'Pembayaran berhasil diverifikasi!');
-    });
-}
+    }
     // 🔹 TOLAK
     public function tolak(Request $request, $id)
     {
@@ -87,6 +100,14 @@ class VerifikasiPembayaranController extends Controller
             'status' => 'ditolak'
         ]);
 
-        return back()->with('success', 'Pembayaran ditolak');
+        // KIRIM WA NOTIFIKASI PENOLAKAN
+        $alasan = $request->catatan_admin ?? 'Bukti transfer tidak sesuai atau tidak terbaca.';
+        $pesanWA = "Halo {$verif->transaksi->member->nama},\n\nMohon maaf, pembayaran Anda dengan kode transaksi *{$verif->transaksi->kode_invoice}* telah **DITOLAK**. ❌";
+        $pesanWA .= "\n\n*Alasan:* {$alasan}";
+        $pesanWA .= "\n\nSilakan lakukan upload ulang bukti pembayaran yang benar melalui menu layanan cek pendaftaran input kode invoice atau nomer wa kamu, atau hubungi admin untuk bantuan lebih lanjut.";
+
+        WhatsappHelper::send($verif->transaksi->member->no_wa, $pesanWA);
+
+        return back()->with('success', 'Pembayaran ditolak & Notifikasi terkirim');
     }
 }

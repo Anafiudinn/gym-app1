@@ -2,9 +2,10 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\Http;
 use App\Models\Setting;
+use App\Models\WaLog;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class WhatsappHelper
 {
@@ -13,6 +14,23 @@ class WhatsappHelper
      */
     public static function send($target, $message)
     {
+        // 1. Validasi awal: Kalau target kosong, jangan lanjut!
+        if (empty($target)) {
+            return [
+                'status' => false,
+                'message' => 'Gagal kirim: Nomor tujuan tidak ditemukan (NULL).'
+            ];
+        }
+        // 2. LOGIKA KONVERSI: Ubah 08... jadi 628...
+        // Kita hapus karakter selain angka (biar kalau ada spasi atau strip aman)
+        $target = preg_replace('/[^0-9]/', '', $target);
+
+        // Kalau depannya '0', ganti jadi '62'
+        if (strpos($target, '0') === 0) {
+            $target = '62' . substr($target, 1);
+        }
+
+        // 2. Ambil URL dan Token API
         $url = Setting::getValue('wa_api_url', 'https://api.fonnte.com/send');
         $token = Setting::getValue('wa_api_key');
 
@@ -21,8 +39,7 @@ class WhatsappHelper
         }
 
         try {
-            // Kita tambahkan timeout(10) artinya Laravel cuma mau nunggu 10 detik
-            $response = Http::timeout(10)
+            $response = Http::timeout(15) // Kita kasih napas 15 detik biar lebih lega
                 ->withoutVerifying()
                 ->withHeaders([
                     'Authorization' => $token,
@@ -33,18 +50,30 @@ class WhatsappHelper
                     'countryCode' => '62',
                 ]);
 
-            return $response->json();
+            $result = $response->json();
 
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            // Kalau Fonnte nggak balas dalam 10 detik, masuk ke sini
-            return [
-                'status' => false,
-                'message' => 'Koneksi ke Fonnte terputus atau sangat lambat.'
-            ];
+            // LOGGING: Catat setiap pengiriman (Berhasil/Gagal dari Fonnte)
+            WaLog::create([
+                'target' => $target,
+                'message' => $message,
+                'status' => ($result['status'] ?? false) ? 'success' : 'failed',
+                'response' => json_encode($result)
+            ]);
+
+            return $result;
+
         } catch (\Exception $e) {
+            // LOGGING: Catat kalau koneksi internet mati atau server Fonnte Down
+            WaLog::create([
+                'target' => $target,
+                'message' => $message,
+                'status' => 'failed',
+                'response' => 'System Error: ' . $e->getMessage()
+            ]);
+
             return [
                 'status' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
             ];
         }
     }

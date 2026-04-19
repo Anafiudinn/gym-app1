@@ -858,13 +858,13 @@
             // Kita bersihkan dan kecilkan hurufnya
             $namaPaketClean = trim(strtolower($p->nama_paket));
 
-            $isPopular = str_contains($namaPaketClean, 'bulanan');
+            $isPopular = str_contains($namaPaketClean, '1 bulan');
 
             $perLabel = match(true) {
-            str_contains($namaPaketClean, 'harian') => '/hari',
-            str_contains($namaPaketClean, '1 bulan') => '/bulan',
+            str_contains($namaPaketClean, 'harian') => '/harian',
+            str_contains($namaPaketClean, '1 bulan') => '/1 bulan',
             str_contains($namaPaketClean, '3 bulan') => '/3 bulan',
-            str_contains($namaPaketClean, 'tahunan') => '/tahun',
+            str_contains($namaPaketClean, '1 tahun') => '/1 tahun',
             default => ''
             };
 
@@ -872,6 +872,8 @@
             $features = match(true) {
             str_contains($namaPaketClean, 'harian') => [
             'Akses semua alat',
+            'untuk tamu harian non-member',
+            'daily pass 1x masuk'
             ],
             str_contains($namaPaketClean, '1 bulan') => [
             'Akses semua alat',
@@ -886,11 +888,10 @@
             'Member card',
             'Free 1 Kaos'
             ],
-            str_contains($namaPaketClean, 'tahunan') => [
+            str_contains($namaPaketClean, '1 tahun') => [
             'Akses semua alat',
             'Locker room',
             'Free air minum',
-            'Unlimited konsultasi',
             'Member card',
             'Free 1 Kaos',
             'Priority booking'

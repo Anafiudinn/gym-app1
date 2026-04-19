@@ -3,6 +3,7 @@
 use App\Http\Controllers\{AbsensiController, DashboardController, LandingPageController, LaporanController, MemberController, PaketController, ProfileController, TransaksiController, VerifikasiPembayaranController};
 use App\Http\Controllers\RiwayatTransaksiController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\WaLogController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -119,7 +120,11 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/', 'update')->name('update');
         Route::delete('/', 'destroy')->name('destroy');
     });
+
+    Route::get('/wa-logs', [WaLogController::class, 'index'])->name('wa-logs.index');
 });
+
+
 
 require __DIR__ . '/auth.php';
 

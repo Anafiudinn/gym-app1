@@ -135,7 +135,7 @@
             display: flex;
             align-items: center;
             gap: 9px;
-            padding: 8px 10px;
+            padding: 6px 6px;
             border-radius: 8px;
             font-size: 12.5px;
             font-weight: 500;
@@ -459,177 +459,197 @@
                     <span class="nav-icon"><i class="fa-solid fa-sliders"></i></span>
                     Pengaturan Gym
                 </a>
-                {{-- Bagian Status Layanan di Sidebar --}}
-                <p class="nav-group-label">Status Layanan</p>
+                {{--logs wa --}}
+                @php
+                    // Kita hitung jumlah status 'failed'
+                    // Kamu bisa batasi 'failed' dalam 24 jam terakhir atau semuanya
+                    $failedCount = \App\Models\WaLog::where('status', 'failed')->count();
+                @endphp
 
-                <div class="nav-item cursor-default group">
-                    <span class="nav-icon">
-                        {{-- Kita kasih ID wa-icon, warna default abu-abu --}}
-                        <i id="wa-icon" class="fa-brands fa-whatsapp text-gray-400"></i>
-                    </span>
-                    <span class="flex-1 text-[13px] text-gray-400">
-                        WA Gateway: <strong id="wa-text">Checking...</strong>
-                    </span>
+                <a href="{{ route('wa-logs.index') }}"
+                    class="nav-item {{ request()->routeIs('wa-logs.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                    <span class="text-[13px]">Logs Wa</span>
 
-                    {{-- Tempat indikator titik (dot) atau icon error --}}
-                    <div id="wa-status-container">
-                        {{-- Muncul loading kecil atau biarkan kosong dulu --}}
-                        <i class="fa-solid fa-spinner fa-spin text-gray-300 text-[10px]"></i>
-                    </div>
-                </div>
+    {{-- Munculkan angka merah hanya jika ada yang gagal --}}
+    @if($failedCount > 0)
+        <span
+            class="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-bounce">
+            {{ $failedCount }}
+        </span>
+    @endif
+    </a>
+    {{-- Bagian Status Layanan di Sidebar --}}
+    <p class="nav-group-label">Status Layanan</p>
 
-            </nav>
+    <div class="nav-item cursor-default group">
+        <span class="nav-icon">
+            {{-- Kita kasih ID wa-icon, warna default abu-abu --}}
+            <i id="wa-icon" class="fa-brands fa-whatsapp text-gray-400"></i>
+        </span>
+        <span class="flex-1 text-[13px] text-gray-400">
+            WA: <strong id="wa-text">Checking...</strong>
+        </span>
 
-            {{-- User footer --}}
-            <div class="sidebar-user">
-                <div class="user-card">
-                    <div class="user-avatar">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="user-name truncate">{{ auth()->user()->name ?? 'Administrator' }}</div>
-                        <div class="user-email truncate">{{ auth()->user()->email ?? 'admin@gympro.com' }}</div>
-                    </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" onclick="return confirmLogout(event)"
-                            class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition"
-                            title="Logout">
-                            <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
-                        </button>
-                    </form>
+        {{-- Tempat indikator titik (dot) atau icon error --}}
+        <div id="wa-status-container">
+            {{-- Muncul loading kecil atau biarkan kosong dulu --}}
+            <i class="fa-solid fa-spinner fa-spin text-gray-300 text-[10px]"></i>
+        </div>
+    </div>
+
+    </nav>
+
+    {{-- User footer --}}
+    <div class="sidebar-user">
+        <div class="user-card">
+            <div class="user-avatar">
+                {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="user-name truncate">{{ auth()->user()->name ?? 'Administrator' }}</div>
+                <div class="user-email truncate">{{ auth()->user()->email ?? 'admin@gympro.com' }}</div>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" onclick="return confirmLogout(event)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition"
+                    title="Logout">
+                    <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    </aside>
+
+    {{-- ===== MAIN AREA ===== --}}
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {{-- TOPBAR --}}
+        <header class="topbar px-4 lg:px-6 flex items-center justify-between flex-shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                {{-- Hamburger --}}
+                <button onclick="openSidebar()"
+                    class="lg:hidden p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
+
+                {{-- Breadcrumb --}}
+                <div class="flex items-center text-[13px]">
+                    <span class="text-gray-400 font-medium">GymPro</span>
+                    <span class="breadcrumb-sep"></span>
+                    <span class="font-600 text-gray-700 font-semibold">@yield('page-title', 'Dashboard')</span>
                 </div>
             </div>
-        </aside>
 
-        {{-- ===== MAIN AREA ===== --}}
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-            {{-- TOPBAR --}}
-            <header class="topbar px-4 lg:px-6 flex items-center justify-between flex-shrink-0 z-10">
-                <div class="flex items-center gap-3">
-                    {{-- Hamburger --}}
-                    <button onclick="openSidebar()"
-                        class="lg:hidden p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition">
-                        <i class="fa-solid fa-bars text-sm"></i>
-                    </button>
-
-                    {{-- Breadcrumb --}}
-                    <div class="flex items-center text-[13px]">
-                        <span class="text-gray-400 font-medium">GymPro</span>
-                        <span class="breadcrumb-sep"></span>
-                        <span class="font-600 text-gray-700 font-semibold">@yield('page-title', 'Dashboard')</span>
-                    </div>
+            <div class="flex items-center gap-2">
+                {{-- Date chip --}}
+                <div
+                    class="hidden sm:flex items-center gap-1.5 text-[11.5px] text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-lg font-medium">
+                    <i class="fa-regular fa-calendar-days text-[10px] text-gray-400"></i>
+                    {{ now()->translatedFormat('d M Y') }}
                 </div>
 
-                <div class="flex items-center gap-2">
-                    {{-- Date chip --}}
-                    <div
-                        class="hidden sm:flex items-center gap-1.5 text-[11.5px] text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-lg font-medium">
-                        <i class="fa-regular fa-calendar-days text-[10px] text-gray-400"></i>
-                        {{ now()->translatedFormat('d M Y') }}
-                    </div>
+                {{-- Notification --}}
+                <div class="relative">
+                    <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i class="fa-regular fa-bell text-[13px]"></i>
+                    </button>
+                    @if(isset($pending) && $pending > 0)
+                        <span class="bell-dot"></span>
+                    @endif
+                </div>
 
-                    {{-- Notification --}}
-                    <div class="relative">
-                        <button
-                            class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition">
-                            <i class="fa-regular fa-bell text-[13px]"></i>
-                        </button>
-                        @if(isset($pending) && $pending > 0)
-                            <span class="bell-dot"></span>
-                        @endif
-                    </div>
-
-                    {{-- Avatar chip --}}
-                    {{-- Avatar + Dropdown --}}
-                    <div class="relative ml-1" id="avatar-wrapper">
-                        <button onclick="toggleAvatarMenu()"
-                            class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105"
-                            style="background: linear-gradient(135deg, #10b981, #059669); box-shadow:0 2px 8px rgba(37, 201, 116, 0.3);">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                        </button>
-                        <div id="avatar-menu" class="avatar-menu hidden" style="right:0;">
-                            <div class="px-4 py-3 border-b" style="border-color:#eaecf4;">
-                                <div class="text-sm font-semibold text-gray-800">
-                                    {{ auth()->user()->name ?? 'Administrator' }}
-                                </div>
-                                <div class="text-xs text-gray-400 mt-0.5">{{ auth()->user()->email ?? 'admin@gympro.com'
-                                    }}</div>
+                {{-- Avatar chip --}}
+                {{-- Avatar + Dropdown --}}
+                <div class="relative ml-1" id="avatar-wrapper">
+                    <button onclick="toggleAvatarMenu()"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold transition-transform hover:scale-105"
+                        style="background: linear-gradient(135deg, #10b981, #059669); box-shadow:0 2px 8px rgba(37, 201, 116, 0.3);">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                    </button>
+                    <div id="avatar-menu" class="avatar-menu hidden" style="right:0;">
+                        <div class="px-4 py-3 border-b" style="border-color:#eaecf4;">
+                            <div class="text-sm font-semibold text-gray-800">
+                                {{ auth()->user()->name ?? 'Administrator' }}
                             </div>
-                            <div class="p-1.5">
-                                <a href="{{ route('profile.edit') }}"
-                                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
-                                    <i class="fa-regular fa-user w-4 text-center text-gray-400 text-xs"></i> Profil
-                                </a>
-                                <a href="{{ route('settings.index') }}"
-                                    class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
-                                    <i class="fa-solid fa-gear w-4 text-center text-gray-400 text-xs"></i> Pengaturan
-                                </a>
-                                <div class="border-t my-1" style="border-color:#eaecf4;"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition text-left">
-                                        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-xs"></i>
-                                        Logout
-                                    </button>
-                                </form>
-                            </div>
+                            <div class="text-xs text-gray-400 mt-0.5">{{ auth()->user()->email ?? 'admin@gympro.com'
+                                }}</div>
+                        </div>
+                        <div class="p-1.5">
+                            <a href="{{ route('profile.edit') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+                                <i class="fa-regular fa-user w-4 text-center text-gray-400 text-xs"></i> Profil
+                            </a>
+                            <a href="{{ route('settings.index') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+                                <i class="fa-solid fa-gear w-4 text-center text-gray-400 text-xs"></i> Pengaturan
+                            </a>
+                            <div class="border-t my-1" style="border-color:#eaecf4;"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition text-left">
+                                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-xs"></i>
+                                    Logout
+                                </button>
+                            </form>
                         </div>
                     </div>
-
                 </div>
-            </header>
 
-            {{-- CONTENT --}}
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+            </div>
+        </header>
 
-                {{-- Flash Messages via SweetAlert2 --}}
-                @if(session('success'))
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            Swal.fire({
-                                icon: 'success', title: 'Berhasil!', text: @json(session('success')),
-                                confirmButtonColor: '#10b981', confirmButtonText: 'OK', timer: 3500, timerProgressBar: true
-                            });
-                        });
-                    </script>
-                @endif
-                @if(session('error'))
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            Swal.fire({
-                                icon: 'error', title: 'Gagal!', text: @json(session('error')),
-                                confirmButtonColor: '#ef4444', confirmButtonText: 'Tutup'
-                            });
-                        });
-                    </script>
-                @endif
-                @if(session('warning'))
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            Swal.fire({
-                                icon: 'warning', title: 'Perhatian!', text: @json(session('warning')),
-                                confirmButtonColor: '#f59e0b', confirmButtonText: 'Mengerti'
-                            });
-                        });
-                    </script>
-                @endif
-                @if(session('info'))
-                    <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            Swal.fire({
-                                icon: 'info', title: 'Informasi', text: @json(session('info')),
-                                confirmButtonColor: '#3b82f6', confirmButtonText: 'OK'
-                            });
-                        });
-                    </script>
-                @endif
+        {{-- CONTENT --}}
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6">
 
-                @yield('content')
-            </main>
-        </div>
+            {{-- Flash Messages via SweetAlert2 --}}
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Swal.fire({
+                            icon: 'success', title: 'Berhasil!', text: @json(session('success')),
+                            confirmButtonColor: '#10b981', confirmButtonText: 'OK', timer: 3500, timerProgressBar: true
+                        });
+                    });
+                </script>
+            @endif
+            @if(session('error'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Swal.fire({
+                            icon: 'error', title: 'Gagal!', text: @json(session('error')),
+                            confirmButtonColor: '#ef4444', confirmButtonText: 'Tutup'
+                        });
+                    });
+                </script>
+            @endif
+            @if(session('warning'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Swal.fire({
+                            icon: 'warning', title: 'Perhatian!', text: @json(session('warning')),
+                            confirmButtonColor: '#f59e0b', confirmButtonText: 'Mengerti'
+                        });
+                    });
+                </script>
+            @endif
+            @if(session('info'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Swal.fire({
+                            icon: 'info', title: 'Informasi', text: @json(session('info')),
+                            confirmButtonColor: '#3b82f6', confirmButtonText: 'OK'
+                        });
+                    });
+                </script>
+            @endif
+
+            @yield('content')
+        </main>
+    </div>
     </div>
 
     <script>
