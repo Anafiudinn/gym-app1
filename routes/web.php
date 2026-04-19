@@ -12,6 +12,25 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+
+Route::get('/tes-wa', function () {
+    // Kita ambil nomor yang kamu input di menu Pengaturan tadi
+    $nomor = \App\Models\Setting::getValue('no_telp'); 
+    
+    if (!$nomor) {
+        return "Waduh, isi dulu Nomor Telepon Bisnis di menu Pengaturan gess!";
+    }
+
+    $pesan = "Halo Ahmad! Notif WA dari sistem Gym kamu sudah aktif. 🔥\n\nIdentitas Bisnis: " . \App\Models\Setting::getValue('nama_gym');
+
+    $response = \App\Helpers\WhatsappHelper::send($nomor, $pesan);
+
+    return response()->json([
+        'info' => 'Mencoba kirim WA ke nomor: ' . $nomor,
+        'api_response' => $response
+    ]);
+});
+
 Route::controller(LandingPageController::class)->group(function () {
     Route::get('/', 'index')->name('landing');
     Route::get('/daftar', 'create')->name('daftar.index');

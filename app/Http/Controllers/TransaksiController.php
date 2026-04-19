@@ -15,27 +15,35 @@ class TransaksiController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Inisialisasi Query dengan Filter Default: Onsite & Hari Ini
+        // 1. Inisialisasi Query (Tetap sama)
         $query = Transaksi::with(['member', 'paket'])
-            ->where('channel', 'onsite') // Hanya menampilkan yang Onsite
+            ->where('channel', 'onsite')
             ->latest();
 
-        // 2. Logika Auto-Reset Harian
-        // Jika user TIDAK sedang mencari berdasarkan tanggal, maka otomatis filter 'hari ini'
-        if (!$request->filled('date_from') && !$request->filled('date_to')) {
-            $query->whereDate('created_at', today());
-        }
-
-        // 3. Filter Pencarian (Nama/Invoice) - Tetap berfungsi jika ingin cari data hari ini
+        // 2 & 3. LOGIKA SMART FILTER (Kuncinya di sini!)
         if ($request->filled('search')) {
+            // JIKA ADA SEARCH: Abaikan filter tanggal hari ini, cari di SEMUA riwayat
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('kode_invoice', 'like', "%{$search}%")
                     ->orWhere('nama_tamu', 'like', "%{$search}%")
                     ->orWhereHas('member', fn($q) => $q->where('nama', 'like', "%{$search}%"));
             });
+        } else {
+            // JIKA TIDAK ADA SEARCH: Baru terapkan filter tanggal
+            if (!$request->filled('date_from') && !$request->filled('date_to')) {
+                // Default: Tampilkan hari ini jika filter tanggal kosong
+                $query->whereDate('created_at', today());
+            } else {
+                // Filter tanggal manual jika diisi
+                if ($request->filled('date_from')) {
+                    $query->whereDate('created_at', '>=', $request->date_from);
+                }
+                if ($request->filled('date_to')) {
+                    $query->whereDate('created_at', '<=', $request->date_to);
+                }
+            }
         }
-
         // 4. Filter Tanggal Manual (Jika ingin melihat history hari lain)
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
@@ -53,7 +61,7 @@ class TransaksiController extends Controller
         }
 
         // 6. Eksekusi Data
-        $data    = $query->paginate(15)->withQueryString();
+        $data = $query->paginate(15)->withQueryString();
         $members = Member::orderBy('nama')->get();
 
         // Ambil paket selain harian untuk dropdown membership
@@ -65,7 +73,7 @@ class TransaksiController extends Controller
         // total hari ini ambil data status di bayar dan chanlenya onsite
         $totalHariIni = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->where('channel', 'onsite')->sum('jumlah_bayar');
         $totalBulanIni = Transaksi::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('jumlah_bayar');
-        $countHariIni  = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->count();
+        $countHariIni = Transaksi::whereDate('created_at', today())->where('status', 'dibayar')->count();
 
         $activeTab = $request->query('tab', 'tamu');
         $selectedMemberId = $request->query('member');
@@ -107,14 +115,14 @@ class TransaksiController extends Controller
         }
 
         Transaksi::create([
-            'kode_invoice'       => 'INV-' . strtoupper(Str::random(6)),
-            'nama_tamu'          => $request->nama_tamu,
-            'paket_id'           => $paket->id,
-            'tipe'               => 'harian',
-            'channel'            => 'onsite',
-            'jumlah_bayar'       => $paket->harga,
-            'metode_pembayaran'  => $request->metode_pembayaran,
-            'status'             => 'dibayar',
+            'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
+            'nama_tamu' => $request->nama_tamu,
+            'paket_id' => $paket->id,
+            'tipe' => 'harian',
+            'channel' => 'onsite',
+            'jumlah_bayar' => $paket->harga,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'status' => 'dibayar',
             'tanggal_pembayaran' => now(),
         ]);
 
@@ -123,147 +131,176 @@ class TransaksiController extends Controller
 
     public function storeMembership(Request $request)
     {
-        // 1. Bersihkan input no_wa dari spasi, strip, atau tanda + sebelum divalidasi
+        // 1. Bersihkan input no_wa
         $request->merge([
             'no_wa' => $request->no_wa ? str_replace([' ', '-', '+'], '', $request->no_wa) : null,
         ]);
 
         // 2. Validasi Input
         $request->validate([
-            'tipe_member'       => 'required|in:baru,perpanjang',
-            'paket_id'          => 'required|exists:pakets,id',
-            'metode_pembayaran' => 'required|in:cash,transfer', // Tambahkan validasi metode bayar
-
-            // Validasi HP Indonesia: Wajib angka, awalan 08/628, panjang 10-15 digit
+            'tipe_member' => 'required|in:baru,perpanjang',
+            'paket_id' => 'required|exists:pakets,id',
+            'metode_pembayaran' => 'required|in:cash,transfer',
             'no_wa' => [
                 'required_if:tipe_member,baru',
                 'nullable',
                 'unique:members,no_wa',
                 'regex:/^(08|628)[0-9]{8,13}$/',
             ],
-            'nama'          => 'required_if:tipe_member,baru',
+            'nama' => 'required_if:tipe_member,baru',
             'jenis_kelamin' => 'required_if:tipe_member,baru',
-            'member_id'     => 'nullable|required_if:tipe_member,perpanjang|exists:members,id',
+            'member_id' => 'nullable|required_if:tipe_member,perpanjang|exists:members,id',
         ], [
-            'no_wa.unique'      => 'Waduh, nomor WhatsApp ini sudah terdaftar sebagai member! Silakan pilih menu perpanjang.',
-            'no_wa.required_if' => 'Nomor WhatsApp wajib diisi untuk pendaftaran member baru.',
-            'no_wa.regex'       => 'Format nomor tidak valid. Gunakan awalan 08 atau 628.',
-            'metode_pembayaran.required' => 'Pilih metode pembayaran (Cash/Transfer) dulu gess.',
+            'no_wa.unique' => 'Nomor WA sudah terdaftar! Gunakan menu perpanjang gess.',
+            'no_wa.regex' => 'Format nomor tidak valid. Gunakan awalan 08 atau 628.',
         ]);
 
-        if ($request->tipe_member === 'perpanjang') {
-            $member = Member::findOrFail($request->member_id);
-
-            // CEK STATUS: Jika nonaktif, batalkan proses
-            if ($member->status === 'nonaktif') {
-                return back()->with('error', 'Gagal: Member ini sedang dinonaktifkan (bermasalah). Pergi ke halaman management member.');
-            }
-        }
+        // --- BAGIAN INI SUDAH KITA HAPUS (Proteksi Nonaktif Dibuang) ---
+        // Jadi siapa pun bisa diperpanjang untuk "Aktivasi Ulang"
 
         try {
             return DB::transaction(function () use ($request) {
                 $paket = Paket::findOrFail($request->paket_id);
 
-                // 2. Logika Member (Baru atau Ambil yang sudah ada)
+                // 3. Logika Member (Baru atau Ambil yang sudah ada)
                 if ($request->tipe_member === 'baru') {
                     $member = Member::create([
-                        'kode_member'    => 'GYM-' . rand(1000, 9999),
-                        'nama'           => $request->nama,
-                        'no_wa'          => $request->no_wa,
-                        'jenis_kelamin'  => $request->jenis_kelamin,
-                        'status'         => 'aktif',
+                        'kode_member' => 'GYM-' . rand(1000, 9999),
+                        'nama' => $request->nama,
+                        'no_wa' => $request->no_wa,
+                        'jenis_kelamin' => $request->jenis_kelamin,
+                        'status' => 'aktif',
                         'tanggal_daftar' => now(),
                     ]);
                 } else {
                     $member = Member::findOrFail($request->member_id);
                 }
 
-                // 3. Hitung Tanggal Mulai & Selesai
+                // 4. Hitung Tanggal Mulai & Selesai
                 $start = now();
-                // Jika member masih punya masa aktif (belum kadaluarsa), akumulasikan
                 if ($member->tanggal_kadaluarsa && Carbon::parse($member->tanggal_kadaluarsa)->gt(now())) {
                     $start = Carbon::parse($member->tanggal_kadaluarsa);
                 }
 
                 $end = Carbon::parse($start)->addDays($paket->durasi_hari);
 
-                // 4. Buat Transaksi
+                // 5. Buat Transaksi
                 $transaksi = Transaksi::create([
-                    'kode_invoice'       => 'INV-' . strtoupper(Str::random(6)),
-                    'member_id'          => $member->id,
-                    'paket_id'           => $paket->id,
-                    'tipe'               => 'membership',
-                    'channel'            => 'onsite',
-                    'jumlah_bayar'       => $paket->harga,
-                    'metode_pembayaran'  => $request->metode_pembayaran,
-                    'status'             => 'dibayar',
+                    'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),
+                    'member_id' => $member->id,
+                    'paket_id' => $paket->id,
+                    'tipe' => 'membership',
+                    'channel' => 'onsite',
+                    'jumlah_bayar' => $paket->harga,
+                    'metode_pembayaran' => $request->metode_pembayaran,
+                    'status' => 'dibayar',
                     'tanggal_pembayaran' => now(),
                 ]);
 
-                // 5. Catat Log Membership
+                // 6. Catat Log Membership
                 Membership::create([
-                    'member_id'       => $member->id,
-                    'transaksi_id'    => $transaksi->id,
-                    'paket_id'        => $paket->id,
-                    'tanggal_mulai'   => $start,
+                    'member_id' => $member->id,
+                    'transaksi_id' => $transaksi->id,
+                    'paket_id' => $paket->id,
+                    'tanggal_mulai' => $start,
                     'tanggal_selesai' => $end,
-                    'status'          => 'aktif',
+                    'status' => 'aktif',
                 ]);
 
-                // 6. Update Masa Aktif Member
+                // 7. Update Masa Aktif Member (OTOMATIS JADI AKTIF LAGI)
                 $member->update([
-                    'status'             => 'aktif',
+                    'status' => 'aktif',
                     'tanggal_kadaluarsa' => $end
                 ]);
 
-                return back()->with('success', 'Membership ' . $member->nama . ' berhasil diproses');
+                // --- LOGIC NOTIFIKASI WA PRO ---
+                $namaGym = \App\Models\Setting::getValue('nama_gym', 'Gym Fit');
+
+                $pesan = "*TRANSAKSI BERHASIL* ✅\n\n";
+                $pesan .= "Halo *{$member->nama}*,\n";
+                $pesan .= ($request->tipe_member === 'baru')
+                    ? "Selamat bergabung di *{$namaGym}*!\n\n"
+                    : "Terima kasih telah memperpanjang membership di *{$namaGym}*!\n\n";
+
+                $pesan .= "--- *Detail Membership* ---\n";
+                $pesan .= "ID Member : *{$member->kode_member}*\n";
+                $pesan .= "Paket     : {$paket->nama_paket}\n";
+                $pesan .= "Masa Aktif: " . $end->format('d M Y') . "\n";
+                $pesan .= "Metode    : " . strtoupper($request->metode_pembayaran) . "\n\n";
+                $pesan .= "Semangat latihannya gess! 🔥";
+
+                \App\Helpers\WhatsappHelper::send($member->no_wa, $pesan);
+
+                return back()->with('success', 'Membership ' . $member->nama . ' berhasil diproses & WA terkirim!');
             });
         } catch (\Exception $e) {
-            // Jangan tampilkan $e->getMessage() kalau tidak mau lihat tulisan SQL yang rumit
-            return back()->with('error', 'Terjadi kesalahan saat menyimpan data. Pastikan semua input benar.')->withInput();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
     // 1. Method Batalkan Transaksi
     public function batalkan($id)
     {
-        $transaksi = Transaksi::findOrFail($id);
+        $transaksi = Transaksi::with(['member', 'paket'])->findOrFail($id);
 
-        // Proteksi: Hanya transaksi 'dibayar' yang bisa dibatalkan
+        // Proteksi: Hanya transaksi yang sudah dibayar yang bisa dibatalkan
         if ($transaksi->status === 'batal') {
-            return back()->with('error', 'Transaksi ini sudah dibatalkan sebelumnya.');
+            return back()->with('error', 'Waduh, transaksi ini memang sudah batal dari awal gess.');
         }
 
         try {
             return DB::transaction(function () use ($transaksi) {
-                // Jika ini Membership, kita harus tarik ulang masa aktif membernya
-                if ($transaksi->tipe === 'membership' && $transaksi->member_id) {
-                    $member = Member::find($transaksi->member_id);
+                $member = $transaksi->member;
+                $paket = $transaksi->paket;
 
-                    // Logika sederhana: set status nonaktif jika tidak ada membership lain
-                    // Atau set kadaluarsa ke hari ini (mengurangi durasi paket yang dibatalkan)
-                    $paket = $transaksi->paket;
-                    $newExpired = Carbon::parse($member->tanggal_kadaluarsa)->subDays($paket->durasi_hari);
+                // 1. LOGIKA KOREKSI MASA AKTIF (Jika transaksi membership)
+                if ($transaksi->tipe === 'membership' && $member) {
+                    // Ambil tanggal kadaluarsa saat ini
+                    $currentExpired = Carbon::parse($member->tanggal_kadaluarsa);
 
+                    // KURANGI dengan durasi paket yang dibatalkan
+                    $newExpired = $currentExpired->subDays($paket->durasi_hari);
+
+                    // Cek apakah setelah dikurangi dia masih punya sisa hari di masa depan?
+                    $isStillActive = $newExpired->gt(now());
+
+                    // Update Member: Jika newExpired sudah lewat, kita mentokin di 'now' agar tidak minus jauh ke belakang
                     $member->update([
                         'tanggal_kadaluarsa' => $newExpired->lt(now()) ? now() : $newExpired,
-                        'status' => $newExpired->lt(now()) ? 'nonaktif' : 'aktif'
+                        'status' => $isStillActive ? 'aktif' : 'nonaktif'
                     ]);
 
-                    // Nonaktifkan log di tabel memberships
+                    // Update log di tabel memberships (History perpanjangan jadi batal)
                     Membership::where('transaksi_id', $transaksi->id)->update(['status' => 'batal']);
                 }
 
-                // Update status transaksi jadi dibatalkan
-                $transaksi->update(['status' => 'batal']);
+                // 2. UPDATE STATUS TRANSAKSI UTAMA
+                $transaksi->update([
+                    'status' => 'batal',
+                    'keterangan' => 'Dibatalkan oleh admin pada ' . now()->format('d-m-Y H:i')
+                ]);
 
-                return back()->with('success', 'Transaksi #' . $transaksi->kode_invoice . ' berhasil dibatalkan.');
+                // 3. KIRIM NOTIFIKASI WA (BIAR PRO)
+                if ($member && $member->no_wa) {
+                    $namaGym = \App\Models\Setting::getValue('nama_gym', 'Gym Kami');
+
+                    $pesan = "*PEMBATALAN TRANSAKSI* ⚠️\n\n";
+                    $pesan .= "Halo *{$member->nama}*,\n";
+                    $pesan .= "Transaksi *#{$transaksi->kode_invoice}* telah dibatalkan untuk keperluan koreksi data.\n\n";
+                    $pesan .= "--- *Update Status* ---\n";
+                    $pesan .= "ID Member: *{$member->kode_member}*\n";
+                    $pesan .= "Masa Aktif: *" . Carbon::parse($member->tanggal_kadaluarsa)->format('d M Y') . "*\n";
+                    $pesan .= "Status Akun: " . strtoupper($member->status) . "\n\n";
+                    $pesan .= "Silakan hubungi admin jika ingin melakukan perpanjangan ulang. Terima kasih.";
+
+                    \App\Helpers\WhatsappHelper::send($member->no_wa, $pesan);
+                }
+
+                return back()->with('success', 'Transaksi #' . $transaksi->kode_invoice . ' berhasil dibatalkan. Masa aktif member telah disesuaikan.');
             });
         } catch (\Exception $e) {
-            // Tambahkan dd($e->getMessage()) untuk melihat error aslinya saat testing
-            return back()->with('error', 'Gagal: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
         }
     }
-
     // 2. Method Cetak Struk (View Struk Digital)
     public function struk($id)
     {
@@ -272,6 +309,6 @@ class TransaksiController extends Controller
         // Kita return view khusus struk yang ukurannya kecil (thermal)
         $safeInvoice = str_replace(['/', '\\'], '-', $transaksi->kode_invoice);
         $filename = 'STRUK-' . $safeInvoice . '.pdf';
-        return view('transaksi.struk', compact('transaksi','filename'));
+        return view('transaksi.struk', compact('transaksi', 'filename'));
     }
 }

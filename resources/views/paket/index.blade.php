@@ -1,313 +1,388 @@
 @extends('layouts.admin')
+
 @section('title', 'Manajemen Paket')
 @section('page-title', 'Manajemen Paket')
 
 @push('styles')
 <style>
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e9ecf0; }
+    .badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 3px 10px; border-radius: 99px;
+        font-size: 11px; font-weight: 600;
     }
-    .fade-up { animation: fadeUp 0.35s ease both; }
-    .fade-up-1 { animation-delay: .05s; }
-    .fade-up-2 { animation-delay: .10s; }
-    
-    .paket-row { transition: all 0.2s ease; }
-    .paket-row:hover { transform: translateY(-1px); }
-    .paket-row:hover .row-actions { opacity: 1; }
-    .row-actions { opacity: 0; transition: opacity 0.15s; }
-    
-    .modal-enter { animation: fadeUp 0.25s ease-out; }
+    .badge-green  { background: #f0fdf7; color: #059669; }
+    .badge-blue   { background: #eff6ff; color: #2563eb; }
+    .badge-orange { background: #fff7ed; color: #d97706; }
+    .btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 8px;
+        font-size: 12.5px; font-weight: 600;
+        transition: all .15s; cursor: pointer; border: none;
+    }
+    .btn-primary   { background: #10b981; color: #fff; }
+    .btn-primary:hover { background: #059669; }
+    .btn-white     { background: #fff; color: #374151; border: 1px solid #e5e7eb; }
+    .btn-white:hover { background: #f9fafb; }
+    .btn-danger    { background: #fef2f2; color: #dc2626; }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-edit      { background: #eff6ff; color: #2563eb; }
+    .btn-edit:hover { background: #dbeafe; }
+    .btn-sm        { padding: 5px 10px; font-size: 11.5px; border-radius: 7px; }
+
+    /* Table */
+    .tbl th {
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .07em; color: #9ca3af;
+        padding: 10px 14px; border-bottom: 1px solid #f1f3f5;
+        white-space: nowrap;
+    }
+    .tbl td {
+        padding: 11px 14px; font-size: 13px; color: #374151;
+        border-bottom: 1px solid #f8f9fa; vertical-align: middle;
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: #fafafa; }
+
+    /* Modal */
+    .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,.45);
+        backdrop-filter: blur(4px); z-index: 200;
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+    }
+    .modal-box {
+        background: #fff; border-radius: 14px; width: 100%; max-width: 440px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.15);
+        animation: modalIn .2s ease;
+    }
+    @keyframes modalIn {
+        from { opacity:0; transform: translateY(12px) scale(.98); }
+        to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid #f1f3f5;
+    }
+    .modal-body  { padding: 18px 20px; }
+    .modal-footer { padding: 12px 20px; border-top: 1px solid #f1f3f5; display:flex; justify-content: flex-end; gap:8px; }
+
+    /* Input */
+    .field-group { margin-bottom: 14px; }
+    .field-label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:5px; }
+    .field-input {
+        width: 100%; padding: 8px 11px; border-radius: 8px;
+        border: 1px solid #e5e7eb; font-size: 13px; color: #111827;
+        background: #f9fafb; transition: border .15s, box-shadow .15s;
+        outline: none;
+    }
+    .field-input:focus { border-color: #10b981; background:#fff; box-shadow: 0 0 0 3px rgba(16,185,129,.1); }
+    .field-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+    .field-input.error { border-color: #ef4444; background: #fef2f2; }
+
+    /* Stat cards */
+    .stat-card {
+        background: #fff; border: 1px solid #e9ecf0; border-radius: 12px;
+        padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+    }
+    .stat-icon {
+        width: 40px; height: 40px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; flex-shrink: 0;
+    }
+    .stat-label { font-size: 11.5px; color: #9ca3af; font-weight: 500; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.1; }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding: 48px 24px; }
+    .empty-state i { font-size: 36px; color: #d1d5db; }
+    .empty-state p { font-size: 13px; color: #9ca3af; margin-top: 10px; }
+
+    /* Search input */
+    .search-wrap { position: relative; }
+    .search-wrap i { position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; color:#9ca3af; }
+    .search-input { padding-left:30px; }
 </style>
 @endpush
 
-@push('scripts')
-<script>
-let currentEditId = null;
-
-// Auto format Rupiah
-function formatRupiah(input) {
-    let value = input.value.replace(/[^\d]/g, '');
-    value = value ? parseInt(value).toLocaleString('id-ID') : '';
-    input.value = 'Rp ' + value;
-}
-
-// Remove format untuk submit
-function removeRupiahFormat(input) {
-    input.value = input.value.replace(/[^\d]/g, '');
-}
-
-// Open Edit Paket
-function openEditPaket(id, nama, harga, durasi, desc) {
-    currentEditId = id;
-    document.getElementById('form-edit-paket').action = `/paket/${id}`;
-    document.getElementById('edit-nama').value = nama;
-    document.getElementById('edit-harga').value = parseInt(harga).toLocaleString('id-ID');
-    document.getElementById('edit-durasi').value = durasi;
-    document.getElementById('edit-desc').value = desc || '';
-    document.getElementById('modal-edit-paket').classList.remove('hidden');
-    document.getElementById('modal-edit-paket').classList.add('modal-enter');
-}
-
-// ✅ SWEETALERT2 DELETE PAKET
-async function handleDeletePaket(event, paketId, namaPaket) {
-    event.preventDefault();
-    
-    const confirmed = await GymProAlert.confirm(
-        'Hapus Paket',
-        `Paket "${namaPaket}" akan dihapus permanen dan tidak bisa dipulihkan. Pastikan tidak ada member aktif yang menggunakan paket ini!`,
-        'Hapus Paket',
-        'Batal'
-    );
-    
-    if (confirmed) {
-        event.target.closest('form').submit();
-    }
-}
-
-// Close modals
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
-
-// ESC key close
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeModal('modal-tambah-paket');
-        closeModal('modal-edit-paket');
-    }
-});
-</script>
-@endpush
-
 @section('content')
-<div class="space-y-6 fade-up fade-up-1">
 
-    {{-- ===== HEADER ===== --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-boxes-stacked text-emerald-500 text-sm"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold text-gray-800 leading-tight">Manajemen Paket</h1>
-                <p class="text-xs text-gray-400 mt-0.5">{{ $paket->count() }} paket tersedia</p>
+{{-- ── Page Header ─────────────────────────── --}}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+    <div>
+        <h1 class="text-[17px] font-bold text-gray-800 leading-tight">Manajemen Paket</h1>
+        <p class="text-[12px] text-gray-400 mt-0.5">Kelola paket membership gym Anda</p>
+    </div>
+    <button onclick="openModal('modal-tambah')" class="btn btn-primary">
+        <i class="fa-solid fa-plus text-[11px]"></i> Tambah Paket
+    </button>
+</div>
+
+{{-- ── Stat Cards ─────────────────────────── --}}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-50">
+            <i class="fa-solid fa-box-open text-emerald-500"></i>
+        </div>
+        <div>
+            <div class="stat-label">Total Paket</div>
+            <div class="stat-value">{{ $paket->count() }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-blue-50">
+            <i class="fa-solid fa-tag text-blue-500"></i>
+        </div>
+        <div>
+            <div class="stat-label">Harga Terendah</div>
+            <div class="stat-value text-[15px] mt-0.5">
+                Rp {{ $paket->count() ? number_format($paket->min('harga'), 0, ',', '.') : '—' }}
             </div>
         </div>
-       <!-- BENAR ✅ -->
-<button onclick="document.getElementById('modal-tambah-paket').classList.remove('hidden')"
-    class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all flex items-center gap-2">
-    <i class="fa-solid fa-plus"></i>Tambah Paket
-</button>
     </div>
-
-    {{-- ===== TABLE ===== --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden fade-up fade-up-2">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[800px]">
-                <thead>
-                    <tr class="border-b border-gray-100 bg-gray-50/70">
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-left">Paket</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-left">Deskripsi</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Durasi</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Harga</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($paket as $p)
-                    <tr class="paket-row h-16 hover:bg-emerald-50/30 transition-all">
-                        {{-- Paket --}}
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center shadow-sm">
-                                    <i class="fa-solid fa-box text-emerald-600 text-sm"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-[13px] font-semibold text-gray-800 truncate">{{ $p->nama_paket }}</p>
-                                    <p class="text-[10px] text-gray-400 mt-0.5">ID: #{{ $p->id }}</p>
-                                </div>
-                            </div>
-                        </td>
-
-                        {{-- Deskripsi --}}
-                        <td class="px-6 py-4">
-                            <p class="text-[12px] text-gray-600 line-clamp-2 max-w-md">{{ $p->deskripsi ?? '-' }}</p>
-                        </td>
-
-                        {{-- Durasi --}}
-                        <td class="px-6 py-4 text-center">
-                            <span class="inline-flex px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-semibold rounded-full border border-emerald-200">
-                                {{ $p->durasi_hari }} Hari
-                            </span>
-                        </td>
-
-                        {{-- Harga --}}
-                        <td class="px-6 py-4 text-right">
-                            <p class="text-[14px] font-black text-gray-800">Rp {{ number_format($p->harga) }}</p>
-                            <p class="text-[10px] text-emerald-600 font-semibold mt-0.5">/ {{ $p->durasi_hari }} hari</p>
-                        </td>
-
-                        {{-- Aksi - ✅ SWEETALERT2 INTEGRATED --}}
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex items-center justify-end gap-1.5 row-actions">
-                                {{-- Edit --}}
-                                <button onclick="openEditPaket({{ $p->id }}, '{{ addslashes($p->nama_paket) }}', {{ $p->harga }}, {{ $p->durasi_hari }}, '{{ addslashes($p->deskripsi ?? '') }}')"
-                                    class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all group shadow-sm hover:shadow-md"
-                                    title="Edit Paket">
-                                    <i class="fa-solid fa-pen text-[11px] group-hover:scale-110"></i>
-                                </button>
-                                
-                                {{-- Delete - SweetAlert2 ✅ --}}
-                                <form method="POST" action="{{ route('paket.destroy', $p->id) }}" 
-                                      onsubmit="handleDeletePaket(event, {{ $p->id }}, '{{ addslashes($p->nama_paket) }}')"
-                                      class="inline-flex">
-                                    @csrf @method('DELETE')
-                                    <button type="submit"
-                                        class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group shadow-sm hover:shadow-md"
-                                        title="Hapus Paket">
-                                        <i class="fa-solid fa-trash text-[11px] group-hover:scale-110"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-16 text-center">
-                            <div class="flex flex-col items-center gap-3 text-gray-300">
-                                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
-                                    <i class="fa-solid fa-box-open text-gray-400 text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-400">Belum ada paket tersedia</p>
-                                    <p class="text-[11px] text-gray-300 mt-1">Tambahkan paket pertama Anda</p>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    <div class="stat-card">
+        <div class="stat-icon bg-orange-50">
+            <i class="fa-solid fa-crown text-orange-400"></i>
+        </div>
+        <div>
+            <div class="stat-label">Harga Tertinggi</div>
+            <div class="stat-value text-[15px] mt-0.5">
+                Rp {{ $paket->count() ? number_format($paket->max('harga'), 0, ',', '.') : '—' }}
+            </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-purple-50">
+            <i class="fa-solid fa-calendar-days text-purple-500"></i>
+        </div>
+        <div>
+            <div class="stat-label">Durasi Terlama</div>
+            <div class="stat-value text-[15px] mt-0.5">
+                {{ $paket->count() ? $paket->max('durasi_hari') . ' hari' : '—' }}
+            </div>
         </div>
     </div>
 </div>
 
-{{-- =========================================== --}}
-{{-- MODAL TAMBAH PAKET --}}
-<div id="modal-tambah-paket" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 flex items-center justify-between px-6 py-5 border-b border-gray-50 bg-white/80 backdrop-blur-sm z-10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                    <i class="fa-solid fa-plus text-emerald-500 text-sm"></i>
-                </div>
-                <h2 class="font-bold text-lg text-gray-800">Tambah Paket Baru</h2>
+{{-- ── Table Card ─────────────────────────── --}}
+<div class="card">
+
+    {{-- Toolbar --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-gray-100">
+        <div class="font-semibold text-[13.5px] text-gray-700">
+            Daftar Paket
+            <span class="ml-1.5 text-[11px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                {{ $paket->count() }} paket
+            </span>
+        </div>
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" onkeyup="filterTable()"
+                   placeholder="Cari paket..."
+                   class="field-input search-input w-full sm:w-52 text-[12.5px]">
+        </div>
+    </div>
+
+    {{-- Table --}}
+    <div class="overflow-x-auto">
+        <table class="tbl w-full" id="paketTable">
+            <thead>
+                <tr>
+                    <th class="text-left">#</th>
+                    <th class="text-left">Nama Paket</th>
+                    <th class="text-left">Harga</th>
+                    <th class="text-left">Durasi</th>
+                    <th class="text-left">Kategori</th>
+                    <th class="text-left">Dibuat</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="paketBody">
+                @forelse($paket as $i => $p)
+                <tr class="paket-row">
+                    <td class="text-gray-400 text-[12px]">{{ $i + 1 }}</td>
+                    <td>
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-dumbbell text-emerald-500 text-[11px]"></i>
+                            </div>
+                            <span class="font-semibold text-gray-800 text-[13px] paket-name">{{ $p->nama_paket }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="font-semibold text-gray-800">Rp {{ number_format($p->harga, 0, ',', '.') }}</span>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-1.5 text-gray-600 text-[12.5px]">
+                            <i class="fa-regular fa-clock text-gray-400 text-[11px]"></i>
+                            {{ $p->durasi_hari }} hari
+                        </div>
+                    </td>
+                    <td>
+                        @if($p->durasi_hari <= 7)
+                            <span class="badge badge-orange"><i class="fa-solid fa-bolt text-[9px]"></i> Trial</span>
+                        @elseif($p->durasi_hari <= 31)
+                            <span class="badge badge-blue"><i class="fa-solid fa-star text-[9px]"></i> Bulanan</span>
+                        @else
+                            <span class="badge badge-green"><i class="fa-solid fa-crown text-[9px]"></i> Premium</span>
+                        @endif
+                    </td>
+                    <td class="text-gray-400 text-[12px]">
+                        {{ $p->created_at ? $p->created_at->format('d M Y') : '—' }}
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-center gap-1.5">
+                            {{-- Edit --}}
+                            <button onclick="openEdit({{ $p->id }}, '{{ addslashes($p->nama_paket) }}', {{ $p->harga }}, {{ $p->durasi_hari }})"
+                                    class="btn btn-edit btn-sm" title="Edit">
+                                <i class="fa-solid fa-pen text-[10px]"></i> Edit
+                            </button>
+                            {{-- Hapus --}}
+                            <form id="form-del-{{ $p->id }}"
+                                  action="{{ route('paket.destroy', $p->id) }}" method="POST">
+                                @csrf @method('DELETE')
+                                <button type="button"
+                                        onclick="Swal.deleteConfirm(document.getElementById('form-del-{{ $p->id }}'), '{{ addslashes($p->nama_paket) }}')"
+                                        class="btn btn-danger btn-sm" title="Hapus">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr id="empty-row">
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-box-open"></i>
+                            <p>Belum ada paket. Tambahkan paket pertama Anda!</p>
+                            <button onclick="openModal('modal-tambah')" class="btn btn-primary mt-4">
+                                <i class="fa-solid fa-plus text-[11px]"></i> Tambah Paket
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        {{-- No results row (hidden by default) --}}
+        <div id="no-results" class="hidden">
+            <div class="empty-state">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <p>Tidak ada paket yang cocok dengan pencarian Anda.</p>
             </div>
-            <button onclick="closeModal('modal-tambah-paket')"
-                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all hover:bg-gray-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
+        </div>
+    </div>
+</div>
+
+
+{{-- ═══════════════════════════════════════════
+     MODAL — TAMBAH PAKET
+════════════════════════════════════════════ --}}
+<div id="modal-tambah" class="modal-backdrop hidden" onclick="closeOnBackdrop(event, 'modal-tambah')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3 class="font-bold text-[15px] text-gray-800">Tambah Paket</h3>
+                <p class="text-[11.5px] text-gray-400 mt-0.5">Isi detail paket baru</p>
+            </div>
+            <button onclick="closeModal('modal-tambah')"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+                <i class="fa-solid fa-xmark text-[13px]"></i>
             </button>
         </div>
-        
-        <form method="POST" action="{{ route('paket.store') }}" class="p-6 space-y-5">
+
+        <form action="{{ route('paket.store') }}" method="POST" id="form-tambah" novalidate>
             @csrf
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Nama Paket *</label>
-                    <input type="text" name="nama_paket" required maxlength="50"
-                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all bg-gray-50 hover:bg-white">
+            <div class="modal-body">
+
+                <div class="field-group">
+                    <label class="field-label">Nama Paket <span class="text-red-500">*</span></label>
+                    <input type="text" name="nama_paket" id="tambah-nama" placeholder="cth. Paket Silver 1 Bulan"
+                           class="field-input" autocomplete="off">
+                    <div class="field-hint hidden text-red-500" id="err-tambah-nama">Nama paket wajib diisi.</div>
                 </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Deskripsi</label>
-                    <input type="text" name="deskripsi" maxlength="100"
-                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all bg-gray-50 hover:bg-white">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Harga *</label>
-                        <input type="text" name="harga" id="harga-tambah" required 
-                            oninput="formatRupiah(this)" onblur="removeRupiahFormat(this)"
-                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all bg-gray-50 hover:bg-white text-right font-mono">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="field-group mb-0">
+                        <label class="field-label">Harga (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" name="harga" id="tambah-harga" placeholder="150000" min="0"
+                               class="field-input" oninput="previewHarga(this, 'preview-harga-tambah')">
+                        <div class="field-hint" id="preview-harga-tambah"></div>
+                        <div class="field-hint hidden text-red-500" id="err-tambah-harga">Harga wajib diisi.</div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Durasi *</label>
-                        <input type="number" name="durasi_hari" min="1" max="365" required
-                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all bg-gray-50 hover:bg-white">
+                    <div class="field-group mb-0">
+                        <label class="field-label">Durasi (Hari) <span class="text-red-500">*</span></label>
+                        <input type="number" name="durasi_hari" id="tambah-durasi" placeholder="30" min="1"
+                               class="field-input" oninput="previewDurasi(this, 'preview-durasi-tambah')">
+                        <div class="field-hint" id="preview-durasi-tambah"></div>
+                        <div class="field-hint hidden text-red-500" id="err-tambah-durasi">Durasi wajib diisi.</div>
                     </div>
                 </div>
+
             </div>
-            
-            <div class="flex gap-3 pt-4">
-                <button type="button" onclick="closeModal('modal-tambah-paket')"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="flex-1 px-4 py-2.5 text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <i class="fa-solid fa-save mr-1.5"></i>Simpan Paket
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('modal-tambah')" class="btn btn-white">Batal</button>
+                <button type="button" onclick="submitTambah()" class="btn btn-primary">
+                    <i class="fa-solid fa-check text-[11px]"></i> Simpan Paket
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- MODAL EDIT PAKET --}}
-<div id="modal-edit-paket" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 flex items-center justify-between px-6 py-5 border-b border-gray-50 bg-white/80 backdrop-blur-sm z-10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                    <i class="fa-solid fa-pen text-blue-500 text-sm"></i>
-                </div>
-                <h2 class="font-bold text-lg text-gray-800">Edit Paket</h2>
+
+{{-- ═══════════════════════════════════════════
+     MODAL — EDIT PAKET
+════════════════════════════════════════════ --}}
+<div id="modal-edit" class="modal-backdrop hidden" onclick="closeOnBackdrop(event, 'modal-edit')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3 class="font-bold text-[15px] text-gray-800">Edit Paket</h3>
+                <p class="text-[11.5px] text-gray-400 mt-0.5">Ubah detail paket</p>
             </div>
-            <button onclick="closeModal('modal-edit-paket')"
-                class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-all hover:bg-gray-100">
-                <i class="fa-solid fa-xmark text-lg"></i>
+            <button onclick="closeModal('modal-edit')"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+                <i class="fa-solid fa-xmark text-[13px]"></i>
             </button>
         </div>
-        
-        <form id="form-edit-paket" method="POST" class="p-6 space-y-5">
+
+        <form id="form-edit" method="POST" novalidate>
             @csrf @method('PUT')
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Nama Paket *</label>
-                    <input type="text" name="nama_paket" id="edit-nama" required maxlength="50"
-                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all bg-gray-50 hover:bg-white">
+            <div class="modal-body">
+
+                <div class="field-group">
+                    <label class="field-label">Nama Paket <span class="text-red-500">*</span></label>
+                    <input type="text" name="nama_paket" id="edit-nama" placeholder="Nama paket"
+                           class="field-input" autocomplete="off">
+                    <div class="field-hint hidden text-red-500" id="err-edit-nama">Nama paket wajib diisi.</div>
                 </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Deskripsi</label>
-                    <input type="text" name="deskripsi" id="edit-desc" maxlength="100"
-                        class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all bg-gray-50 hover:bg-white">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Harga *</label>
-                        <input type="text" name="harga" id="edit-harga" required 
-                            oninput="formatRupiah(this)" onblur="removeRupiahFormat(this)"
-                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all bg-gray-50 hover:bg-white text-right font-mono">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="field-group mb-0">
+                        <label class="field-label">Harga (Rp) <span class="text-red-500">*</span></label>
+                        <input type="number" name="harga" id="edit-harga" placeholder="150000" min="0"
+                               class="field-input" oninput="previewHarga(this, 'preview-harga-edit')">
+                        <div class="field-hint" id="preview-harga-edit"></div>
+                        <div class="field-hint hidden text-red-500" id="err-edit-harga">Harga wajib diisi.</div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Durasi *</label>
-                        <input type="number" name="durasi_hari" id="edit-durasi" min="1" max="365" required
-                            class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all bg-gray-50 hover:bg-white">
+                    <div class="field-group mb-0">
+                        <label class="field-label">Durasi (Hari) <span class="text-red-500">*</span></label>
+                        <input type="number" name="durasi_hari" id="edit-durasi" placeholder="30" min="1"
+                               class="field-input" oninput="previewDurasi(this, 'preview-durasi-edit')">
+                        <div class="field-hint" id="preview-durasi-edit"></div>
+                        <div class="field-hint hidden text-red-500" id="err-edit-durasi">Durasi wajib diisi.</div>
                     </div>
                 </div>
+
             </div>
-            
-            <div class="flex gap-3 pt-4">
-                <button type="button" onclick="closeModal('modal-edit-paket')"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm">
-                    Batal
-                </button>
-                <button type="submit"
-                    class="flex-1 px-4 py-2.5 text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <i class="fa-solid fa-save mr-1.5"></i>Update Paket
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('modal-edit')" class="btn btn-white">Batal</button>
+                <button type="button" onclick="submitEdit()" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk text-[11px]"></i> Simpan Perubahan
                 </button>
             </div>
         </form>
@@ -315,3 +390,134 @@ document.addEventListener('keydown', function(event) {
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+/* ── Modal helpers ── */
+function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.style.overflow = '';
+    clearErrors(id);
+}
+function closeOnBackdrop(e, id) {
+    if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+/* ── Open edit modal & populate ── */
+function openEdit(id, nama, harga, durasi) {
+    const form = document.getElementById('form-edit');
+    form.action = `/paket/${id}`;
+
+    document.getElementById('edit-nama').value   = nama;
+    document.getElementById('edit-harga').value  = harga;
+    document.getElementById('edit-durasi').value = durasi;
+
+    // trigger preview
+    previewHarga(document.getElementById('edit-harga'), 'preview-harga-edit');
+    previewDurasi(document.getElementById('edit-durasi'), 'preview-durasi-edit');
+
+    openModal('modal-edit');
+}
+
+/* ── Preview helpers ── */
+function previewHarga(el, previewId) {
+    const v = parseInt(el.value);
+    const p = document.getElementById(previewId);
+    p.textContent = v > 0 ? 'Rp ' + v.toLocaleString('id-ID') : '';
+}
+function previewDurasi(el, previewId) {
+    const v = parseInt(el.value);
+    const p = document.getElementById(previewId);
+    if (!v || v < 1) { p.textContent = ''; return; }
+    const bulan = Math.floor(v / 30);
+    const sisa  = v % 30;
+    p.textContent = bulan > 0
+        ? `${bulan} bulan${sisa > 0 ? ` ${sisa} hari` : ''}`
+        : `${v} hari`;
+}
+
+/* ── Validation helpers ── */
+function clearErrors(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.querySelectorAll('.field-hint.text-red-500').forEach(el => el.classList.add('hidden'));
+    modal.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+}
+function showErr(inputId, errId) {
+    document.getElementById(inputId).classList.add('error');
+    document.getElementById(errId).classList.remove('hidden');
+}
+function clearErr(inputId, errId) {
+    document.getElementById(inputId).classList.remove('error');
+    document.getElementById(errId).classList.add('hidden');
+}
+function validate(prefix) {
+    let ok = true;
+    const nama   = document.getElementById(`${prefix}-nama`).value.trim();
+    const harga  = document.getElementById(`${prefix}-harga`).value;
+    const durasi = document.getElementById(`${prefix}-durasi`).value;
+
+    if (!nama)              { showErr(`${prefix}-nama`,   `err-${prefix}-nama`);   ok = false; }
+    else                    { clearErr(`${prefix}-nama`,  `err-${prefix}-nama`); }
+    if (!harga || harga<=0) { showErr(`${prefix}-harga`,  `err-${prefix}-harga`);  ok = false; }
+    else                    { clearErr(`${prefix}-harga`, `err-${prefix}-harga`); }
+    if (!durasi||durasi<=0) { showErr(`${prefix}-durasi`, `err-${prefix}-durasi`); ok = false; }
+    else                    { clearErr(`${prefix}-durasi`,`err-${prefix}-durasi`); }
+    return ok;
+}
+
+/* ── Submit tambah ── */
+function submitTambah() {
+    if (!validate('tambah')) {
+        Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning');
+        return;
+    }
+    Swal.confirm({
+        title: 'Tambah Paket?',
+        text: `Paket "${document.getElementById('tambah-nama').value}" akan disimpan.`,
+        confirmText: 'Ya, Simpan',
+        onConfirm: () => document.getElementById('form-tambah').submit()
+    });
+}
+
+/* ── Submit edit ── */
+function submitEdit() {
+    if (!validate('edit')) {
+        Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning');
+        return;
+    }
+    Swal.confirm({
+        title: 'Simpan Perubahan?',
+        text: `Data paket "${document.getElementById('edit-nama').value}" akan diperbarui.`,
+        confirmText: 'Ya, Simpan',
+        onConfirm: () => document.getElementById('form-edit').submit()
+    });
+}
+
+/* ── Search / filter table ── */
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('.paket-row');
+    let found = 0;
+    rows.forEach(row => {
+        const name = row.querySelector('.paket-name').textContent.toLowerCase();
+        const show = name.includes(q);
+        row.style.display = show ? '' : 'none';
+        if (show) found++;
+    });
+    document.getElementById('no-results').classList.toggle('hidden', found > 0);
+}
+
+/* ── ESC to close ── */
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        ['modal-tambah','modal-edit'].forEach(id => {
+            if (!document.getElementById(id).classList.contains('hidden')) closeModal(id);
+        });
+    }
+});
+</script>
+@endpush

@@ -62,49 +62,52 @@
             </button>
 
             {{-- TOMBOL BARU: Perpanjang --}}
-            <a href="{{ route('transaksi.index', ['tab' => 'perpanjang', 'member' => $member->id]) }}"
+            <a href="{{ route('transaksi.index') }}"
                 class="w-full py-2.5 text-[13px] bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition flex items-center justify-center gap-2 text-center">
                 <i class="fa-solid fa-rotate text-[11px]"></i> Perpanjang Membership
-            </a>
-
-            <form method="POST" action="{{ route('member.toggle', $member->id) }}">
-                @csrf @method('PATCH')
-                <button type="submit"
-                    class="w-full py-2.5 text-[13px] border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-power-off text-[11px]"></i>
-                    {{ $member->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }} Member
-                </button>
-            </form>
+</a>
         </div>
     </div>
 
     {{-- RIGHT COL --}}
-    <div class="lg:col-span-2 space-y-4">
-        {{-- RIWAYAT TRANSAKSI (Limit 5) --}}
-        <div class="bg-white rounded-xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-[13px] font-semibold text-gray-700">5 Transaksi Terakhir</h3>
-                <i class="fa-solid fa-clock-rotate-left text-gray-300"></i>
-            </div>
-            <div class="divide-y divide-gray-50">
-                @forelse($transaksi->take(5) as $trx)
-                <div class="flex items-center justify-between py-3">
-                    <div>
-                        <div class="text-[13px] font-medium text-gray-800">{{ $trx->tipe }}</div>
-                        <div class="text-[11px] text-gray-400 mt-0.5">
-                            {{ \Carbon\Carbon::parse($trx->tanggal_pembayaran)->format('d M Y') }} · {{ $trx->paket->nama_paket ?? '-' }}
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-[13px] font-semibold text-gray-800">Rp {{ number_format($trx->jumlah_bayar) }}</div>
-                        <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">LUNAS</span>
+  <div class="lg:col-span-2 space-y-4">
+    {{-- RIWAYAT TRANSAKSI (Limit 5) --}}
+    <div class="bg-white rounded-xl border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-[13px] font-semibold text-gray-700">5 Transaksi Terakhir</h3>
+            <i class="fa-solid fa-clock-rotate-left text-gray-300"></i>
+        </div>
+        <div class="divide-y divide-gray-50">
+            @forelse($transaksi->take(5) as $trx)
+            <div class="flex items-center justify-between py-3">
+                <div>
+                    {{-- Badge Tipe agar lebih rapi --}}
+                    <div class="text-[13px] font-medium text-gray-800">{{ ucfirst($trx->tipe) }}</div>
+                    <div class="text-[11px] text-gray-400 mt-0.5">
+                        {{ \Carbon\Carbon::parse($trx->tanggal_pembayaran ?? $trx->created_at)->format('d M Y') }} · {{ $trx->paket->nama_paket ?? '-' }}
                     </div>
                 </div>
-                @empty
-                <div class="py-8 text-center text-gray-400 text-[13px]">Belum ada transaksi</div>
-                @endforelse
+                <div class="text-right">
+                    <div class="text-[13px] font-semibold text-gray-800">Rp {{ number_format($trx->jumlah_bayar) }}</div>
+                    
+                    {{-- LOGIKA STATUS DINAMIS --}}
+                    @if($trx->status === 'dibayar')
+                        <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">LUNAS</span>
+                    @elseif($trx->status === 'batal')
+                        <span class="text-[10px] text-red-500 font-bold uppercase tracking-wider">DIBATALKAN</span>
+                    @elseif($trx->status === 'pending')
+                        <span class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">PENDING</span>
+                    @else
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{{ strtoupper($trx->status) }}</span>
+                    @endif
+                </div>
             </div>
+            @empty
+            <div class="py-8 text-center text-gray-400 text-[13px]">Belum ada transaksi</div>
+            @endforelse
         </div>
+    </div>
+
 
         {{-- RIWAYAT ABSENSI (Limit 5) --}}
         <div class="bg-white rounded-xl border border-gray-100 p-5">

@@ -12,12 +12,6 @@ class MemberController extends Controller
     // 🔹 LIST MEMBER
     public function index(Request $request)
     {
-        // 1. Ambil statistik (Simpan dalam variabel agar bisa dikirim ke view)
-        $stats = [
-            'totalMembers'   => Member::count(),
-            'activeMembers'  => Member::where('status', 'aktif')->count(),
-            'expiredMembers' => Member::where('status', 'expired')->count(),
-        ];
 
         // 2. Mulai query
         // Gunakan with() jika di view kamu menampilkan data membership untuk menghindari N+1 query problem
@@ -41,7 +35,7 @@ class MemberController extends Controller
         $members = $query->latest()->paginate(10)->withQueryString();
 
         // 6. Return ke view dengan membawa data members dan stats
-        return view('member.index', compact('members', 'stats'));
+        return view('member.index', compact('members'));
     }
 
     // 🔹 DETAIL MEMBER

@@ -238,7 +238,7 @@
                 Periode
             </span>
         </div>
-        <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Total Pendapatan</p>
+        <p class="text-[6px] text-gray-400 font-semibold uppercase tracking-wide mb-0.5">Total Pendapatan</p>
         <p class="text-[22px] font-black text-gray-900 leading-none counter">
             Rp{{ number_format($totalPendapatan, 0, ',', '.') }}
         </p>

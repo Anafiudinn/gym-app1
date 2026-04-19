@@ -1,345 +1,255 @@
 @extends('layouts.admin')
-@section('title', 'Transaksi')
-@section('page-title', 'Transaksi')
+@section('title', 'Transaksi Onsite')
+@section('page-title', 'Transaksi Onsite')
 
 @push('styles')
 <style>
+    /* ── Tabs ── */
     .tab-btn {
-        padding: 10px 4px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #6b7280;
+        flex: 1; padding: 10px 6px;
+        font-size: 11.5px; font-weight: 600; color: #94a3b8;
         border-bottom: 2px solid transparent;
-        border-top: none;
-        border-left: none;
-        border-right: none;
-        background: none;
-        cursor: pointer;
-        transition: all 0.15s;
-        white-space: nowrap;
+        border-top: none; border-left: none; border-right: none;
+        background: none; cursor: pointer;
+        transition: color 0.15s, border-color 0.15s;
+        white-space: nowrap; font-family: inherit;
     }
+    .tab-btn:hover { color: #475569; }
+    .tab-btn.active { color: #10b981; border-bottom-color: #10b981; }
 
-    .tab-btn:hover {
-        color: #374151;
-    }
-
-    .tab-btn.active {
-        color: #10b981;
-        border-bottom-color: #10b981;
-    }
-
-    .form-input {
-        width: 100%;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 9px 13px;
-        font-size: 13px;
-        color: #111827;
-        background: #fff;
-        outline: none;
-        transition: border-color 0.15s, box-shadow 0.15s;
-        box-sizing: border-box;
-    }
-
-    .form-input:focus {
-        border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-
+    /* ── Form elements ── */
     .form-label {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: #9ca3af;
-        margin-bottom: 5px;
+        display: block; font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: #94a3b8; margin-bottom: 5px;
+    }
+    .form-input {
+        width: 100%; border: 1px solid #e2e8f0; border-radius: 9px;
+        padding: 8px 12px; font-size: 12.5px; color: #1e293b;
+        background: #fff; outline: none; font-family: inherit;
+        transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box;
+    }
+    .form-input:focus {
+        border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
     }
 
-    .btn-green {
-        width: 100%;
-        background: #10b981;
-        color: #fff;
-        font-size: 12.5px;
-        font-weight: 700;
-        padding: 11px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        transition: background 0.15s, transform 0.1s;
-    }
-
-    .btn-green:hover {
-        background: #059669;
-    }
-
-    .btn-green:active {
-        transform: scale(0.985);
-    }
-
-    .btn-outline-green {
-        width: 100%;
-        background: #f0fdf4;
-        color: #059669;
-        font-size: 12.5px;
-        font-weight: 700;
-        padding: 11px;
-        border-radius: 10px;
-        border: 1px solid #bbf7d0;
-        cursor: pointer;
+    /* ── Payment method radio ── */
+    .pay-option { cursor: pointer; }
+    .pay-option input[type="radio"] { display: none; }
+    .pay-card {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 8px 10px; border-radius: 9px;
+        border: 1.5px solid #e2e8f0; background: #fff;
+        font-size: 11.5px; font-weight: 700; color: #64748b;
         transition: all 0.15s;
     }
-
-    .btn-outline-green:hover {
-        background: #dcfce7;
+    .pay-option input:checked ~ .pay-card.cash {
+        border-color: #10b981; background: rgba(16,185,129,0.08); color: #059669;
     }
+    .pay-option input:checked ~ .pay-card.transfer {
+        border-color: #3b82f6; background: rgba(59,130,246,0.08); color: #2563eb;
+    }
+    .pay-card:hover { background: #f8fafc; }
 
-    .member-search-wrapper {
+    /* ── Submit buttons ── */
+    .btn-primary {
+        width: 100%; background: #10b981; color: #fff;
+        font-size: 12.5px; font-weight: 700; padding: 10px;
+        border-radius: 9px; border: none; cursor: pointer;
+        transition: background 0.15s, transform 0.1s; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-primary:hover { background: #059669; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+        width: 100%; background: rgba(16,185,129,0.08); color: #059669;
+        font-size: 12.5px; font-weight: 700; padding: 10px;
+        border-radius: 9px; border: 1px solid rgba(16,185,129,0.2); cursor: pointer;
+        transition: all 0.15s; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: rgba(16,185,129,0.14); }
+
+    /* ── Member search dropdown ── */
+    .member-search-wrapper { position: relative; }
+    .member-search-input {
+        width: 100%; border: 1px solid #e2e8f0; border-radius: 9px;
+        padding: 8px 12px 8px 34px; font-size: 12.5px; color: #1e293b;
+        background: #fff; outline: none; font-family: inherit;
+        transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box;
+    }
+    .member-search-input:focus {
+        border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+    }
+    .member-search-icon {
+        position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+        color: #94a3b8; font-size: 11px; pointer-events: none;
+    }
+    .member-dropdown {
+        position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08); z-index: 50;
+        max-height: 200px; overflow-y: auto; display: none;
+    }
+    .member-dropdown.show { display: block; }
+    .member-option {
+        padding: 9px 12px; font-size: 12px; cursor: pointer;
+        border-bottom: 1px solid #f8fafc; transition: background 0.1s;
         position: relative;
     }
-
-    .member-search-input {
-        width: 100%;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 9px 13px 9px 36px;
-        font-size: 13px;
-        color: #111827;
-        background: #fff;
-        outline: none;
-        transition: border-color 0.15s, box-shadow 0.15s;
-        box-sizing: border-box;
-    }
-
-    .member-search-input:focus {
-        border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-
-    .member-search-icon {
-        position: absolute;
-        left: 11px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-        font-size: 12px;
-        pointer-events: none;
-    }
-
-    .member-dropdown {
-        position: absolute;
-        top: calc(100% + 4px);
-        left: 0;
-        right: 0;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        z-index: 50;
-        max-height: 200px;
-        overflow-y: auto;
-        display: none;
-    }
-
-    .member-dropdown.show {
-        display: block;
-    }
-
-    .member-option {
-        padding: 9px 13px;
-        font-size: 12.5px;
-        cursor: pointer;
-        transition: background 0.1s;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .member-option:last-child {
-        border-bottom: none;
-    }
-
-    .member-option:hover {
-        background: #f0fdf4;
-    }
-
-    .member-option .member-name {
-        font-weight: 600;
-        color: #111827;
-    }
-
-    .member-option .member-code {
-        font-size: 11px;
-        color: #9ca3af;
-        margin-top: 1px;
-    }
-
+    .member-option:last-child { border-bottom: none; }
+    .member-option:hover { background: rgba(16,185,129,0.05); }
+    .member-option .member-name { font-weight: 600; color: #1e293b; font-size: 12px; }
+    .member-option .member-code { font-size: 10px; color: #94a3b8; margin-top: 1px; }
     .member-option .member-status {
-        font-size: 10px;
-        font-weight: 700;
-        padding: 1px 6px;
-        border-radius: 4px;
-        float: right;
-        margin-top: 2px;
+        font-size: 9px; font-weight: 700; padding: 1px 6px;
+        border-radius: 99px; float: right; margin-top: 1px;
     }
-
-    .member-option .member-status.aktif {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .member-option .member-status.expired {
-        background: #fee2e2;
-        color: #991b1b;
-    }
+    .member-option .member-status.aktif { background: rgba(16,185,129,0.1); color: #059669; }
+    .member-option .member-status.expired { background: #fef2f2; color: #dc2626; }
+    .no-member-found { padding: 14px; font-size: 12px; color: #94a3b8; text-align: center; }
 
     .member-selected-card {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 10px;
-        padding: 10px 13px;
-        margin-top: 8px;
-        display: none;
+        background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.18);
+        border-radius: 9px; padding: 9px 12px; margin-top: 7px; display: none;
     }
+    .member-selected-card.show { display: block; }
+    .ms-name { font-size: 12.5px; font-weight: 700; color: #065f46; }
+    .ms-meta { font-size: 10.5px; color: #34d399; margin-top: 2px; }
 
-    .member-selected-card.show {
-        display: block;
+    /* ── Table badges ── */
+    .tipe-badge {
+        display: inline-flex; align-items: center;
+        padding: 2px 7px; border-radius: 99px;
+        font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     }
+    .tipe-membership { background: rgba(59,130,246,0.08); color: #2563eb; }
+    .tipe-harian { background: #f1f5f9; color: #64748b; }
 
-    .member-selected-card .ms-name {
-        font-size: 13px;
-        font-weight: 700;
-        color: #065f46;
+    .metode-badge {
+        display: inline-flex; align-items: center; gap: 3px;
+        padding: 2px 7px; border-radius: 99px;
+        font-size: 9px; font-weight: 700; text-transform: uppercase;
     }
+    .metode-transfer { background: rgba(59,130,246,0.08); color: #2563eb; }
+    .metode-cash { background: rgba(16,185,129,0.08); color: #059669; }
 
-    .member-selected-card .ms-meta {
-        font-size: 11px;
-        color: #34d399;
-        margin-top: 2px;
-    }
+    .status-text-dibayar { color: #10b981; }
+    .status-text-pending  { color: #f97316; }
+    .status-text-batal    { color: #ef4444; }
 
-    .no-member-found {
-        padding: 12px 13px;
-        font-size: 12px;
-        color: #9ca3af;
-        text-align: center;
-    }
-
-    /* BARU: Auto-selected member banner */
-    .auto-selected-banner {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        border-radius: 10px;
-        padding: 12px;
-        margin-top: 8px;
+    /* ── Section header inside form card ── */
+    .section-divider {
+        background: #f8fafc; border-radius: 8px; padding: 10px 12px;
+        border: 1px solid #f1f5f9; margin-bottom: 2px;
     }
 </style>
 @endpush
 
 @section('content')
 
-{{-- Cek Error Validasi --}}
+{{-- Validation errors --}}
 @if($errors->any())
-    <div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
-        <span style="font-size: 1.5rem;">⚠️</span>
-        <div style="font-size: 0.9rem;">
-            @foreach($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
-        </div>
+<div class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-[12.5px]">
+    <i class="fa-solid fa-circle-exclamation mt-0.5 flex-shrink-0"></i>
+    <div class="space-y-0.5">
+        @foreach($errors->all() as $error)
+            <div>{{ $error }}</div>
+        @endforeach
     </div>
-@endif
-
-@if(session('error'))
-    <div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-        {{ session('error') }}
-    </div>
+</div>
 @endif
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-    {{-- KIRI (4 kolom) --}}
+    {{-- ═══ KIRI ═══ --}}
     <div class="lg:col-span-4 space-y-4 order-1">
 
-        {{-- Summary --}}
-        <div class="bg-white rounded-xl border border-gray-100 px-5 py-4">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Pemasukan Hari Ini</p>
-            <p class="text-[22px] font-bold text-gray-800 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
-            <p class="text-[11px] text-gray-400 mt-1">{{ $countHariIni }} transaksi</p>
+        {{-- Summary card --}}
+        <div class="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center justify-between" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pemasukan Hari Ini</p>
+                <p class="text-[22px] font-black text-gray-900 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
+                <p class="text-[10.5px] text-gray-400 mt-1.5">{{ $countHariIni }} transaksi selesai</p>
+            </div>
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.1);">
+                <i class="fa-solid fa-sack-dollar text-emerald-500 text-[16px]"></i>
+            </div>
         </div>
 
-        {{-- Form dengan 3 Tab --}}
-        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div class="flex items-center border-b border-gray-100 w-full">
-                <button type="button" onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active flex-1 py-3 text-center">
-                    <i class="fa-solid fa-person-walking text-[10px] mr-1"></i>Tamu
+        {{-- Form card --}}
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+
+            {{-- Tabs --}}
+            <div class="flex border-b border-gray-100">
+                <button type="button" onclick="switchTab('tamu')" id="btn-tamu" class="tab-btn active">
+                    <i class="fa-solid fa-person-walking text-[9px] mr-1"></i>Tamu
                 </button>
-                <button type="button" onclick="switchTab('member-baru')" id="btn-member-baru" class="tab-btn flex-1 py-3 text-center border-x border-gray-50">
-                    <i class="fa-solid fa-user-plus text-[10px] mr-1"></i>Member Baru
+                <button type="button" onclick="switchTab('member-baru')" id="btn-member-baru" class="tab-btn" style="border-left:1px solid #f1f5f9; border-right:1px solid #f1f5f9;">
+                    <i class="fa-solid fa-user-plus text-[9px] mr-1"></i>Member Baru
                 </button>
-                <button type="button" onclick="switchTab('perpanjang')" id="btn-perpanjang" class="tab-btn flex-1 py-3 text-center">
-                    <i class="fa-solid fa-rotate-right text-[10px] mr-1"></i>Perpanjang
+                <button type="button" onclick="switchTab('perpanjang')" id="btn-perpanjang" class="tab-btn">
+                    <i class="fa-solid fa-rotate-right text-[9px] mr-1"></i>Perpanjang
                 </button>
             </div>
 
-            <div class="p-5">
-                {{-- TAB 1: TAMU HARIAN --}}
+            <div class="p-4 space-y-4">
+
+                {{-- ── TAB TAMU ── --}}
                 <div id="pane-tamu">
-                    <div class="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
+                    {{-- Paket info --}}
+                    <div class="flex items-center justify-between rounded-xl px-4 py-3 mb-3" style="background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.15);">
                         <div>
-                            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Paket Default</p>
-                            <p class="text-[14px] font-bold text-emerald-900 mt-0.5">
-                                {{ $paketDefault->nama_paket ?? 'Harian' }}
-                            </p>
+                            <p class="text-[9.5px] font-bold text-emerald-600 uppercase tracking-widest">Paket Default</p>
+                            <p class="text-[13.5px] font-bold text-emerald-900 mt-0.5">{{ $paketDefault->nama_paket ?? 'Harian' }}</p>
                         </div>
-                        <span class="text-[20px] font-black text-emerald-600">
-                            Rp{{ number_format($paketDefault->harga ?? 0, 0, ',', '.') }}
-                        </span>
+                        <span class="text-[18px] font-black text-emerald-600">Rp{{ number_format($paketDefault->harga ?? 0, 0, ',', '.') }}</span>
                     </div>
+
                     <form method="POST" action="{{ route('transaksi.harian') }}" class="space-y-3">
                         @csrf
                         <div>
                             <label class="form-label">Nama Pengunjung</label>
                             <input type="text" name="nama_tamu" placeholder="Masukkan nama tamu..." class="form-input" required>
                         </div>
+
                         <div>
                             <label class="form-label">Metode Pembayaran</label>
-                            <div class="grid grid-cols-2 gap-3 mt-2">
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                                        <span class="font-bold text-sm">CASH</span>
-                                    </div>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
-                                        <span class="font-bold text-sm">TRANSFER</span>
-                                    </div>
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn-green">
-                            <i class="fa-solid fa-cash-register mr-1.5"></i> Bayar Sekarang
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-cash-register text-[11px]"></i> Bayar Sekarang
                         </button>
                     </form>
                 </div>
 
-                {{-- TAB 2: MEMBER BARU --}}
+                {{-- ── TAB MEMBER BARU ── --}}
                 <div id="pane-member-baru" class="hidden">
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
                         <input type="hidden" name="tipe_member" value="baru">
-                        <div class="space-y-2.5 p-3.5 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+
+                        <div class="section-divider space-y-3">
                             <div>
                                 <label class="form-label">Nama Lengkap</label>
-                                <input type="text" name="nama" placeholder="Nama lengkap member baru" class="form-input" required>
+                                <input type="text" name="nama" placeholder="Nama lengkap member" class="form-input" required>
                             </div>
                             <div>
                                 <label class="form-label">No. WhatsApp</label>
-                                <input type="tel" name="no_wa" placeholder="Contoh: 08123456789" class="form-input"
-                                       oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-                                <p class="text-[10px] text-gray-400 mt-1">Gunakan format angka saja (08...)</p>
+                                <input type="tel" name="no_wa" placeholder="08123456789" class="form-input"
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                                <p class="text-[10px] text-gray-400 mt-1">Format angka saja (08...)</p>
                             </div>
                             <div>
                                 <label class="form-label">Jenis Kelamin</label>
@@ -350,6 +260,7 @@
                                 </select>
                             </div>
                         </div>
+
                         <div>
                             <label class="form-label">Paket</label>
                             <select name="paket_id" class="form-input" required>
@@ -359,80 +270,64 @@
                                 @endforeach
                             </select>
                         </div>
+
                         <div>
                             <label class="form-label">Metode Pembayaran</label>
-                            <div class="grid grid-cols-2 gap-3 mt-2">
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                                        <span class="font-bold text-sm">CASH</span>
-                                    </div>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
-                                        <span class="font-bold text-sm">TRANSFER</span>
-                                    </div>
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
                         </div>
-                        <button type="submit" class="btn-outline-green w-full py-3" onclick="this.disabled=true;this.form.submit();">
-                            <i class="fa-solid fa-id-card mr-1.5"></i> Daftarkan Member
+
+                        <button type="submit" class="btn-secondary" onclick="this.disabled=true; this.form.submit();">
+                            <i class="fa-solid fa-id-card text-[11px]"></i> Daftarkan Member
                         </button>
                     </form>
                 </div>
 
-                {{-- TAB 3: PERPANJANG --}}
+                {{-- ── TAB PERPANJANG ── --}}
                 <div id="pane-perpanjang" class="hidden">
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
                         <input type="hidden" name="tipe_member" value="perpanjang">
-                        <input type="hidden" name="member_id" id="member_id_hidden">
 
                         <div>
                             <label class="form-label">Cari Member</label>
+                            <input type="hidden" name="member_id" id="member_id_hidden">
+
                             <div class="member-search-wrapper">
-                              
-                                <input type="text" id="member_search_input" class="member-search-input"
-                                       placeholder="Ketik nama atau kode member..." autocomplete="off">
+                                <i class="fa-solid fa-magnifying-glass member-search-icon"></i>
+                                <input type="text" id="member_search_input"
+                                    class="member-search-input"
+                                    placeholder="Ketik nama atau kode member..."
+                                    autocomplete="off">
                                 <div class="member-dropdown" id="member_dropdown"></div>
                             </div>
 
                             <div class="member-selected-card" id="member_selected_card">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="ms-name" id="ms-name"></div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="ms-name truncate" id="ms-name"></div>
                                         <div class="ms-meta" id="ms-meta"></div>
                                     </div>
                                     <button type="button" onclick="clearMember()"
-                                            class="text-[10px] text-red-400 hover:text-red-600 font-semibold ml-2 flex-shrink-0">
+                                        class="text-[10px] text-red-400 hover:text-red-600 font-semibold flex-shrink-0 flex items-center gap-1">
                                         <i class="fa-solid fa-xmark"></i> Ganti
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- BARU: Auto-selected banner --}}
-                        @if($selectedMemberId && isset($selectedMemberData))
-                        <div class="auto-selected-banner">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wide">Auto-selected</p>
-                                    <p class="text-[13px] font-semibold text-amber-900 mt-0.5">
-                                        {{ $selectedMemberData['nama'] }} — {{ $selectedMemberData['kode_member'] }}
-                                    </p>
-                                </div>
-                                <span class="text-sm font-bold text-amber-700">✅ Ready</span>
-                            </div>
-                        </div>
-                        @endif
-
                         <div>
                             <label class="form-label">Paket</label>
                             <select name="paket_id" class="form-input" required>
-                                                             <option value="">— Pilih Durasi Paket —</option>
+                                <option value="">— Pilih Durasi Paket —</option>
                                 @foreach($paket as $p)
                                 <option value="{{ $p->id }}">{{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
                                 @endforeach
@@ -441,178 +336,158 @@
 
                         <div>
                             <label class="form-label">Metode Pembayaran</label>
-                            <div class="grid grid-cols-2 gap-3 mt-2">
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="cash" class="hidden peer" required checked>
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-money-bill-wave mr-2"></i>
-                                        <span class="font-bold text-sm">CASH</span>
-                                    </div>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="metode_pembayaran" value="transfer" class="hidden peer">
-                                    <div class="flex items-center justify-center py-3 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-slate-50">
-                                        <i class="fa-solid fa-mobile-screen mr-2"></i>
-                                        <span class="font-bold text-sm">TRANSFER</span>
-                                    </div>
+                                <label class="pay-option">
+                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-outline-green">
-                            <i class="fa-solid fa-rotate-right mr-1.5"></i> Perpanjang Membership
+                        <button type="submit" class="btn-secondary">
+                            <i class="fa-solid fa-rotate-right text-[11px]"></i> Perpanjang Membership
                         </button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
 
-    {{-- KANAN (8 kolom) --}}
-    <div class="lg:col-span-8 space-y-3 order-2">
+    {{-- ═══ KANAN ═══ --}}
+    <div class="lg:col-span-8 space-y-4 order-2">
 
-        {{-- Filter Bar --}}
-        <div class="bg-white rounded-xl border border-gray-100 p-4">
+        {{-- Filter bar --}}
+        <div class="bg-white rounded-2xl border border-gray-100 px-4 py-3.5" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <form action="{{ route('transaksi.index') }}" method="GET">
                 @if(request('tab')) <input type="hidden" name="tab" value="{{ request('tab') }}"> @endif
-                @if(request('member')) <input type="hidden" name="member" value="{{ request('member') }}"> @endif
-                <div class="flex flex-wrap gap-2.5">
-                    <div class="flex-1 min-w-[160px]">
+                <div class="flex flex-wrap gap-2">
+                    <div class="flex-1 min-w-[150px] relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-[10px]"></i>
                         <input type="text" name="search" value="{{ request('search') }}"
-                               placeholder="Cari nama / invoice..." class="form-input text-[12px]" style="padding: 8px 12px;">
+                            placeholder="Cari nama / invoice..."
+                            class="form-input pl-8" style="padding-top:7px; padding-bottom:7px;">
                     </div>
-                    <div>
-                        <input type="date" name="date_from" value="{{ request('date_from') }}"
-                               class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
-                    </div>
-                    <div>
-                        <input type="date" name="date_to" value="{{ request('date_to') }}"
-                               class="form-input text-[12px]" style="padding: 8px 12px; width: 138px;">
-                    </div>
-                    <div>
-                        <select name="tipe" class="form-input text-[12px]" style="padding: 8px 12px; width: 130px;">
-                            <option value="">Semua Tipe</option>
-                            <option value="harian" {{ request('tipe') === 'harian' ? 'selected' : '' }}>Harian</option>
-                            <option value="membership" {{ request('tipe') === 'membership' ? 'selected' : '' }}>Membership</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select name="status" class="form-input text-[12px]" style="padding: 8px 12px; width: 130px;">
-                            <option value="">Semua Status</option>
-                            <option value="dibayar" {{ request('status') === 'dibayar' ? 'selected' : '' }}>Dibayar</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="batal" {{ request('status') === 'batal' ? 'selected' : '' }}>Batal</option>
-                        </select>
-                    </div>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}"
+                        class="form-input" style="width:135px; padding:7px 10px;">
+                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                        class="form-input" style="width:135px; padding:7px 10px;">
+                    <select name="tipe" class="form-input" style="width:120px; padding:7px 10px;">
+                        <option value="">Semua Tipe</option>
+                        <option value="harian" {{ request('tipe')==='harian' ? 'selected' : '' }}>Harian</option>
+                        <option value="membership" {{ request('tipe')==='membership' ? 'selected' : '' }}>Membership</option>
+                    </select>
+                    <select name="status" class="form-input" style="width:120px; padding:7px 10px;">
+                        <option value="">Semua Status</option>
+                        <option value="dibayar" {{ request('status')==='dibayar' ? 'selected' : '' }}>Dibayar</option>
+                        <option value="pending" {{ request('status')==='pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="batal" {{ request('status')==='batal' ? 'selected' : '' }}>Batal</option>
+                    </select>
                     <button type="submit"
-                            class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition">
-                        <i class="fa-solid fa-filter text-[10px] mr-1"></i> Filter
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-filter text-[10px]"></i> Filter
                     </button>
                     @if(request()->hasAny(['search','date_from','date_to','tipe','status']))
                     <a href="{{ route('transaksi.index') }}"
-                       class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center">
-                        Reset
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[12px] font-semibold px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-xmark text-[10px]"></i> Reset
                     </a>
                     @endif
                 </div>
             </form>
         </div>
 
-        {{-- Tabel --}}
-        <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+        {{-- Table --}}
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+
+            <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
                 <div>
-                    <h3 class="text-[12.5px] font-bold text-gray-700">Riwayat Transaksi Onsite</h3>
-                    <p class="text-[11px] text-emerald-500 mt-0.5 font-medium">
-                        <i class="fa-solid fa-calendar-day mr-1"></i> Hari Ini: {{ now()->format('d M Y') }}
+                    <h3 class="font-bold text-gray-800 text-[13px]">Riwayat Transaksi Onsite</h3>
+                    <p class="text-[10.5px] text-gray-400 mt-0.5">
+                        <i class="fa-regular fa-calendar-days mr-1"></i>{{ now()->translatedFormat('d F Y') }}
                     </p>
                 </div>
-                <span class="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    Live
-                </span>
+                <div class="flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span> Live
+                </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full min-w-[720px]">
                     <thead>
-                        <tr class="bg-gray-50/60 border-b border-gray-100">
+                        <tr class="bg-gray-50/70">
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">#</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Invoice</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tanggal</th>
                             <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pelanggan</th>
-                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pembayaran</th>
-                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Paket</th>
+                            <th class="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Bayar</th>
                             <th class="px-4 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total</th>
                             <th class="px-4 py-3 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         @forelse($data as $d)
-                        <tr class="hover:bg-gray-50/50 transition-colors group">
-                            <td class="px-4 py-3.5 text-[12px] text-gray-400">
+                        <tr class="hover:bg-gray-50/60 transition-colors group">
+                            <td class="px-4 py-3.5 text-[11.5px] text-gray-400">
                                 {{ $data->firstItem() + $loop->index }}
                             </td>
                             <td class="px-4 py-3.5">
-                                <span class="text-[11px] font-semibold text-gray-800 group-hover:text-emerald-600 transition">
+                                <span class="font-mono text-[11px] font-bold text-gray-700 group-hover:text-emerald-600 transition">
                                     {{ $d->kode_invoice }}
                                 </span>
                             </td>
                             <td class="px-4 py-3.5">
-                                <div class="text-[12.5px] font-semibold text-gray-700">{{ $d->created_at->format('d M Y') }}</div>
-                                <div class="text-[10.5px] text-gray-400">{{ $d->created_at->format('H:i') }}</div>
+                                <div class="text-[12px] font-semibold text-gray-700 leading-tight">{{ $d->created_at->format('d M Y') }}</div>
+                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $d->created_at->format('H:i') }}</div>
                             </td>
                             <td class="px-4 py-3.5">
-                                <div class="text-[12.5px] font-semibold text-gray-800">
+                                <div class="text-[12.5px] font-semibold text-gray-800 leading-tight">
                                     {{ $d->member->nama ?? $d->nama_tamu }}
                                 </div>
-                                <div>
-                                    <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide
-                                    {{ $d->tipe === 'membership' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500' }}">
-                                        {{ $d->tipe }}
-                                    </span>
-                                </div>
+                                <span class="tipe-badge mt-1 {{ $d->tipe === 'membership' ? 'tipe-membership' : 'tipe-harian' }}">
+                                    {{ $d->tipe }}
+                                </span>
                             </td>
-                            <td class="px-4 py-2">
-                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide
-                                    {{ $d->metode_pembayaran === 'transfer' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600' }}">
+                            <td class="px-4 py-3.5">
+                                <span class="metode-badge {{ $d->metode_pembayaran === 'transfer' ? 'metode-transfer' : 'metode-cash' }}">
+                                    @if($d->metode_pembayaran === 'transfer')
+                                        <i class="fa-solid fa-mobile-screen text-[8px]"></i>
+                                    @else
+                                        <i class="fa-solid fa-money-bill-wave text-[8px]"></i>
+                                    @endif
                                     {{ $d->metode_pembayaran ?? 'cash' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3.5 text-[12.5px] text-gray-600">
-                                {{ $d->paket->nama_paket ?? 'Visit Harian' }}
-                            </td>
                             <td class="px-4 py-3.5 text-right">
-                                <div class="text-[13px] font-bold text-gray-900">
-                                    Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}
-                                </div>
-                                <span class="text-[9.5px] font-semibold uppercase
-                                    {{ $d->status === 'dibayar' ? 'text-emerald-500' : ($d->status === 'pending' ? 'text-orange-400' : 'text-red-400') }}">
-                                    {{ $d->status }}
-                                </span>
+                                <div class="text-[13px] font-black text-gray-900">Rp{{ number_format($d->jumlah_bayar, 0, ',', '.') }}</div>
+                                <span class="text-[9.5px] font-bold uppercase status-text-{{ $d->status }}">{{ $d->status }}</span>
                             </td>
                             <td class="px-4 py-3.5">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('transaksi.struk', $d->id) }}" 
-                                       target="_blank"
-                                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm"
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('transaksi.struk', $d->id) }}" target="_blank"
+                                       class="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition"
                                        title="Cetak Struk">
-                                        <i class="fa-solid fa-print text-xs"></i>
+                                        <i class="fa-solid fa-print text-[10px]"></i>
                                     </a>
+
                                     @if($d->status !== 'batal')
-                                    <form action="{{ route('transaksi.batalkan', $d->id) }}" method="POST" 
-                                          onsubmit="return confirm('Apakah Anda yakin ingin membatalkan transaksi ini? Pendapatan akan dikurangi.')">
+                                    <form action="{{ route('transaksi.batalkan', $d->id) }}" method="POST"
+                                          onsubmit="return batalkanConfirm(event, this)">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" 
-                                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all shadow-sm"
-                                                title="Batalkan Transaksi">
-                                            <i class="fa-solid fa-ban text-xs"></i>
+                                        <button type="submit"
+                                            class="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition"
+                                            title="Batalkan Transaksi">
+                                            <i class="fa-solid fa-ban text-[10px]"></i>
                                         </button>
                                     </form>
                                     @else
-                                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">
-                                        <i class="fa-solid fa-check text-xs"></i>
+                                    <div class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed" title="Sudah dibatalkan">
+                                        <i class="fa-solid fa-ban text-[10px]"></i>
                                     </div>
                                     @endif
                                 </div>
@@ -620,9 +495,11 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="px-5 py-14 text-center">
-                                <i class="fa-solid fa-receipt text-3xl text-gray-200 mb-3 block"></i>
-                                <p class="text-[12px] text-gray-400">Tidak ada transaksi ditemukan</p>
+                            <td colspan="7" class="px-5 py-16 text-center">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-solid fa-receipt text-xl text-gray-300"></i>
+                                </div>
+                                <p class="text-[12px] text-gray-400 font-medium">Tidak ada transaksi ditemukan</p>
                             </td>
                         </tr>
                         @endforelse
@@ -631,8 +508,8 @@
             </div>
 
             @if($data->hasPages())
-            <div class="px-5 py-3.5 border-t border-gray-100 flex items-center justify-between">
-                <p class="text-[11.5px] text-gray-400">
+            <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between flex-wrap gap-2">
+                <p class="text-[11px] text-gray-400">
                     Menampilkan {{ $data->firstItem() }}–{{ $data->lastItem() }} dari {{ $data->total() }} transaksi
                 </p>
                 {{ $data->links() }}
@@ -640,195 +517,128 @@
             @endif
         </div>
     </div>
+
 </div>
-
-@php
-    // Data members untuk dropdown
-    $membersJson = $members->map(function($m) {
-        return [
-            'id' => $m->id,
-            'nama' => $m->nama,
-            'kode_member' => $m->kode_member,
-            'no_wa' => $m->no_wa ?? '',
-            'tanggal_kadaluarsa' => $m->tanggal_kadaluarsa,
-            'status' => $m->status,
-        ];
-    });
-
-    // Data member terpilih untuk auto-fill
-    $selectedMemberData = null;
-    if ($selectedMemberId) {
-        $foundMember = $members->find($selectedMemberId);
-        if ($foundMember) {
-            $selectedMemberData = [
-                'id' => $foundMember->id,
-                'nama' => $foundMember->nama,
-                'kode_member' => $foundMember->kode_member,
-                'no_wa' => $foundMember->no_wa ?? '',
-                'tanggal_kadaluarsa' => $foundMember->tanggal_kadaluarsa,
-                'status' => $foundMember->status,
-            ];
-        }
-    }
-@endphp
+@endsection
 
 @push('scripts')
 <script>
-(function() {
-    var allMembers = @js($membersJson);
-    var selectedMemberData = @js($selectedMemberData);
-    var defaultTab = @js($activeTab) || new URLSearchParams(window.location.search).get('tab') || 'tamu';
-    var preSelectedId = @js($selectedMemberId) || new URLSearchParams(window.location.search).get('member');
+(function () {
+    @php
+        $membersJson = $members->map(fn($m) => [
+            'id'                  => $m->id,
+            'nama'                => $m->nama,
+            'kode_member'         => $m->kode_member,
+            'no_wa'               => $m->no_wa ?? '',
+            'tanggal_kadaluarsa'  => $m->tanggal_kadaluarsa,
+            'status'              => $m->status,
+        ]);
+    @endphp
 
-    var TABS = ['tamu', 'member-baru', 'perpanjang'];
+    var allMembers   = @json($membersJson);
+    var defaultTab   = @js($activeTab ?? 'tamu');
+    var preSelectedId = @js($selectedMemberId ?? null);
+    var TABS         = ['tamu', 'member-baru', 'perpanjang'];
 
-    // *** FIX: Global functions ***
-    window.switchTab = function(tab) {
-        TABS.forEach(function(t) {
+    /* ── Tab switching ── */
+    function switchTab(tab) {
+        TABS.forEach(function (t) {
             var pane = document.getElementById('pane-' + t);
-            var btn = document.getElementById('btn-' + t);
+            var btn  = document.getElementById('btn-' + t);
             if (pane) pane.classList.toggle('hidden', t !== tab);
-            if (btn) btn.classList.toggle('active', t === tab);
+            if (btn)  btn.classList.toggle('active', t === tab);
         });
-    };
-
-    // Tunggu DOM FULLY ready + extra delay untuk CSS animation
-    function initApp() {
-        // Delay lebih lama untuk pastikan semua elemen rendered
-        setTimeout(function() {
-            console.log('🔥 INIT - Tab:', defaultTab, 'Member:', preSelectedId);
-            
-            // 1. HARUS switch tab DULU
-            if (typeof window.switchTab === 'function') {
-                window.switchTab(defaultTab);
-            }
-
-            // 2. BARU auto-fill member (khusus tab perpanjang)
-            if (defaultTab === 'perpanjang' && selectedMemberData && typeof window.selectMember === 'function') {
-                setTimeout(function() {
-                    window.selectMember(selectedMemberData);
-                    console.log('✅ Member auto-selected:', selectedMemberData.nama);
-                }, 300); // Extra delay untuk member card animation
-            }
-        }, 250); // Initial delay lebih panjang
     }
+    window.switchTab = switchTab;
 
-    // Multiple trigger untuk pastikan jalan
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-        initApp();
-    }
+    /* ── Member search ── */
+    var searchInput  = document.getElementById('member_search_input');
+    var dropdown     = document.getElementById('member_dropdown');
+    var hiddenInput  = document.getElementById('member_id_hidden');
+    var selectedCard = document.getElementById('member_selected_card');
+    var msName       = document.getElementById('ms-name');
+    var msMeta       = document.getElementById('ms-meta');
 
-    // Fallback: window load
-    window.addEventListener('load', function() {
-        setTimeout(initApp, 100);
-    });
-
-    // *** FUNGSI LAINNYA - Buat global juga ***
-    window.formatTgl = function(tgl) {
+    function formatTgl(tgl) {
         if (!tgl) return 'Belum ada data';
         var d = new Date(tgl);
-        var bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        var bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
         return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
-    };
+    }
 
-    window.selectMember = function(m) {
-        var hiddenInput = document.getElementById('member_id_hidden');
-        var msName = document.getElementById('ms-name');
-        var msMeta = document.getElementById('ms-meta');
-        var selectedCard = document.getElementById('member_selected_card');
-        var searchInput = document.getElementById('member_search_input');
-        var dropdown = document.getElementById('member_dropdown');
-
-        if (hiddenInput) hiddenInput.value = m.id;
-        if (msName) msName.textContent = m.nama + ' — ' + m.kode_member;
-        if (msMeta) msMeta.textContent = 'Aktif s/d: ' + window.formatTgl(m.tanggal_kadaluarsa);
-        if (selectedCard) selectedCard.classList.add('show');
-        if (searchInput) searchInput.style.display = 'none';
-        if (dropdown) dropdown.classList.remove('show');
-    };
-
-    window.clearMember = function() {
-        var hiddenInput = document.getElementById('member_id_hidden');
-        var searchInput = document.getElementById('member_search_input');
-        var selectedCard = document.getElementById('member_selected_card');
-        var dropdown = document.getElementById('member_dropdown');
-
-        if (hiddenInput) hiddenInput.value = '';
-        if (searchInput) {
-            searchInput.value = '';
-            searchInput.style.display = '';
-            searchInput.focus();
+    function renderDropdown(results) {
+        dropdown.innerHTML = '';
+        if (!results.length) {
+            dropdown.innerHTML = '<div class="no-member-found"><i class="fa-solid fa-user-slash mr-1"></i> Member tidak ditemukan</div>';
+        } else {
+            results.forEach(function (m) {
+                var expired     = m.tanggal_kadaluarsa && new Date(m.tanggal_kadaluarsa) < new Date();
+                var statusClass = (m.status === 'aktif' && !expired) ? 'aktif' : 'expired';
+                var el          = document.createElement('div');
+                el.className    = 'member-option';
+                el.innerHTML    =
+                    '<span class="member-status ' + statusClass + '">' + (expired ? 'expired' : m.status) + '</span>' +
+                    '<div class="member-name">' + m.nama + '</div>' +
+                    '<div class="member-code">' + m.kode_member + (m.no_wa ? ' · ' + m.no_wa : '') + '</div>';
+                el.addEventListener('mousedown', function (e) { e.preventDefault(); selectMember(m); });
+                dropdown.appendChild(el);
+            });
         }
-        if (selectedCard) selectedCard.classList.remove('show');
-        if (dropdown) dropdown.classList.remove('show');
+        dropdown.classList.add('show');
+    }
+
+    function selectMember(m) {
+        hiddenInput.value       = m.id;
+        msName.textContent      = m.nama + ' — ' + m.kode_member;
+        msMeta.textContent      = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
+        selectedCard.classList.add('show');
+        searchInput.style.display = 'none';
+        dropdown.classList.remove('show');
+    }
+
+    window.clearMember = function () {
+        hiddenInput.value         = '';
+        searchInput.value         = '';
+        searchInput.style.display = '';
+        selectedCard.classList.remove('show');
+        dropdown.classList.remove('show');
+        searchInput.focus();
     };
 
-    // Search functionality
-    function initSearch() {
-        var searchInput = document.getElementById('member_search_input');
-        var dropdown = document.getElementById('member_dropdown');
-        if (!searchInput || !dropdown) return;
-
-        searchInput.addEventListener('input', function() {
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
             var q = this.value.trim().toLowerCase();
-            if (q.length < 1) {
-                dropdown.classList.remove('show');
-                return;
-            }
-            var results = allMembers.filter(function(m) {
+            if (q.length < 1) { dropdown.classList.remove('show'); return; }
+            var results = allMembers.filter(function (m) {
                 return m.nama.toLowerCase().includes(q) ||
-                    m.kode_member.toLowerCase().includes(q) ||
-                    (m.no_wa && m.no_wa.includes(q));
+                       m.kode_member.toLowerCase().includes(q) ||
+                       (m.no_wa && m.no_wa.includes(q));
             }).slice(0, 8);
-            
-            dropdown.innerHTML = '';
-            if (!results.length) {
-                dropdown.innerHTML = '<div class="no-member-found"><i class="fa-solid fa-user-slash mr-1"></i> Member tidak ditemukan</div>';
-            } else {
-                results.forEach(function(m) {
-                    var expired = m.tanggal_kadaluarsa && new Date(m.tanggal_kadaluarsa) < new Date();
-                    var statusLabel = expired ? 'expired' : m.status;
-                    var statusClass = (m.status === 'aktif' && !expired) ? 'aktif' : 'expired';
-                    var el = document.createElement('div');
-                    el.className = 'member-option';
-                    el.innerHTML =
-                        '<span class="member-status ' + statusClass + '">' + statusLabel + '</span>' +
-                        '<div class="member-name">' + m.nama + '</div>' +
-                        '<div class="member-code">' + m.kode_member + (m.no_wa ? ' · ' + m.no_wa : '') + '</div>';
-                    el.addEventListener('mousedown', function(e) {
-                        e.preventDefault();
-                        window.selectMember(m);
-                    });
-                    dropdown.appendChild(el);
-                });
-            }
-            dropdown.classList.add('show');
+            renderDropdown(results);
         });
-
-        searchInput.addEventListener('blur', function() {
-            setTimeout(function() {
-                dropdown.classList.remove('show');
-            }, 150);
-        });
-
-        searchInput.addEventListener('focus', function() {
-            if (this.value.trim().length > 0) {
-                this.dispatchEvent(new Event('input'));
-            }
-        });
+        searchInput.addEventListener('blur',  function () { setTimeout(function () { dropdown.classList.remove('show'); }, 150); });
+        searchInput.addEventListener('focus', function () { if (this.value.trim().length > 0) this.dispatchEvent(new Event('input')); });
     }
 
-    // Init search setelah DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSearch);
-    } else {
-        initSearch();
-    }
+    /* ── Batalkan confirm ── */
+    window.batalkanConfirm = function (e, form) {
+        e.preventDefault();
+        Swal.confirm({
+            title: 'Batalkan Transaksi?',
+            text: 'Pendapatan akan dikurangi dan transaksi tidak dapat dikembalikan.',
+            confirmText: 'Ya, Batalkan',
+            onConfirm: function () { form.submit(); }
+        });
+    };
 
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', function () {
+        switchTab(defaultTab);
+        if (defaultTab === 'perpanjang' && preSelectedId && searchInput) {
+            var found = allMembers.find(function (m) { return m.id == preSelectedId; });
+            if (found) selectMember(found);
+        }
+    });
 })();
 </script>
 @endpush
-
-@endsection
