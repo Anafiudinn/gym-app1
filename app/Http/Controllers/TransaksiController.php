@@ -61,7 +61,7 @@ class TransaksiController extends Controller
         }
 
         // 6. Eksekusi Data
-        $data = $query->paginate(15)->withQueryString();
+        $data = $query->paginate(20)->withQueryString();
         $members = Member::orderBy('nama')->get();
 
         // Ambil paket selain harian untuk dropdown membership

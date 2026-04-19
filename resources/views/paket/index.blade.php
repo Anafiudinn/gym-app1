@@ -5,110 +5,113 @@
 
 @push('styles')
 <style>
-    .card { background: #fff; border-radius: 12px; border: 1px solid #e9ecf0; }
-    .badge {
-        display: inline-flex; align-items: center; gap: 4px;
-        padding: 3px 10px; border-radius: 99px;
-        font-size: 11px; font-weight: 600;
-    }
-    .badge-green  { background: #f0fdf7; color: #059669; }
-    .badge-blue   { background: #eff6ff; color: #2563eb; }
-    .badge-orange { background: #fff7ed; color: #d97706; }
-    .btn {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 7px 14px; border-radius: 8px;
-        font-size: 12.5px; font-weight: 600;
-        transition: all .15s; cursor: pointer; border: none;
-    }
-    .btn-primary   { background: #10b981; color: #fff; }
-    .btn-primary:hover { background: #059669; }
-    .btn-white     { background: #fff; color: #374151; border: 1px solid #e5e7eb; }
-    .btn-white:hover { background: #f9fafb; }
-    .btn-danger    { background: #fef2f2; color: #dc2626; }
-    .btn-danger:hover { background: #fee2e2; }
-    .btn-edit      { background: #eff6ff; color: #2563eb; }
-    .btn-edit:hover { background: #dbeafe; }
-    .btn-sm        { padding: 5px 10px; font-size: 11.5px; border-radius: 7px; }
+    /* ── Card base ── */
+    .card { background:#fff; border-radius:12px; border:1px solid #e9ecf0; }
 
-    /* Table */
+    /* ── Badge ── */
+    .badge {
+        display:inline-flex; align-items:center; gap:4px;
+        padding:3px 10px; border-radius:99px;
+        font-size:11px; font-weight:600;
+    }
+    .badge-green  { background:#f0fdf7; color:#059669; }
+    .badge-blue   { background:#eff6ff; color:#2563eb; }
+    .badge-orange { background:#fff7ed; color:#d97706; }
+
+    /* ── Button ── */
+    .btn {
+        display:inline-flex; align-items:center; gap:6px;
+        padding:7px 14px; border-radius:8px;
+        font-size:12.5px; font-weight:600;
+        transition:all .15s; cursor:pointer; border:none;
+    }
+    .btn-primary       { background:#10b981; color:#fff; }
+    .btn-primary:hover { background:#059669; }
+    .btn-white         { background:#fff; color:#374151; border:1px solid #e5e7eb; }
+    .btn-white:hover   { background:#f9fafb; }
+    .btn-danger        { background:#fef2f2; color:#dc2626; }
+    .btn-danger:hover  { background:#fee2e2; }
+    .btn-edit          { background:#eff6ff; color:#2563eb; }
+    .btn-edit:hover    { background:#dbeafe; }
+    .btn-sm            { padding:5px 10px; font-size:11.5px; border-radius:7px; }
+
+    /* ── Table ── */
     .tbl th {
-        font-size: 11px; font-weight: 700; text-transform: uppercase;
-        letter-spacing: .07em; color: #9ca3af;
-        padding: 10px 14px; border-bottom: 1px solid #f1f3f5;
-        white-space: nowrap;
+        font-size:11px; font-weight:700; text-transform:uppercase;
+        letter-spacing:.07em; color:#9ca3af;
+        padding:10px 14px; border-bottom:1px solid #f1f3f5;
+        white-space:nowrap;
     }
     .tbl td {
-        padding: 11px 14px; font-size: 13px; color: #374151;
-        border-bottom: 1px solid #f8f9fa; vertical-align: middle;
+        padding:11px 14px; font-size:13px; color:#374151;
+        border-bottom:1px solid #f8f9fa; vertical-align:middle;
     }
-    .tbl tr:last-child td { border-bottom: none; }
-    .tbl tr:hover td { background: #fafafa; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .tbl tr:hover td { background:#fafafa; }
 
-    /* Modal */
+    /* ── Modal ── */
     .modal-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,.45);
-        backdrop-filter: blur(4px); z-index: 200;
-        display: flex; align-items: center; justify-content: center;
-        padding: 16px;
+        position:fixed; inset:0; background:rgba(0,0,0,.45);
+        backdrop-filter:blur(4px); z-index:200;
+        display:flex; align-items:center; justify-content:center;
+        padding:16px;
     }
     .modal-box {
-        background: #fff; border-radius: 14px; width: 100%; max-width: 440px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.15);
-        animation: modalIn .2s ease;
+        background:#fff; border-radius:14px; width:100%; max-width:440px;
+        box-shadow:0 20px 60px rgba(0,0,0,.15);
+        animation:modalIn .2s ease;
     }
     @keyframes modalIn {
-        from { opacity:0; transform: translateY(12px) scale(.98); }
-        to   { opacity:1; transform: translateY(0) scale(1); }
+        from { opacity:0; transform:translateY(12px) scale(.98); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
     }
     .modal-header {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 18px 20px 14px;
-        border-bottom: 1px solid #f1f3f5;
+        display:flex; align-items:center; justify-content:space-between;
+        padding:18px 20px 14px; border-bottom:1px solid #f1f3f5;
     }
-    .modal-body  { padding: 18px 20px; }
-    .modal-footer { padding: 12px 20px; border-top: 1px solid #f1f3f5; display:flex; justify-content: flex-end; gap:8px; }
+    .modal-body   { padding:18px 20px; }
+    .modal-footer { padding:12px 20px; border-top:1px solid #f1f3f5; display:flex; justify-content:flex-end; gap:8px; }
 
-    /* Input */
-    .field-group { margin-bottom: 14px; }
-    .field-label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:5px; }
-    .field-input {
-        width: 100%; padding: 8px 11px; border-radius: 8px;
-        border: 1px solid #e5e7eb; font-size: 13px; color: #111827;
-        background: #f9fafb; transition: border .15s, box-shadow .15s;
-        outline: none;
+    /* ── Fields ── */
+    .field-group  { margin-bottom:14px; }
+    .field-label  { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:5px; }
+    .field-input  {
+        width:100%; padding:8px 11px; border-radius:8px;
+        border:1px solid #e5e7eb; font-size:13px; color:#111827;
+        background:#f9fafb; transition:border .15s, box-shadow .15s; outline:none;
     }
-    .field-input:focus { border-color: #10b981; background:#fff; box-shadow: 0 0 0 3px rgba(16,185,129,.1); }
-    .field-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
-    .field-input.error { border-color: #ef4444; background: #fef2f2; }
+    .field-input:focus { border-color:#10b981; background:#fff; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+    .field-hint        { font-size:11px; color:#9ca3af; margin-top:4px; }
+    .field-input.error { border-color:#ef4444; background:#fef2f2; }
 
-    /* Stat cards */
+    /* ── Stat cards ── */
     .stat-card {
-        background: #fff; border: 1px solid #e9ecf0; border-radius: 12px;
-        padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+        background:#fff; border:1px solid #e9ecf0; border-radius:12px;
+        padding:16px 18px; display:flex; align-items:center; gap:14px;
     }
     .stat-icon {
-        width: 40px; height: 40px; border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; flex-shrink: 0;
+        width:40px; height:40px; border-radius:10px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:16px; flex-shrink:0;
     }
-    .stat-label { font-size: 11.5px; color: #9ca3af; font-weight: 500; }
-    .stat-value { font-size: 22px; font-weight: 700; color: #111827; line-height: 1.1; }
+    .stat-label { font-size:11.5px; color:#9ca3af; font-weight:500; }
+    .stat-value { font-size:22px; font-weight:700; color:#111827; line-height:1.1; }
 
-    /* Empty state */
-    .empty-state { text-align:center; padding: 48px 24px; }
-    .empty-state i { font-size: 36px; color: #d1d5db; }
-    .empty-state p { font-size: 13px; color: #9ca3af; margin-top: 10px; }
+    /* ── Empty state ── */
+    .empty-state { text-align:center; padding:48px 24px; }
+    .empty-state i { font-size:36px; color:#d1d5db; }
+    .empty-state p { font-size:13px; color:#9ca3af; margin-top:10px; }
 
-    /* Search input */
-    .search-wrap { position: relative; }
+    /* ── Search ── */
+    .search-wrap   { position:relative; }
     .search-wrap i { position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; color:#9ca3af; }
-    .search-input { padding-left:30px; }
+    .search-input  { padding-left:30px; }
 </style>
 @endpush
 
 @section('content')
 
-{{-- ── Page Header ─────────────────────────── --}}
+{{-- ── Page Header ── --}}
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div>
         <h1 class="text-[17px] font-bold text-gray-800 leading-tight">Manajemen Paket</h1>
@@ -119,7 +122,7 @@
     </button>
 </div>
 
-{{-- ── Stat Cards ─────────────────────────── --}}
+{{-- ── Stat Cards ── --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
     <div class="stat-card">
         <div class="stat-icon bg-emerald-50">
@@ -137,7 +140,7 @@
         <div>
             <div class="stat-label">Harga Terendah</div>
             <div class="stat-value text-[15px] mt-0.5">
-                Rp {{ $paket->count() ? number_format($paket->min('harga'), 0, ',', '.') : '—' }}
+                Rp {{ $paket->count() ? number_format($paket->min('harga'),0,',','.') : '—' }}
             </div>
         </div>
     </div>
@@ -148,7 +151,7 @@
         <div>
             <div class="stat-label">Harga Tertinggi</div>
             <div class="stat-value text-[15px] mt-0.5">
-                Rp {{ $paket->count() ? number_format($paket->max('harga'), 0, ',', '.') : '—' }}
+                Rp {{ $paket->count() ? number_format($paket->max('harga'),0,',','.') : '—' }}
             </div>
         </div>
     </div>
@@ -159,13 +162,13 @@
         <div>
             <div class="stat-label">Durasi Terlama</div>
             <div class="stat-value text-[15px] mt-0.5">
-                {{ $paket->count() ? $paket->max('durasi_hari') . ' hari' : '—' }}
+                {{ $paket->count() ? $paket->max('durasi_hari').' hari' : '—' }}
             </div>
         </div>
     </div>
 </div>
 
-{{-- ── Table Card ─────────────────────────── --}}
+{{-- ── Table Card ── --}}
 <div class="card">
 
     {{-- Toolbar --}}
@@ -211,7 +214,7 @@
                         </div>
                     </td>
                     <td>
-                        <span class="font-semibold text-gray-800">Rp {{ number_format($p->harga, 0, ',', '.') }}</span>
+                        <span class="font-semibold text-gray-800">Rp {{ number_format($p->harga,0,',','.') }}</span>
                     </td>
                     <td>
                         <div class="flex items-center gap-1.5 text-gray-600 text-[12.5px]">
@@ -233,12 +236,10 @@
                     </td>
                     <td>
                         <div class="flex items-center justify-center gap-1.5">
-                            {{-- Edit --}}
                             <button onclick="openEdit({{ $p->id }}, '{{ addslashes($p->nama_paket) }}', {{ $p->harga }}, {{ $p->durasi_hari }})"
                                     class="btn btn-edit btn-sm" title="Edit">
                                 <i class="fa-solid fa-pen text-[10px]"></i> Edit
                             </button>
-                            {{-- Hapus --}}
                             <form id="form-del-{{ $p->id }}"
                                   action="{{ route('paket.destroy', $p->id) }}" method="POST">
                                 @csrf @method('DELETE')
@@ -267,7 +268,6 @@
             </tbody>
         </table>
 
-        {{-- No results row (hidden by default) --}}
         <div id="no-results" class="hidden">
             <div class="empty-state">
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -278,10 +278,8 @@
 </div>
 
 
-{{-- ═══════════════════════════════════════════
-     MODAL — TAMBAH PAKET
-════════════════════════════════════════════ --}}
-<div id="modal-tambah" class="modal-backdrop hidden" onclick="closeOnBackdrop(event, 'modal-tambah')">
+{{-- ═══ MODAL TAMBAH ═══ --}}
+<div id="modal-tambah" class="modal-backdrop hidden" onclick="closeOnBackdrop(event,'modal-tambah')">
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
@@ -293,35 +291,32 @@
                 <i class="fa-solid fa-xmark text-[13px]"></i>
             </button>
         </div>
-
         <form action="{{ route('paket.store') }}" method="POST" id="form-tambah" novalidate>
             @csrf
             <div class="modal-body">
-
                 <div class="field-group">
                     <label class="field-label">Nama Paket <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_paket" id="tambah-nama" placeholder="cth. Paket Silver 1 Bulan"
+                    <input type="text" name="nama_paket" id="tambah-nama"
+                           placeholder="cth. Paket Silver 1 Bulan"
                            class="field-input" autocomplete="off">
                     <div class="field-hint hidden text-red-500" id="err-tambah-nama">Nama paket wajib diisi.</div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div class="field-group mb-0">
                         <label class="field-label">Harga (Rp) <span class="text-red-500">*</span></label>
                         <input type="number" name="harga" id="tambah-harga" placeholder="150000" min="0"
-                               class="field-input" oninput="previewHarga(this, 'preview-harga-tambah')">
+                               class="field-input" oninput="previewHarga(this,'preview-harga-tambah')">
                         <div class="field-hint" id="preview-harga-tambah"></div>
                         <div class="field-hint hidden text-red-500" id="err-tambah-harga">Harga wajib diisi.</div>
                     </div>
                     <div class="field-group mb-0">
                         <label class="field-label">Durasi (Hari) <span class="text-red-500">*</span></label>
                         <input type="number" name="durasi_hari" id="tambah-durasi" placeholder="30" min="1"
-                               class="field-input" oninput="previewDurasi(this, 'preview-durasi-tambah')">
+                               class="field-input" oninput="previewDurasi(this,'preview-durasi-tambah')">
                         <div class="field-hint" id="preview-durasi-tambah"></div>
                         <div class="field-hint hidden text-red-500" id="err-tambah-durasi">Durasi wajib diisi.</div>
                     </div>
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="closeModal('modal-tambah')" class="btn btn-white">Batal</button>
@@ -334,10 +329,8 @@
 </div>
 
 
-{{-- ═══════════════════════════════════════════
-     MODAL — EDIT PAKET
-════════════════════════════════════════════ --}}
-<div id="modal-edit" class="modal-backdrop hidden" onclick="closeOnBackdrop(event, 'modal-edit')">
+{{-- ═══ MODAL EDIT ═══ --}}
+<div id="modal-edit" class="modal-backdrop hidden" onclick="closeOnBackdrop(event,'modal-edit')">
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
@@ -349,35 +342,31 @@
                 <i class="fa-solid fa-xmark text-[13px]"></i>
             </button>
         </div>
-
         <form id="form-edit" method="POST" novalidate>
             @csrf @method('PUT')
             <div class="modal-body">
-
                 <div class="field-group">
                     <label class="field-label">Nama Paket <span class="text-red-500">*</span></label>
-                    <input type="text" name="nama_paket" id="edit-nama" placeholder="Nama paket"
-                           class="field-input" autocomplete="off">
+                    <input type="text" name="nama_paket" id="edit-nama"
+                           placeholder="Nama paket" class="field-input" autocomplete="off">
                     <div class="field-hint hidden text-red-500" id="err-edit-nama">Nama paket wajib diisi.</div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div class="field-group mb-0">
                         <label class="field-label">Harga (Rp) <span class="text-red-500">*</span></label>
                         <input type="number" name="harga" id="edit-harga" placeholder="150000" min="0"
-                               class="field-input" oninput="previewHarga(this, 'preview-harga-edit')">
+                               class="field-input" oninput="previewHarga(this,'preview-harga-edit')">
                         <div class="field-hint" id="preview-harga-edit"></div>
                         <div class="field-hint hidden text-red-500" id="err-edit-harga">Harga wajib diisi.</div>
                     </div>
                     <div class="field-group mb-0">
                         <label class="field-label">Durasi (Hari) <span class="text-red-500">*</span></label>
                         <input type="number" name="durasi_hari" id="edit-durasi" placeholder="30" min="1"
-                               class="field-input" oninput="previewDurasi(this, 'preview-durasi-edit')">
+                               class="field-input" oninput="previewDurasi(this,'preview-durasi-edit')">
                         <div class="field-hint" id="preview-durasi-edit"></div>
                         <div class="field-hint hidden text-red-500" id="err-edit-durasi">Durasi wajib diisi.</div>
                     </div>
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="closeModal('modal-edit')" class="btn btn-white">Batal</button>
@@ -407,27 +396,22 @@ function closeOnBackdrop(e, id) {
     if (e.target === document.getElementById(id)) closeModal(id);
 }
 
-/* ── Open edit modal & populate ── */
+/* ── Open edit ── */
 function openEdit(id, nama, harga, durasi) {
     const form = document.getElementById('form-edit');
     form.action = `/paket/${id}`;
-
     document.getElementById('edit-nama').value   = nama;
     document.getElementById('edit-harga').value  = harga;
     document.getElementById('edit-durasi').value = durasi;
-
-    // trigger preview
     previewHarga(document.getElementById('edit-harga'), 'preview-harga-edit');
     previewDurasi(document.getElementById('edit-durasi'), 'preview-durasi-edit');
-
     openModal('modal-edit');
 }
 
 /* ── Preview helpers ── */
 function previewHarga(el, previewId) {
     const v = parseInt(el.value);
-    const p = document.getElementById(previewId);
-    p.textContent = v > 0 ? 'Rp ' + v.toLocaleString('id-ID') : '';
+    document.getElementById(previewId).textContent = v > 0 ? 'Rp ' + v.toLocaleString('id-ID') : '';
 }
 function previewDurasi(el, previewId) {
     const v = parseInt(el.value);
@@ -435,16 +419,13 @@ function previewDurasi(el, previewId) {
     if (!v || v < 1) { p.textContent = ''; return; }
     const bulan = Math.floor(v / 30);
     const sisa  = v % 30;
-    p.textContent = bulan > 0
-        ? `${bulan} bulan${sisa > 0 ? ` ${sisa} hari` : ''}`
-        : `${v} hari`;
+    p.textContent = bulan > 0 ? `${bulan} bulan${sisa > 0 ? ` ${sisa} hari` : ''}` : `${v} hari`;
 }
 
-/* ── Validation helpers ── */
+/* ── Validation ── */
 function clearErrors(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.querySelectorAll('.field-hint.text-red-500').forEach(el => el.classList.add('hidden'));
-    modal.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+    document.getElementById(modalId).querySelectorAll('.field-hint.text-red-500').forEach(el => el.classList.add('hidden'));
+    document.getElementById(modalId).querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
 }
 function showErr(inputId, errId) {
     document.getElementById(inputId).classList.add('error');
@@ -459,7 +440,6 @@ function validate(prefix) {
     const nama   = document.getElementById(`${prefix}-nama`).value.trim();
     const harga  = document.getElementById(`${prefix}-harga`).value;
     const durasi = document.getElementById(`${prefix}-durasi`).value;
-
     if (!nama)              { showErr(`${prefix}-nama`,   `err-${prefix}-nama`);   ok = false; }
     else                    { clearErr(`${prefix}-nama`,  `err-${prefix}-nama`); }
     if (!harga || harga<=0) { showErr(`${prefix}-harga`,  `err-${prefix}-harga`);  ok = false; }
@@ -471,10 +451,7 @@ function validate(prefix) {
 
 /* ── Submit tambah ── */
 function submitTambah() {
-    if (!validate('tambah')) {
-        Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning');
-        return;
-    }
+    if (!validate('tambah')) { Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning'); return; }
     Swal.confirm({
         title: 'Tambah Paket?',
         text: `Paket "${document.getElementById('tambah-nama').value}" akan disimpan.`,
@@ -485,10 +462,7 @@ function submitTambah() {
 
 /* ── Submit edit ── */
 function submitEdit() {
-    if (!validate('edit')) {
-        Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning');
-        return;
-    }
+    if (!validate('edit')) { Swal.toast('Lengkapi semua field yang wajib diisi.', 'warning'); return; }
     Swal.confirm({
         title: 'Simpan Perubahan?',
         text: `Data paket "${document.getElementById('edit-nama').value}" akan diperbarui.`,
@@ -497,14 +471,13 @@ function submitEdit() {
     });
 }
 
-/* ── Search / filter table ── */
+/* ── Search ── */
 function filterTable() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     const rows = document.querySelectorAll('.paket-row');
     let found = 0;
     rows.forEach(row => {
-        const name = row.querySelector('.paket-name').textContent.toLowerCase();
-        const show = name.includes(q);
+        const show = row.querySelector('.paket-name').textContent.toLowerCase().includes(q);
         row.style.display = show ? '' : 'none';
         if (show) found++;
     });

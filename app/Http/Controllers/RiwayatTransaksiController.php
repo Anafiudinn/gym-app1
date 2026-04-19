@@ -50,7 +50,7 @@ class RiwayatTransaksiController extends Controller
     $totalNominal = (clone $query)->where('status', 'dibayar')->sum('jumlah_bayar');
 
     // 3. Eksekusi Paginate
-    $data = $query->paginate(10)->withQueryString();
+    $data = $query->paginate(15)->withQueryString();
 
     // 4. Kirim totalNominal ke view
     return view('riwayat.index', compact('data', 'totalNominal'));
