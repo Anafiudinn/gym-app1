@@ -1068,9 +1068,11 @@
                     </div>
                 </div>
             </div>
-            <a href="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;">
-                ✈ Buka di Google Maps
-            </a>
+           <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode(\App\Models\Setting::getValue('alamat_gym')) }}" 
+   target="_blank" rel="noopener" class="btn-primary" 
+   style="display:inline-flex;align-items:center;gap:0.4rem;">
+    ✈ Buka di Google Maps
+</a>
         </div>
 
         <div class="map-container">
@@ -1078,9 +1080,6 @@
                 src="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}"
                 allowfullscreen loading="lazy">
             </iframe>
-            <a href="{{ \App\Models\Setting::getValue('google_maps_url', 'https://www.google.com/maps/embed?pb=...') }}" target="_blank" rel="noopener" class="map-overlay-btn">
-                Buka di Maps ↗
-            </a>
         </div>
     </div>
 </section>
