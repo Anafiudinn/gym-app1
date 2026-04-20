@@ -1100,13 +1100,13 @@
                 <div class="kontak-val">{{ \App\Models\Setting::getValue('instagram', '@anafiudinn') }}</div>
             </div>
         </a>
-        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\Setting::getValue('no_telp')) }}" target="_blank" class="kontak-card">
-            <div class="kontak-icon">💬</div>
-            <div>
-                <div class="kontak-label">WhatsApp</div>
-                <div class="kontak-val">{{ \App\Models\Setting::getValue('no_telp', '0812-xxxx') }}</div>
-            </div>
-        </a>
+       <a href="https://wa.me/{{ '62' . ltrim(preg_replace('/[^0-9]/', '', \App\Models\Setting::getValue('no_telp')), '0') }}" target="_blank" class="kontak-card">
+    <div class="kontak-icon">💬</div>
+    <div>
+        <div class="kontak-label">WhatsApp</div>
+        <div class="kontak-val">{{ \App\Models\Setting::getValue('no_telp', '0812-xxxx') }}</div>
+    </div>
+</a>
         <a href="mailto:info@jefrygym.com" class="kontak-card">
             <div class="kontak-icon">✉</div>
             <div>
