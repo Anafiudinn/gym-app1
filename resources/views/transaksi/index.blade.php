@@ -169,7 +169,7 @@
         {{-- Summary card --}}
         <div class="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center justify-between" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <div>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pemasukan Hari Ini</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pemasukan Hari Ini (Oniste)</p>
                 <p class="text-[22px] font-black text-gray-900 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
                 <p class="text-[10.5px] text-gray-400 mt-1.5">{{ $countHariIni }} transaksi selesai</p>
             </div>

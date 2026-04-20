@@ -15,3 +15,5 @@ Schedule::call(function () {
         ->where('expired_at', '<', now())
         ->update(['status' => 'ditolak']);
 })->everyMinute(); // Kita set setiap menit
+
+Schedule::command('member:check-expired')->dailyAt('08:00');

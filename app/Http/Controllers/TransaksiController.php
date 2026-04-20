@@ -178,12 +178,21 @@ class TransaksiController extends Controller
 
                 // 4. Hitung Tanggal Mulai & Selesai
                 $start = now();
-                if ($member->tanggal_kadaluarsa && Carbon::parse($member->tanggal_kadaluarsa)->gt(now())) {
-                    $start = Carbon::parse($member->tanggal_kadaluarsa);
+
+                // Cek apakah member punya tanggal kadaluarsa dan apakah masih aktif/berlaku sampai besok atau lebih
+                if ($member->tanggal_kadaluarsa) {
+                    $kadaluarsa = Carbon::parse($member->tanggal_kadaluarsa);
+
+                    // Jika kadaluarsanya hari ini atau masa depan, maka sambung dari sana
+                    // Kita gunakan isFuture() atau isToday() supaya aman
+                    if ($kadaluarsa->isFuture() || $kadaluarsa->isToday()) {
+                        $start = $kadaluarsa;
+                    }
                 }
 
-                $end = Carbon::parse($start)->addDays($paket->durasi_hari);
-
+                // Gunakan copy() supaya variabel $start asli tidak ikut berubah saat ditambah days
+                $end = (clone $start)->addDays($paket->durasi_hari);
+                
                 // 5. Buat Transaksi
                 $transaksi = Transaksi::create([
                     'kode_invoice' => 'INV-' . strtoupper(Str::random(6)),

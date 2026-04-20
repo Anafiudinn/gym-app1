@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\Membership;
 use App\Models\Transaksi;
 use App\Models\VerifikasiPembayaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -51,18 +52,17 @@ class VerifikasiPembayaranController extends Controller
             if ($transaksi->tipe === 'membership' && $transaksi->member_id) {
                 $member = Member::lockForUpdate()->find($transaksi->member_id);
                 $paket = $transaksi->paket;
-
+                // Di fungsi terima()
                 $start = now();
-                if ($member->tanggal_kadaluarsa && now()->lt($member->tanggal_kadaluarsa)) {
-                    $start = $member->tanggal_kadaluarsa;
+                if ($member->tanggal_kadaluarsa && Carbon::parse($member->tanggal_kadaluarsa)->isFuture()) {
+                    $start = Carbon::parse($member->tanggal_kadaluarsa);
                 }
-
-                $end = \Carbon\Carbon::parse($start)->addDays($paket->durasi_hari);
+                $end = Carbon::parse($start)->copy()->addDays($paket->durasi_hari); // Pastikan pakai copy()
 
                 Membership::create([
                     'member_id' => $member->id,
                     'transaksi_id' => $transaksi->id,
-                    'paket_id' => $paket->id,
+                    'paket_id' => $paket->id,   
                     'tanggal_mulai' => $start,
                     'tanggal_selesai' => $end,
                     'status' => 'aktif'

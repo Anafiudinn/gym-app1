@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Member;
 use App\Models\Absensi;
+use App\Models\Member;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
@@ -59,23 +60,24 @@ class AbsensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Member tidak ditemukan']);
         }
 
-        $is_expired = !$member->tanggal_kadaluarsa || now()->gt($member->tanggal_kadaluarsa);
+        // Jadi ini (biar dapet toleransi sampe akhir hari):
+        $is_expired = !$member->tanggal_kadaluarsa || now()->gt(Carbon::parse($member->tanggal_kadaluarsa)->endOfDay());
         $is_nonaktif = $member->status !== 'aktif';
 
         return response()->json([
             'success' => true,
             'data' => [
-                'id'         => $member->id,
-                'nama'       => $member->nama,
-                'kode'       => $member->kode_member,
-                'status'     => $member->status,
+                'id' => $member->id,
+                'nama' => $member->nama,
+                'kode' => $member->kode_member,
+                'status' => $member->status,
                 'expired_at' => $member->tanggal_kadaluarsa
                     ? $member->tanggal_kadaluarsa->format('d M Y')
                     : '-',
-                'is_expired'  => $is_expired,
+                'is_expired' => $is_expired,
                 'is_nonaktif' => $is_nonaktif,
-                'can_absen'   => !$is_expired && !$is_nonaktif,
-                'manage_url'  => route('member.show', $member->id), // ← tambah ini
+                'can_absen' => !$is_expired && !$is_nonaktif,
+                'manage_url' => route('member.show', $member->id), // ← tambah ini
             ]
         ]);
     }
@@ -90,7 +92,7 @@ class AbsensiController extends Controller
             return back()->with('error', 'Member tidak aktif');
         }
 
-        if (!$member->tanggal_kadaluarsa || now()->gt($member->tanggal_kadaluarsa)) {
+        if (!$member->tanggal_kadaluarsa || now()->gt(Carbon::parse($member->tanggal_kadaluarsa)->endOfDay())) {
             return back()->with('error', 'Membership sudah kadaluarsa');
         }
 
@@ -104,9 +106,9 @@ class AbsensiController extends Controller
         }
 
         Absensi::create([
-            'member_id'   => $member->id,
+            'member_id' => $member->id,
             'waktu_masuk' => now(),
-            'status'      => 'valid',
+            'status' => 'valid',
         ]);
 
         return back()->with('success', 'Absensi ' . $member->nama . ' berhasil dicatat!');

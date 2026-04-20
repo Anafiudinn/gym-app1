@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/tes-wa', function () {
     // Kita ambil nomor yang kamu input di menu Pengaturan tadi
-    $nomor = \App\Models\Setting::getValue('no_telp'); 
-    
+    $nomor = \App\Models\Setting::getValue('no_telp');
+
     if (!$nomor) {
         return "Waduh, isi dulu Nomor Telepon Bisnis di menu Pengaturan gess!";
     }
@@ -58,9 +58,10 @@ Route::middleware(['auth'])->group(function () {
     // Pengelolaan Member
     Route::controller(MemberController::class)->prefix('member')->name('member.')->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::patch('/{id}/toggle', 'toggleStatus')->name('toggle');
         Route::get('/{id}', 'show')->name('show');
         Route::put('/{id}', 'update')->name('update');
-        Route::patch('/{id}/toggle', 'toggleStatus')->name('toggle');
+
     });
 
     // Pengelolaan Paket
