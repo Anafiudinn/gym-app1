@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ \App\Models\Setting::getValue('nama_gym') }}- Transform Your Body & Mind</title>
+    <title>{{ \App\Models\Setting::getValue('nama_gym') }} - Transform Your Body & Mind</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    {{-- SweetAlert2 --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         :root {
             --lime: #AAFF00;
@@ -316,7 +320,7 @@
             padding: 0.85rem 1rem 0.85rem 2.75rem;
             color: var(--text);
             font-family: 'Outfit', sans-serif;
-            font-size: 16px; /* prevents iOS auto-zoom */
+            font-size: 16px;
             transition: border-color 0.2s;
             outline: none;
             -webkit-appearance: none;
@@ -369,6 +373,192 @@
         }
 
         /* =====================
+           SWEETALERT2 — Dark Lime Theme
+        ===================== */
+
+        /* Popup base */
+        .gym-popup {
+            background: #161616 !important;
+            border: 1px solid #2a2a2a !important;
+            border-radius: 20px !important;
+            font-family: 'Outfit', sans-serif !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(170,255,0,.04) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            max-width: 360px !important;
+        }
+
+        /* Accent bar top */
+        .gym-popup::before {
+            content: '';
+            display: block;
+            height: 3px;
+            width: 100%;
+            background: var(--gym-accent, #AAFF00);
+        }
+
+        /* Icon box */
+        .gym-popup .swal2-icon {
+            border: none !important;
+            margin: 24px auto 0 !important;
+            width: 56px !important;
+            height: 56px !important;
+            background: var(--gym-icon-bg, rgba(170,255,0,0.1)) !important;
+            border-radius: 14px !important;
+        }
+
+        .gym-popup .swal2-icon .swal2-icon-content {
+            font-size: 24px !important;
+            color: var(--gym-icon-color, #AAFF00) !important;
+            font-weight: 800 !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+
+        /* Hide swal2 default icon decorations */
+        .gym-popup .swal2-icon.swal2-success [class^='swal2-success-line'],
+        .gym-popup .swal2-icon.swal2-success .swal2-success-ring,
+        .gym-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'],
+        .gym-popup .swal2-icon.swal2-warning::before,
+        .gym-popup .swal2-icon.swal2-info::before,
+        .gym-popup .swal2-icon.swal2-question::before { display: none !important; }
+
+        .gym-popup .swal2-icon.swal2-success .swal2-success-fix,
+        .gym-popup .swal2-icon.swal2-success .swal2-success-circular-line-left,
+        .gym-popup .swal2-icon.swal2-success .swal2-success-circular-line-right {
+            background: transparent !important;
+            display: none !important;
+        }
+
+        /* Title */
+        .gym-popup .swal2-title {
+            color: #fff !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 17px !important;
+            font-weight: 700 !important;
+            padding: 14px 24px 0 !important;
+            margin: 0 !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        /* Body */
+        .gym-popup .swal2-html-container {
+            color: #777 !important;
+            font-size: 13.5px !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 400 !important;
+            padding: 8px 24px 18px !important;
+            margin: 0 !important;
+            line-height: 1.6 !important;
+        }
+
+        /* Actions */
+        .gym-popup .swal2-actions {
+            padding: 0 20px 22px !important;
+            gap: 8px !important;
+            margin: 0 !important;
+            width: 100% !important;
+            flex-wrap: nowrap !important;
+        }
+
+        /* Confirm button */
+        .gym-popup .swal2-confirm {
+            background: var(--gym-accent, #AAFF00) !important;
+            color: #000 !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            padding: 10px 20px !important;
+            border-radius: 10px !important;
+            border: none !important;
+            box-shadow: none !important;
+            flex: 1 !important;
+            transition: background 0.2s, transform 0.15s !important;
+        }
+        .gym-popup .swal2-confirm:hover { background: #88cc00 !important; transform: translateY(-1px) !important; }
+        .gym-popup .swal2-confirm:focus { box-shadow: none !important; }
+
+        /* Cancel button */
+        .gym-popup .swal2-cancel {
+            background: #1e1e1e !important;
+            color: #666 !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding: 10px 20px !important;
+            border-radius: 10px !important;
+            border: 1.5px solid #2a2a2a !important;
+            box-shadow: none !important;
+            flex: 1 !important;
+            transition: border-color 0.2s, color 0.2s !important;
+        }
+        .gym-popup .swal2-cancel:hover { border-color: #444 !important; color: #fff !important; }
+        .gym-popup .swal2-cancel:focus { box-shadow: none !important; }
+
+        /* Timer progress bar */
+        .gym-popup .swal2-timer-progress-bar {
+            background: var(--gym-accent, #AAFF00) !important;
+            opacity: 0.35 !important;
+            height: 3px !important;
+        }
+
+        /* Backdrop */
+        .gym-backdrop {
+            background: rgba(0,0,0,0.8) !important;
+            backdrop-filter: blur(6px) !important;
+            -webkit-backdrop-filter: blur(6px) !important;
+        }
+
+        /* ── Toast ── */
+        .gym-toast {
+            background: #1a1a1a !important;
+            border: 1px solid #2a2a2a !important;
+            border-radius: 12px !important;
+            font-family: 'Outfit', sans-serif !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,.7) !important;
+            padding: 10px 14px !important;
+            border-left: 3px solid var(--gym-toast-accent, #AAFF00) !important;
+        }
+
+        .gym-toast .swal2-title {
+            color: #eee !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            font-family: 'Outfit', sans-serif !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .gym-toast .swal2-icon {
+            border: none !important;
+            width: 26px !important;
+            height: 26px !important;
+            margin: 0 8px 0 0 !important;
+            background: transparent !important;
+        }
+
+        .gym-toast .swal2-icon .swal2-icon-content {
+            font-size: 15px !important;
+            color: var(--gym-toast-accent, #AAFF00) !important;
+            font-weight: 800 !important;
+        }
+
+        .gym-toast .swal2-icon.swal2-success [class^='swal2-success-line'],
+        .gym-toast .swal2-icon.swal2-success .swal2-success-ring,
+        .gym-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'] { display: none !important; }
+
+        .gym-toast .swal2-icon.swal2-success .swal2-success-fix,
+        .gym-toast .swal2-icon.swal2-success .swal2-success-circular-line-left,
+        .gym-toast .swal2-icon.swal2-success .swal2-success-circular-line-right {
+            background: transparent !important;
+            display: none !important;
+        }
+
+        .gym-toast .swal2-timer-progress-bar {
+            background: var(--gym-toast-accent, #AAFF00) !important;
+            opacity: 0.3 !important;
+        }
+
+        /* =====================
            RESPONSIVE
         ===================== */
         @media (max-width: 768px) {
@@ -381,6 +571,7 @@
             nav { padding: 0 2.5rem; }
         }
     </style>
+
     @stack('styles')
 </head>
 <body>
@@ -392,7 +583,7 @@
                 <path d="M6 4v16M18 4v16M3 8h3M18 8h3M3 16h3M18 16h3M6 12h12" stroke="#000" stroke-width="2" stroke-linecap="round"/>
             </svg>
         </div>
-        {{ \App\Models\Setting::getValue('nama_gym',) }}
+        {{ \App\Models\Setting::getValue('nama_gym') }}
     </a>
 
     <ul class="nav-links">
@@ -416,43 +607,187 @@
 </nav>
 
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <a href="/#home" class="mobile-link">Home</a>
-    <a href="/#harga" class="mobile-link">Harga</a>
+    <a href="/#home"      class="mobile-link">Home</a>
+    <a href="/#harga"     class="mobile-link">Harga</a>
     <a href="/#keramaian" class="mobile-link">Keramaian</a>
-    <a href="/#layanan" class="mobile-link">Layanan</a>
-    <a href="/#galeri" class="mobile-link">Galeri</a>
-    <a href="/#lokasi" class="mobile-link">Lokasi</a>
-    <a href="/#kontak" class="mobile-link">Kontak</a>
+    <a href="/#layanan"   class="mobile-link">Layanan</a>
+    <a href="/#galeri"    class="mobile-link">Galeri</a>
+    <a href="/#lokasi"    class="mobile-link">Lokasi</a>
+    <a href="/#kontak"    class="mobile-link">Kontak</a>
     <a href="/daftar" class="mobile-cta">Daftar Sekarang →</a>
 </div>
 
 @yield('content')
 
-<script>
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    let menuOpen = false;
+{{-- SweetAlert2 JS --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-    function toggleMenu(force) {
-        menuOpen = force !== undefined ? force : !menuOpen;
-        hamburger.classList.toggle('open', menuOpen);
-        mobileMenu.classList.toggle('open', menuOpen);
-        mobileMenu.setAttribute('aria-hidden', !menuOpen);
-        document.body.style.overflow = menuOpen ? 'hidden' : '';
+<script>
+/* ══════════════════════════════════════════
+   GymAlert — SweetAlert2 Dark Lime Theme
+══════════════════════════════════════════ */
+const GymAlert = (() => {
+
+    const THEMES = {
+        success:  { accent: '#AAFF00', iconBg: 'rgba(170,255,0,0.1)',   iconColor: '#AAFF00', icon: '✓' },
+        error:    { accent: '#ff4444', iconBg: 'rgba(255,68,68,0.12)',  iconColor: '#ff4444', icon: '✕' },
+        warning:  { accent: '#f59e0b', iconBg: 'rgba(245,158,11,0.12)', iconColor: '#f59e0b', icon: '!' },
+        info:     { accent: '#38bdf8', iconBg: 'rgba(56,189,248,0.12)', iconColor: '#38bdf8', icon: 'i' },
+        question: { accent: '#a78bfa', iconBg: 'rgba(167,139,250,0.1)', iconColor: '#a78bfa', icon: '?' },
+    };
+
+    /* inject CSS vars per call */
+    function setVars(t) {
+        let s = document.getElementById('_gym-vars');
+        if (!s) { s = document.createElement('style'); s.id = '_gym-vars'; document.head.appendChild(s); }
+        s.textContent = `.gym-popup{--gym-accent:${t.accent};--gym-icon-bg:${t.iconBg};--gym-icon-color:${t.iconColor};}`;
     }
 
-    hamburger.addEventListener('click', () => toggleMenu());
+    function fire(type, opts = {}) {
+        const t = THEMES[type] || THEMES.success;
+        setVars(t);
+        return Swal.fire({
+            customClass: { popup: 'gym-popup', backdrop: 'gym-backdrop' },
+            icon: type,
+            iconHtml: `<span style="font-size:22px;font-weight:800;color:${t.iconColor};line-height:1;font-family:Outfit,sans-serif;">${t.icon}</span>`,
+            buttonsStyling: false,
+            reverseButtons: true,
+            ...opts,
+        });
+    }
 
-    document.querySelectorAll('.mobile-link, .mobile-cta').forEach(link => {
-        link.addEventListener('click', () => toggleMenu(false));
-    });
+    function toastFire(type, text) {
+        const t = THEMES[type] || THEMES.success;
+        return Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            customClass: { popup: 'gym-toast' },
+            didOpen: (el) => {
+                el.style.setProperty('--gym-toast-accent', t.accent);
+                el.addEventListener('mouseenter', Swal.stopTimer);
+                el.addEventListener('mouseleave', Swal.resumeTimer);
+            },
+        }).fire({
+            icon: type,
+            iconHtml: `<span style="font-size:14px;font-weight:800;color:${t.iconColor};font-family:Outfit,sans-serif;">${t.icon}</span>`,
+            title: text,
+        });
+    }
 
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-        if (menuOpen && !mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
-            toggleMenu(false);
-        }
-    });
+    return {
+
+        success(text, title = 'Berhasil!') {
+            return fire('success', {
+                title, html: `<span>${text}</span>`,
+                confirmButtonText: 'OK',
+                timer: 4000, timerProgressBar: true,
+            });
+        },
+
+        error(text, title = 'Oops!') {
+            return fire('error', {
+                title, html: `<span>${text}</span>`,
+                confirmButtonText: 'Tutup',
+            });
+        },
+
+        warning(text, title = 'Perhatian!') {
+            return fire('warning', {
+                title, html: `<span>${text}</span>`,
+                confirmButtonText: 'Mengerti',
+                timer: 5000, timerProgressBar: true,
+            });
+        },
+
+        info(text, title = 'Info') {
+            return fire('info', {
+                title, html: `<span>${text}</span>`,
+                confirmButtonText: 'OK',
+            });
+        },
+
+        confirm({ title = 'Apakah kamu yakin?', text = '', confirmText = 'Ya, lanjutkan', cancelText = 'Batal', onConfirm } = {}) {
+            return fire('question', {
+                title,
+                html: text ? `<span>${text}</span>` : undefined,
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText:  cancelText,
+            }).then(r => { if (r.isConfirmed && typeof onConfirm === 'function') onConfirm(); });
+        },
+
+        deleteConfirm(form, itemName = 'data ini') {
+            return fire('error', {
+                title: 'Hapus Data?',
+                html: `Data <strong style="color:#fff;">${itemName}</strong> akan dihapus permanen.`,
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText:  'Batal',
+            }).then(r => { if (r.isConfirmed) form.submit(); });
+        },
+
+        toast(text, type = 'success') { return toastFire(type, text); },
+
+        loading(text = 'Memproses...') {
+            return Swal.fire({
+                title: text,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                customClass: { popup: 'gym-popup', backdrop: 'gym-backdrop' },
+                didOpen: () => Swal.showLoading(),
+            });
+        },
+
+        close() { Swal.close(); },
+    };
+})();
+
+/* ── Auto flash dari Laravel session ── */
+document.addEventListener('DOMContentLoaded', () => {
+    @if(session('success'))
+        GymAlert.success(@json(session('success')));
+    @endif
+    @if(session('error'))
+        GymAlert.error(@json(session('error')));
+    @endif
+    @if(session('warning'))
+        GymAlert.warning(@json(session('warning')));
+    @endif
+    @if(session('info'))
+        GymAlert.info(@json(session('info')));
+    @endif
+});
+
+/* ── Hamburger menu ── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+let menuOpen = false;
+
+function toggleMenu(force) {
+    menuOpen = force !== undefined ? force : !menuOpen;
+    hamburger.classList.toggle('open', menuOpen);
+    mobileMenu.classList.toggle('open', menuOpen);
+    mobileMenu.setAttribute('aria-hidden', !menuOpen);
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+}
+
+hamburger.addEventListener('click', () => toggleMenu());
+
+document.querySelectorAll('.mobile-link, .mobile-cta').forEach(link => {
+    link.addEventListener('click', () => toggleMenu(false));
+});
+
+document.addEventListener('click', (e) => {
+    if (menuOpen && !mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+        toggleMenu(false);
+    }
+});
 </script>
+
+@stack('scripts')
 </body>
 </html>

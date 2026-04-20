@@ -203,7 +203,7 @@
                             <div class="text-[10.5px] font-bold text-emerald-600 mt-0.5 uppercase tracking-wide">{{ $d->transaksi->paket->nama_paket }}</div>
                         </td>
 
-                        <td class="td-cell text-center font-mono text-[12px] font-semibold text-gray-700">
+                        <td class="td-cell text-center font-jakarta text-[12px] font-semibold text-gray-700">
                             {{ $d->transaksi->member->no_wa }}
                         </td>
 
@@ -373,10 +373,12 @@
                 <thead>
                     <tr>
                         <th class="th-cell">Member</th>
+                        <th class="th-cell text-center">No Wa</th>
                         <th class="th-cell text-center">Tanggal</th>
                         <th class="th-cell text-center">Nominal</th>
                         <th class="th-cell text-center hidden sm:table-cell">Channel</th>
                         <th class="th-cell text-center">Status</th>
+                        <th class="th-cell text-center">Bukti</th>
                         <th class="th-cell text-right hidden md:table-cell">Catatan</th>
                     </tr>
                 </thead>
@@ -396,6 +398,9 @@
                                 #{{ $d->transaksi?->kode_invoice ?? 'N/A' }}
                             </div>
                         </td>
+                            <td class="td-cell text-center font-semibold text-[12px] font-semibold text-gray-700">
+                                {{ $d->transaksi?->member?->no_wa ?? '—' }}
+                            </td>
 
                         <td class="td-cell text-center">
                             <div class="font-semibold text-gray-800 text-[12px]">{{ $d->created_at->format('d M Y') }}</div>
@@ -421,6 +426,17 @@
                                 <span class="badge badge-tolak">
                                     <i class="fa-solid fa-xmark text-[8px]"></i> Ditolak
                                 </span>
+                            @endif
+                        </td>
+                        <td class="td-cell text-center">
+                            @if($d->bukti_pembayaran)
+                                <a href="{{ asset('storage/' . $d->bukti_pembayaran) }}" target="_blank"
+                                   class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
+                                   style="background:rgba(16,185,129,0.08);">
+                                    <i class="fa-solid fa-image text-[10px]"></i> Lihat
+                                </a>
+                            @else
+                                <span class="text-gray-400 italic text-[11px]">Tidak ada bukti</span>
                             @endif
                         </td>
 

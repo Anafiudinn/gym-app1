@@ -75,7 +75,7 @@ class LandingPageController extends Controller
                     if ($member->status === 'aktif') {
                         return redirect()->back()
                             ->withInput()
-                            ->with('error', 'Pendaftaran Gagal: Nomor ' . $request->no_wa . ' masih berstatus AKTIF.');
+                            ->with('error', 'Pendaftaran Gagal: Nomor ' . $request->no_wa . ' masih berstatus AKTIF, jika ingin melakukan perubahan data atau perpanjangan silahkan menghubungi admin.');
                     }
                     $member->update(['nama' => $request->nama]);
                 } else {

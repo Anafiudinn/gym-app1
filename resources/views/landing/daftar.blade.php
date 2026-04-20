@@ -25,9 +25,7 @@
         width: 100%;
     }
 
-    .back-link:hover {
-        color: var(--lime);
-    }
+    .back-link:hover { color: var(--lime); }
 
     .daftar-card {
         background: var(--card);
@@ -56,9 +54,7 @@
         gap: 0.6rem;
     }
 
-    .paket-option {
-        position: relative;
-    }
+    .paket-option { position: relative; }
 
     .paket-option input[type="radio"] {
         position: absolute;
@@ -76,27 +72,15 @@
         transition: 0.2s;
     }
 
-    .paket-label:hover {
-        border-color: var(--lime);
-    }
+    .paket-label:hover { border-color: var(--lime); }
 
-    .paket-option input[type="radio"]:checked+.paket-label {
+    .paket-option input[type="radio"]:checked + .paket-label {
         border-color: var(--lime);
         background: rgba(170, 255, 0, 0.07);
     }
 
-    .paket-name {
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text);
-    }
-
-    .paket-price {
-        font-size: 0.78rem;
-        color: var(--lime);
-        font-weight: 600;
-        margin-top: 0.1rem;
-    }
+    .paket-name { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    .paket-price { font-size: 0.78rem; color: var(--lime); font-weight: 600; margin-top: 0.1rem; }
 
     .gender-group {
         display: grid;
@@ -104,9 +88,7 @@
         gap: 0.6rem;
     }
 
-    .gender-option {
-        position: relative;
-    }
+    .gender-option { position: relative; }
 
     .gender-option input[type="radio"] {
         position: absolute;
@@ -128,12 +110,9 @@
         transition: 0.2s;
     }
 
-    .gender-label:hover {
-        border-color: var(--lime);
-        color: var(--lime);
-    }
+    .gender-label:hover { border-color: var(--lime); color: var(--lime); }
 
-    .gender-option input[type="radio"]:checked+.gender-label {
+    .gender-option input[type="radio"]:checked + .gender-label {
         border-color: var(--lime);
         color: var(--lime);
         background: rgba(170, 255, 0, 0.07);
@@ -152,13 +131,8 @@
         outline: none;
     }
 
-    .form-control-plain:focus {
-        border-color: var(--lime);
-    }
-
-    .form-control-plain::placeholder {
-        color: #444;
-    }
+    .form-control-plain:focus { border-color: var(--lime); }
+    .form-control-plain::placeholder { color: #444; }
 
     .error-msg {
         color: var(--danger);
@@ -185,29 +159,24 @@
         margin-top: 0.5rem;
     }
 
-    .btn-submit:hover {
-        background: var(--lime-dark);
-        transform: translateY(-1px);
-    }
+    .btn-submit:hover { background: var(--lime-dark); transform: translateY(-1px); }
 </style>
 @endpush
 
 @section('content')
 
 <div class="daftar-page">
-    <div style="width:100%;max-width:600px;"> 
+    <div style="width:100%;max-width:600px;">
         <div style="text-align:center;margin-bottom:2rem;">
-            <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;">Layanan <span style="color:var(--lime);">Kami</span></h1>
-            <p style="color:var(--muted);font-size:0.875rem;margin-top:0.3rem;">Pilih layanan yang kamu butuhkan</p>
+            <h1 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;">
+                Layanan <span style="color:var(--lime);">Kami</span>
+            </h1>
+            <p style="color:var(--muted);font-size:0.875rem;margin-top:0.3rem;">
+                Pilih layanan yang kamu butuhkan
+            </p>
         </div>
 
-        <div class="steps" style="margin-bottom:2rem;">
-         
-        </div>
-
-    
-
-        <!-- Step Indicator -->
+        {{-- Step Indicator --}}
         <div class="steps" style="margin-bottom:2rem;">
             <div class="step-circle active">1</div>
             <div class="step-line"></div>
@@ -215,69 +184,50 @@
             <div class="step-line"></div>
             <div class="step-circle">3</div>
         </div>
-          {{-- BACK LINK --}}
-       
+
         <a href="/" class="back-link">← Kembali ke beranda</a>
 
         <div class="daftar-card">
             <h2>Data Diri</h2>
             <p class="subtitle">Lengkapi data diri kamu untuk mendaftar</p>
 
-        {{-- Alert Error (General/System Error) --}}
-@if(session('error'))
-<div style="background: rgba(255, 68, 68, 0.1); border: 1.5px solid #ff4444; color: #ff4444; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-    {{ session('error') }}
-</div>
-@endif
+            <form method="POST" action="/daftar" id="form-daftar">
+                @csrf
 
-{{-- Alert Error Validasi (Input Salah) --}}
-@if($errors->any())
-<div style="background: rgba(255, 165, 0, 0.1); border: 1.5px solid #ffa500; color: #ffa500; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-    <strong style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;">⚠️ Periksa kembali inputan Anda:</strong>
-    <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.8rem;">
-        @foreach($errors->all() as $err)
-        <li>{{ $err }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <div class="input-wrap">
+                        <span class="icon">👤</span>
+                        <input type="text" name="nama" class="form-control"
+                               placeholder="Masukkan nama lengkap"
+                               value="{{ old('nama') }}" required>
+                    </div>
+                </div>
 
-<form method="POST" action="/daftar">
-    @csrf
-
-    <div class="form-group">
-        <label>Nama Lengkap</label>
-        <div class="input-wrap">
-            <span class="icon">👤</span>
-            <input type="text" name="nama" class="form-control" placeholder="Masukkan nama lengkap" value="{{ old('nama') }}" required>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label>No. WhatsApp</label>
-        <div class="input-wrap">
-            <span class="icon">📱</span>
-            {{-- type="tel" dan oninput mencegah karakter selain angka --}}
-            <input type="tel" 
-                   name="no_wa" 
-                   class="form-control" 
-                   placeholder="Contoh: 08123456789" 
-                   value="{{ old('no_wa') }}" 
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                   required>
-        </div>
-        <small style="color: #888; font-size: 0.75rem;">Gunakan format angka saja (08xxxxxxxx)</small>
-    </div>
+                <div class="form-group">
+                    <label>No. WhatsApp</label>
+                    <div class="input-wrap">
+                        <span class="icon">📱</span>
+                        <input type="tel" name="no_wa" class="form-control"
+                               placeholder="Contoh: 08123456789"
+                               value="{{ old('no_wa') }}"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                               required>
+                    </div>
+                    <small style="color:#555;font-size:0.75rem;">Gunakan format angka saja (08xxxxxxxx)</small>
+                </div>
 
                 <div class="form-group">
                     <label>Gender</label>
                     <div class="gender-group">
                         <div class="gender-option">
-                            <input type="radio" name="jenis_kelamin" id="laki" value="L" {{ old('jenis_kelamin') === 'L' ? 'checked' : '' }} required>
+                            <input type="radio" name="jenis_kelamin" id="laki" value="L"
+                                   {{ old('jenis_kelamin') === 'L' ? 'checked' : '' }} required>
                             <label for="laki" class="gender-label">Laki-laki</label>
                         </div>
                         <div class="gender-option">
-                            <input type="radio" name="jenis_kelamin" id="perempuan" value="P" {{ old('jenis_kelamin') === 'P' ? 'checked' : '' }}>
+                            <input type="radio" name="jenis_kelamin" id="perempuan" value="P"
+                                   {{ old('jenis_kelamin') === 'P' ? 'checked' : '' }}>
                             <label for="perempuan" class="gender-label">Perempuan</label>
                         </div>
                     </div>
@@ -288,8 +238,10 @@
                     <div class="paket-grid">
                         @foreach($paket as $p)
                         <div class="paket-option">
-                            <input type="radio" name="paket_id" id="paket_{{ $p->id }}" value="{{ $p->id }}"
-                                {{ (old('paket_id') == $p->id || $selectedPaketId == $p->id) ? 'checked' : '' }} required>
+                            <input type="radio" name="paket_id"
+                                   id="paket_{{ $p->id }}" value="{{ $p->id }}"
+                                   {{ (old('paket_id') == $p->id || $selectedPaketId == $p->id) ? 'checked' : '' }}
+                                   required>
                             <label for="paket_{{ $p->id }}" class="paket-label">
                                 <div class="paket-name">{{ $p->nama_paket }}</div>
                                 <div class="paket-price">Rp {{ number_format($p->harga, 0, ',', '.') }}</div>
@@ -299,11 +251,70 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit">
+                <button type="button" class="btn-submit" onclick="submitDaftar()">
                     Lanjut ke Pembayaran →
                 </button>
             </form>
         </div>
     </div>
 </div>
+
 @endsection
+
+@push('scripts')
+<script>
+/* ── Validasi & submit form daftar ── */
+function submitDaftar() {
+    const nama   = document.querySelector('input[name="nama"]').value.trim();
+    const no_wa  = document.querySelector('input[name="no_wa"]').value.trim();
+    const gender = document.querySelector('input[name="jenis_kelamin"]:checked');
+    const paket  = document.querySelector('input[name="paket_id"]:checked');
+
+    if (!nama) {
+        GymAlert.warning('Nama lengkap wajib diisi.', 'Belum Lengkap');
+        return;
+    }
+    if (!no_wa || no_wa.length < 9) {
+        GymAlert.warning('Masukkan nomor WhatsApp yang valid.', 'Belum Lengkap');
+        return;
+    }
+    if (!gender) {
+        GymAlert.warning('Pilih jenis kelamin terlebih dahulu.', 'Belum Lengkap');
+        return;
+    }
+    if (!paket) {
+        GymAlert.warning('Pilih paket membership terlebih dahulu.', 'Belum Lengkap');
+        return;
+    }
+
+    GymAlert.confirm({
+        title: 'Konfirmasi Pendaftaran',
+        text: `Nama: ${nama} — kamu akan diarahkan ke halaman pembayaran.`,
+        confirmText: 'Ya, Lanjutkan →',
+        cancelText: 'Cek Lagi',
+        onConfirm: () => {
+            GymAlert.loading('Memproses pendaftaran...');
+            document.getElementById('form-daftar').submit();
+        }
+    });
+}
+
+/* ── Flash dari Laravel session (validasi server-side) ── */
+document.addEventListener('DOMContentLoaded', () => {
+    @if($errors->any())
+        GymAlert.error(
+            `{{ implode('<br>', $errors->all()) }}`,
+            'Periksa Kembali'
+        );
+    @endif
+
+    @if(session('error'))
+        GymAlert.error(@json(session('error')));
+    @endif
+
+    @if(session('success'))
+        GymAlert.success(@json(session('success')));
+    @endif
+});
+</script>
+@endpush
