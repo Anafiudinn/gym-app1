@@ -1106,13 +1106,15 @@
         <div class="kontak-val">{{ \App\Models\Setting::getValue('no_telp', '0812-xxxx') }}</div>
     </div>
 </a>
-        <a href="mailto:info@jefrygym.com" class="kontak-card">
-            <div class="kontak-icon">✉</div>
-            <div>
-                <div class="kontak-label">Email</div>
-                <div class="kontak-val">info@jefrygym.com</div>
-            </div>
-        </a>
+       <a href="mailto:{{ \App\Models\User::where('role', 'admin')->first()->email ?? 'info@jefrygym.com' }}" class="kontak-card">
+    <div class="kontak-icon">✉</div>
+    <div>
+        <div class="kontak-label">Email</div>
+        <div class="kontak-val">
+            {{ \App\Models\User::where('role', 'admin')->first()->email ?? 'info@jefrygym.com' }}
+        </div>
+    </div>
+</a>
     </div>
 </section>
 
