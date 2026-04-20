@@ -141,11 +141,14 @@ class LandingPageController extends Controller
             $transaksi->update(['status' => 'ditolak']);
         }
 
-        // Tambahkan ini agar Blade tidak bingung
         $sisaDetik = $transaksi->expired_at ? now()->diffInSeconds($transaksi->expired_at, false) : 0;
         $masihAktif = $sisaDetik > 0 && $transaksi->status == 'pending';
 
-        return view('landing.pembayaran', compact('transaksi', 'sisaDetik', 'masihAktif'));
+        // Tambahkan variabel member di sini gess!
+        $member = $transaksi->member;
+
+        // Masukkan $member ke compact
+        return view('landing.pembayaran', compact('transaksi', 'sisaDetik', 'masihAktif', 'member'));
     }
     // 🔹 PROSES SIMPAN BUKTI TRANSFER (POST)
     public function uploadBukti(Request $request, $kode)

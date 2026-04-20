@@ -59,9 +59,7 @@ if ($transaksi->expired_at && $state === 'upload') {
         display:flex; align-items:center; justify-content:center;
         gap:0; margin-bottom:1.5rem; width:100%; max-width:520px;
     }
-
     .step-item { display:flex; flex-direction:column; align-items:center; gap:0.35rem; }
-
     .step-num {
         width:34px; height:34px; border-radius:50%;
         display:grid; place-items:center;
@@ -73,9 +71,7 @@ if ($transaksi->expired_at && $state === 'upload') {
     .step-num.active  { background:var(--lime); color:#000; border-color:var(--lime); }
     .step-num.done    { background:rgba(170,255,0,0.12); color:var(--lime); border-color:var(--lime); }
     .step-num.fail    { background:rgba(255,68,68,0.12); color:#ff4444; border-color:#ff4444; }
-
     .step-label { font-size:0.65rem; color:var(--muted); white-space:nowrap; font-weight:500; }
-
     .step-connector {
         height:2px; flex:1; background:var(--border);
         margin:0 0.4rem; margin-bottom:1.15rem; max-width:60px; transition:background 0.3s;
@@ -91,7 +87,6 @@ if ($transaksi->expired_at && $state === 'upload') {
 
     /* ===================== INVOICE BOX ===================== */
     .invoice-box { border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:1.25rem; }
-
     .inv-row {
         display:flex; justify-content:space-between; align-items:center;
         padding:0.7rem 1rem; font-size:0.85rem; border-bottom:1px solid var(--border);
@@ -112,7 +107,6 @@ if ($transaksi->expired_at && $state === 'upload') {
     .transfer-box-left .t-lbl { font-size:0.72rem; font-weight:700; color:var(--lime); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.3rem; }
     .transfer-box-left .t-bank { font-weight:800; font-size:0.975rem; }
     .transfer-box-left .t-an { font-size:0.8rem; color:var(--muted); margin-top:0.1rem; }
-
     .copy-btn {
         background:rgba(170,255,0,0.1); border:1px solid rgba(170,255,0,0.25);
         color:var(--lime); font-size:0.75rem; font-weight:700;
@@ -136,7 +130,6 @@ if ($transaksi->expired_at && $state === 'upload') {
 
     /* ===================== UPLOAD FORM ===================== */
     .field-label { font-size:0.78rem; font-weight:600; color:var(--muted); display:block; margin-bottom:0.4rem; }
-
     .field-input {
         width:100%; background:var(--bg3); border:1.5px solid var(--border);
         border-radius:10px; padding:0.8rem 1rem; color:var(--text);
@@ -154,7 +147,6 @@ if ($transaksi->expired_at && $state === 'upload') {
     .upload-zone:hover { border-color:#555; }
     .upload-zone.has-file, .upload-zone.drag { border-color:var(--lime); background:rgba(170,255,0,0.04); }
     .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-
     .upload-icon-wrap {
         width:44px; height:44px; border-radius:12px;
         background:rgba(255,255,255,0.06); display:grid; place-items:center;
@@ -163,7 +155,6 @@ if ($transaksi->expired_at && $state === 'upload') {
     .upload-zone p { font-size:0.8rem; color:var(--muted); }
     .upload-zone .hint { font-size:0.7rem; color:#555; margin-top:0.25rem; }
     .upload-zone .file-name { font-size:0.8rem; color:var(--lime); margin-top:0.5rem; font-weight:600; }
-
     .preview-img { width:100%; max-height:160px; object-fit:cover; border-radius:10px; margin-top:0.75rem; display:none; }
 
     /* ===================== BUTTONS ===================== */
@@ -180,13 +171,25 @@ if ($transaksi->expired_at && $state === 'upload') {
     .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
 
     .btn-outline {
-        display:block; width:100%; text-align:center;
+        display:flex; width:100%; text-align:center; align-items:center; justify-content:center; gap:0.5rem;
         background:var(--bg3); color:var(--text); border:1.5px solid var(--border);
         padding:0.8rem; border-radius:12px; font-weight:700; font-size:0.875rem;
         text-decoration:none; transition:border-color 0.2s, color 0.2s;
         font-family:'Outfit',sans-serif; cursor:pointer;
     }
     .btn-outline:hover { border-color:var(--lime); color:var(--lime); }
+
+    /* ── Download Card Button (special) ── */
+    .btn-download-card {
+        width:100%; border:1.5px solid rgba(170,255,0,0.35);
+        background:rgba(170,255,0,0.07); color:var(--lime);
+        padding:0.85rem; border-radius:12px; font-weight:700; font-size:0.875rem;
+        text-decoration:none; transition:all 0.2s;
+        display:flex; align-items:center; justify-content:center; gap:0.55rem;
+        font-family:'Outfit',sans-serif; cursor:pointer; margin-top:0.75rem;
+    }
+    .btn-download-card:hover { background:rgba(170,255,0,0.14); border-color:var(--lime); }
+    .btn-download-card .dl-icon { font-size:1rem; }
 
     .btn-danger-text {
         display:block; text-align:center; color:#ff6666; font-size:0.78rem;
@@ -205,14 +208,12 @@ if ($transaksi->expired_at && $state === 'upload') {
     .state-icon.sukses   { background:rgba(170,255,0,0.1); border:2px solid rgba(170,255,0,0.4); }
     .state-icon.ditolak  { background:rgba(255,68,68,0.1); border:2px solid rgba(255,68,68,0.3); }
     .state-icon.expired  { background:rgba(255,68,68,0.08); border:2px solid rgba(255,68,68,0.25); }
-
     @keyframes spin-slow { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 
     .state-title { font-size:1.25rem; font-weight:800; text-align:center; margin-bottom:0.4rem; }
     .state-title.sukses  { color:var(--lime); }
     .state-title.ditolak { color:#ff4444; }
     .state-title.expired { color:#ff4444; }
-
     .state-desc { font-size:0.85rem; color:var(--muted); text-align:center; line-height:1.6; margin-bottom:1.25rem; }
 
     /* ===================== MEMBER CARD ===================== */
@@ -239,6 +240,9 @@ if ($transaksi->expired_at && $state === 'upload') {
     .mc-aktif-sd .mc-label { text-align:right; color:rgba(255,255,255,0.4); }
     .mc-aktif-sd .mc-value { color:var(--lime); text-align:right; }
     .mc-paket .mc-label { color:rgba(255,255,255,0.4); }
+
+    /* ===================== DOWNLOAD CARD CANVAS ===================== */
+    #canvas-member { display:none; }
 
     /* ===================== SECTION LABEL ===================== */
     .section-label {
@@ -405,11 +409,13 @@ if ($transaksi->expired_at && $state === 'upload') {
                 $tanggalAktif = $member->tanggal_kadaluarsa
                     ? \Carbon\Carbon::parse($member->tanggal_kadaluarsa)
                     : null;
+                $namaGym      = \App\Models\Setting::getValue('nama_gym');
             @endphp
 
-            <div class="member-card">
+            {{-- Membership card (rendered for visual + source for canvas) --}}
+            <div class="member-card" id="memberCardEl">
                 <div class="mc-top">
-                    <div class="mc-brand">{{ strtoupper(\App\Models\Setting::getValue('nama_gym')) }}</div>
+                    <div class="mc-brand">{{ strtoupper($namaGym) }}</div>
                     <div class="mc-status {{ $member->status === 'aktif' ? 'aktif' : 'nonaktif' }}">
                         {{ ucfirst($member->status) }}
                     </div>
@@ -440,7 +446,23 @@ if ($transaksi->expired_at && $state === 'upload') {
                 </div>
             </div>
 
-            <div class="section-label">Detail Transaksi</div>
+            {{-- Hidden canvas for download --}}
+            <canvas id="canvas-member"></canvas>
+
+            {{-- Action buttons --}}
+            <a href="/" class="btn-submit" style="text-decoration:none;">Kembali ke Beranda</a>
+
+            <button type="button" class="btn-download-card" id="btnDownloadCard" onclick="downloadMemberCard()">
+                <span class="dl-icon">⬇</span>
+                Download Kartu Member
+            </button>
+
+            <a href="/cek-membership?search={{ $transaksi->member->no_wa }}"
+               class="btn-outline" style="margin-top:0.75rem;text-decoration:none;">
+                Lihat Status Membership
+            </a>
+
+            <div class="section-label" style="margin-top:1.5rem;">Detail Transaksi</div>
             <div class="invoice-box">
                 <div class="inv-row">
                     <span class="lbl">Kode Invoice</span>
@@ -477,20 +499,6 @@ if ($transaksi->expired_at && $state === 'upload') {
                 </div>
                 @endif
             </div>
-
-            {{-- download member card --}}
-              <div style="margin-top: 1rem; text-align: center; ">
-                            <button id="downloadCard" class="btn-cari"
-                                style="background: var(--lime); color: #000; width: 100%; max-width: 600px; height: 3.5rem; border-radius: 10px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background 0.2s, transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration:none;">
-                                Download Kartu Digital
-                            </button>
-                        </div>
-          
-            <a href="/" class="btn-submit" style="text-decoration:none;">Kembali ke Beranda</a>
-            <a href="/cek-membership?search={{ $transaksi->member->no_wa }}"
-               class="btn-outline" style="margin-top:0.75rem;text-decoration:none;">
-                Lihat Status Membership
-            </a>
 
 
             {{-- ════ STATE: MENUNGGU ════ --}}
@@ -562,7 +570,6 @@ if ($transaksi->expired_at && $state === 'upload') {
                class="btn-outline" style="text-decoration:none;">
                 Cek Status Pendaftaran
             </a>
-            {{-- hubungi admin apabila belum di konfirmasi --}}
             <a href="https://wa.me/{{ \App\Models\Setting::getValue('no_telp') }}?text=Halo%20Admin%2C%20saya%20ingin%20menanyakan%20status%20pendaftaran%20dengan%20kode%20{{ $transaksi->kode_invoice }}"
                class="btn-outline" style="margin-top:0.75rem;text-decoration:none;" target="_blank">
                 Hubungi Admin
@@ -661,12 +668,10 @@ if ($transaksi->expired_at && $state === 'upload') {
                 'verifikasi' => null
             ])
 
-            {{-- Tombol batal --}}
             <button type="button" class="btn-danger-text" onclick="konfirmasiBatal()">
                 Batalkan Pendaftaran
             </button>
 
-            {{-- Form batal tersembunyi --}}
             <form id="form-batal"
                   action="/pembayaran/{{ $transaksi->kode_invoice }}/batal"
                   method="POST" style="display:none;">
@@ -681,7 +686,9 @@ if ($transaksi->expired_at && $state === 'upload') {
 @endsection
 
 @push('scripts')
- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+{{-- html2canvas for membership card download --}}
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <script>
 /* ── Copy to clipboard ── */
 function copyText(text, btn) {
@@ -697,6 +704,42 @@ function copyText(text, btn) {
         document.execCommand('copy'); document.body.removeChild(ta);
         GymAlert.toast('Nomor berhasil disalin!', 'success');
     });
+}
+
+/* ── Download Membership Card ── */
+async function downloadMemberCard() {
+    const btn = document.getElementById('btnDownloadCard');
+    const cardEl = document.getElementById('memberCardEl');
+    if (!cardEl) return;
+
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<span class="dl-icon">⏳</span> Menyiapkan kartu...';
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+
+    try {
+        const canvas = await html2canvas(cardEl, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: null,
+            logging: false,
+            width: cardEl.offsetWidth,
+            height: cardEl.offsetHeight,
+        });
+
+        const link = document.createElement('a');
+        link.download = 'kartu-member-{{ $member->kode_member }}.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        GymAlert.toast('Kartu member berhasil diunduh!', 'success');
+    } catch (err) {
+        GymAlert.error('Gagal mengunduh kartu. Coba lagi.', 'Error');
+    } finally {
+        btn.innerHTML = origText;
+        btn.style.opacity = '';
+        btn.style.pointerEvents = '';
+    }
 }
 
 /* ── Konfirmasi batal pendaftaran ── */
@@ -728,8 +771,8 @@ function konfirmasiBatal() {
     const boxEl   = document.getElementById('countdownBox');
     if (!timerEl) return;
 
-    let warned5  = false;
-    let warned1  = false;
+    let warned5 = false;
+    let warned1 = false;
 
     function fmt(s) {
         if (s <= 0) return '00:00:00';
@@ -743,73 +786,54 @@ function konfirmasiBatal() {
     function tick() {
         if (sisa <= 0) {
             timerEl.textContent = '00:00:00';
-            GymAlert.warning(
-                'Batas waktu pembayaran telah habis. Halaman akan dimuat ulang.',
-                'Waktu Habis!'
-            );
+            GymAlert.warning('Batas waktu pembayaran telah habis. Halaman akan dimuat ulang.', 'Waktu Habis!');
             setTimeout(() => location.reload(), 3000);
             return;
         }
-
         timerEl.textContent = fmt(sisa);
-
-        /* warning 5 menit */
         if (sisa <= 300 && !warned5) {
             warned5 = true;
             if (boxEl) boxEl.classList.add('danger');
             GymAlert.toast('Tersisa 5 menit untuk menyelesaikan pembayaran!', 'warning');
         }
-
-        /* warning 1 menit */
         if (sisa <= 60 && !warned1) {
             warned1 = true;
             GymAlert.toast('Kurang dari 1 menit! Segera upload bukti bayar.', 'error');
         }
-
         sisa--;
         setTimeout(tick, 1000);
     }
-
     tick();
 })();
 @endif
 
 /* ── Upload zone interaktif ── */
-const uploadZone  = document.getElementById('uploadZone');
-const fileInput   = document.getElementById('fileInput');
-const fileNameEl  = document.getElementById('fileName');
-const previewImg  = document.getElementById('previewImg');
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+const fileNameEl = document.getElementById('fileName');
+const previewImg = document.getElementById('previewImg');
 
 if (fileInput && uploadZone) {
     fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
         if (!file) return;
-
-        /* Validasi ukuran file (maks 5MB) */
         if (file.size > 5 * 1024 * 1024) {
             GymAlert.error('Ukuran file terlalu besar. Maksimal 5MB.', 'File Terlalu Besar');
-            fileInput.value = '';
-            return;
+            fileInput.value = ''; return;
         }
-
-        /* Validasi tipe file */
         const allowed = ['image/jpeg','image/jpg','image/png','image/webp'];
         if (!allowed.includes(file.type)) {
             GymAlert.error('Format tidak didukung. Gunakan JPG, PNG, atau WEBP.', 'Format Salah');
-            fileInput.value = '';
-            return;
+            fileInput.value = ''; return;
         }
-
         if (fileNameEl) fileNameEl.textContent = '✓ ' + file.name;
         uploadZone.classList.add('has-file');
-
         if (previewImg && file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = e => { previewImg.src = e.target.result; previewImg.style.display = 'block'; };
             reader.readAsDataURL(file);
         }
     });
-
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
     uploadZone.addEventListener('drop', e => {
@@ -821,7 +845,7 @@ if (fileInput && uploadZone) {
     });
 }
 
-/* ── Flash session dari Laravel ── */
+/* ── Flash session ── */
 document.addEventListener('DOMContentLoaded', () => {
     @if(session('success'))
         GymAlert.success(@json(session('success')));
@@ -833,55 +857,15 @@ document.addEventListener('DOMContentLoaded', () => {
         GymAlert.warning(@json(session('warning')));
     @endif
 
-    {{-- Auto popup sesuai state --}}
     @if($state === 'sukses')
-        GymAlert.success(
-            'Membership kamu resmi aktif. Tunjukkan kode member saat masuk gym!',
-            '🎉 Selamat!'
-        );
+        GymAlert.success('Membership kamu resmi aktif. Tunjukkan kode member saat masuk gym!', '🎉 Selamat!');
     @elseif($state === 'ditolak')
-        GymAlert.error(
-            'Bukti pembayaranmu ditolak admin. Silahkan upload ulang bukti yang valid.',
-            'Bukti Ditolak'
-        );
+        GymAlert.error('Bukti pembayaranmu ditolak admin. Silahkan upload ulang bukti yang valid.', 'Bukti Ditolak');
     @elseif($state === 'expired')
-        GymAlert.error(
-            'Batas waktu pembayaran sudah lewat. Silahkan daftar ulang.',
-            'Invoice Kedaluwarsa'
-        );
+        GymAlert.error('Batas waktu pembayaran sudah lewat. Silahkan daftar ulang.', 'Invoice Kedaluwarsa');
     @elseif($state === 'menunggu')
         GymAlert.toast('Bukti sudah diterima, menunggu verifikasi admin.', 'info');
     @endif
 });
-
-  document.getElementById('downloadCard').addEventListener('click', function () {
-                const card = document.querySelector('.member-card');
-                const btn = this;
-
-                // Ubah teks tombol saat proses
-                const originalText = btn.textContent;
-                btn.textContent = '⏳ Memproses...';
-                btn.disabled = true;
-
-                html2canvas(card, {
-                    scale: 2, // Biar hasil gambar lebih tajam/HD
-                    backgroundColor: null, // Background transparan jika border-radius ada
-                    useCORS: true // Jaga-jaga kalau ada gambar dari URL luar
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    // Di baris 378 ganti jadi begini:
-                    link.download = 'Member-{{ $member ? $member->kode_member : "Download" }}.png';
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-
-                    // Kembalikan tombol
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }).catch(err => {
-                    console.error('Gagal download kartu:', err);
-                    btn.textContent = '❌ Gagal Download';
-                    btn.disabled = false;
-                });
-            });
 </script>
 @endpush
