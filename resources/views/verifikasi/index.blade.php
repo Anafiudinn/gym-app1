@@ -215,14 +215,18 @@
                             </div>
                         </td>
 
-                        <td class="td-cell text-center">
-                           <a href="{{ Storage::disk('s3')->url($item->verifikasi->bukti_pembayaran) }}" 
-   target="_blank" 
-   class="inline-flex items-center gap-1 text-[11.5px] font-semibold text-blue-600 hover:underline">
-    <i class="fa-solid fa-image text-[10px]"></i> Lihat Bukti
-</a>
-                        </td>
-
+                       <td class="td-cell text-center">
+    @if($d->bukti_pembayaran)
+        {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
+        <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+           class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
+           style="background:rgba(16,185,129,0.08);">
+            <i class="fa-solid fa-image text-[10px]"></i> Lihat
+        </a>
+    @else
+        <span class="text-gray-400 italic text-[11px]">Tidak ada bukti</span>
+    @endif
+</td>
                         <td class="td-cell">
                             <div class="flex items-center gap-2 justify-end flex-wrap">
                                 {{-- TOLAK --}}
@@ -287,11 +291,12 @@
                     <div><span class="text-gray-400">No. WA</span><br><span class="font-mono font-semibold text-gray-700">{{ $d->transaksi->member->no_wa }}</span></div>
                     <div><span class="text-gray-400">Bank</span><br><span class="font-semibold text-gray-700">{{ $d->nama_bank }} · {{ $d->nama_rekening }}</span></div>
                     <div><span class="text-gray-400">Tanggal</span><br><span class="font-semibold text-gray-700">{{ $d->created_at->format('d M Y') }}</span></div>
-                    <div>
-                        <span class="text-gray-400">Bukti</span><br>
-                        <a href="{{ asset('storage/' . $d->bukti_pembayaran) }}" target="_blank"
-                           class="font-semibold text-emerald-600 underline">Lihat foto</a>
-                    </div>
+                   <div>
+    <span class="text-gray-400">Bukti</span><br>
+    {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
+    <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+       class="font-semibold text-emerald-600 underline">Lihat foto</a>
+</div>
                 </div>
 
                 {{-- Mobile actions --}}
@@ -428,17 +433,18 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="td-cell text-center">
-                            @if($d->bukti_pembayaran)
-                                <a href="{{ asset('storage/' . $d->bukti_pembayaran) }}" target="_blank"
-                                   class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
-                                   style="background:rgba(16,185,129,0.08);">
-                                    <i class="fa-solid fa-image text-[10px]"></i> Lihat
-                                </a>
-                            @else
-                                <span class="text-gray-400 italic text-[11px]">Tidak ada bukti</span>
-                            @endif
-                        </td>
+                      <td class="td-cell text-center">
+    @if($d->bukti_pembayaran)
+        {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
+        <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+           class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
+           style="background:rgba(16,185,129,0.08);">
+            <i class="fa-solid fa-image text-[10px]"></i> Lihat
+        </a>
+    @else
+        <span class="text-gray-400 italic text-[11px]">Tidak ada bukti</span>
+    @endif
+</td>
 
                         <td class="td-cell text-right text-[11.5px] text-gray-400 italic hidden md:table-cell">
                             {{ $d->catatan_admin ?? '—' }}

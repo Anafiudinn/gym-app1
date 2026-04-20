@@ -90,7 +90,6 @@
         const btn = document.getElementById('submitBtn');
         const txt = document.getElementById('submitText');
         const spin = document.getElementById('submitSpinner');
-        btn.disabled = true;
         txt.style.display = 'none';
         spin.style.display = 'inline';
     });

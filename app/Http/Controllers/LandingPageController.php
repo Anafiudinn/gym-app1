@@ -166,20 +166,38 @@ class LandingPageController extends Controller
             return redirect()->back()->with('error', 'Maaf, waktu pembayaran sudah habis. Silahkan daftar ulang.');
         }
 
+
         $request->validate([
             'nama_rekening' => 'required|string|max:255',
             'nama_bank' => 'required|string|max:100',
-            'bukti' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'bukti' => 'required|file|image|mimes:jpeg,png,jpg|max:2048' // Pastikan ada 'file'
+        ], [
+            'bukti.required' => 'Waduh gess, fotonya belum kepilih tuh!',
+            'bukti.max' => 'Fotonya kegedean gess, maksimal 2MB ya!',
+            'bukti.image' => 'Yang diupload harus foto ya gess!'
         ]);
 
-        $file = $request->file('bukti')->store('bukti', 'public');
+        // 2. Inisialisasi variabel
+        $path = null;
 
+        // 3. Proses upload
+        if ($request->hasFile('bukti')) {
+            // Kita simpan hasil store() ke variabel $path
+            $path = $request->file('bukti')->store('bukti', 's3');
+        }
+
+        // 4. CEK DULU: Kalau path masih kosong, JANGAN SIMPAN ke DB
+        if (!$path) {
+            return redirect()->back()->with('error', 'Gagal memproses file gambar. Silakan coba lagi.');
+        }
+
+        // 5. Baru simpan ke Database
         VerifikasiPembayaran::updateOrCreate(
             ['transaksi_id' => $transaksi->id],
             [
                 'nama_rekening' => $request->nama_rekening,
                 'nama_bank' => $request->nama_bank,
-                'bukti_pembayaran' => $file,
+                'bukti_pembayaran' => $path, // Pastikan variabel $path ini isinya string path s3
                 'status' => 'pending',
                 'catatan_admin' => null
             ]
