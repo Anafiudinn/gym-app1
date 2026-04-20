@@ -216,11 +216,11 @@
                         </td>
 
                         <td class="td-cell text-center">
-                            <a href="{{ asset('storage/' . $d->bukti_pembayaran) }}" target="_blank"
-                               class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
-                               style="background:rgba(16,185,129,0.08);">
-                                <i class="fa-solid fa-image text-[10px]"></i> Lihat
-                            </a>
+                           <a href="{{ Storage::disk('s3')->url($item->verifikasi->bukti_pembayaran) }}" 
+   target="_blank" 
+   class="inline-flex items-center gap-1 text-[11.5px] font-semibold text-blue-600 hover:underline">
+    <i class="fa-solid fa-image text-[10px]"></i> Lihat Bukti
+</a>
                         </td>
 
                         <td class="td-cell">
