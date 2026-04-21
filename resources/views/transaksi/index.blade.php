@@ -169,7 +169,7 @@
         {{-- Summary card --}}
         <div class="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center justify-between" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <div>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pemasukan Hari Ini (Oniste)</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pemasukan Hari Ini (Onsite)</p>
                 <p class="text-[22px] font-black text-gray-900 leading-none">Rp{{ number_format($totalHariIni, 0, ',', '.') }}</p>
                 <p class="text-[10.5px] text-gray-400 mt-1.5">{{ $countHariIni }} transaksi selesai</p>
             </div>
@@ -209,20 +209,25 @@
 
                     <form method="POST" action="{{ route('transaksi.harian') }}" class="space-y-3">
                         @csrf
+                        {{-- Tab tidak perlu disimpan di sini karena tamu selalu tab ini --}}
                         <div>
                             <label class="form-label">Nama Pengunjung</label>
-                            <input type="text" name="nama_tamu" placeholder="Masukkan nama tamu..." class="form-input" required>
+                            <input type="text" name="nama_tamu"
+                                   value="{{ old('nama_tamu') }}"
+                                   placeholder="Masukkan nama tamu..." class="form-input" required>
                         </div>
 
                         <div>
                             <label class="form-label">Metode Pembayaran</label>
                             <div class="grid grid-cols-2 gap-2 mt-1">
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <input type="radio" name="metode_pembayaran" value="cash"
+                                           {{ old('metode_pembayaran', 'cash') === 'cash' ? 'checked' : '' }} required>
                                     <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <input type="radio" name="metode_pembayaran" value="transfer"
+                                           {{ old('metode_pembayaran') === 'transfer' ? 'checked' : '' }}>
                                     <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
@@ -238,16 +243,22 @@
                 <div id="pane-member-baru" class="hidden">
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
+                        {{-- ↓ Penanda tab — dikirim ke controller supaya tahu harus balik ke tab mana --}}
+                        <input type="hidden" name="tab" value="member-baru">
                         <input type="hidden" name="tipe_member" value="baru">
 
                         <div class="section-divider space-y-3">
                             <div>
                                 <label class="form-label">Nama Lengkap</label>
-                                <input type="text" name="nama" placeholder="Nama lengkap member" class="form-input" required>
+                                <input type="text" name="nama"
+                                       value="{{ old('nama') }}"
+                                       placeholder="Nama lengkap member" class="form-input" required>
                             </div>
                             <div>
                                 <label class="form-label">No. WhatsApp</label>
-                                <input type="tel" name="no_wa" placeholder="08123456789" class="form-input"
+                                <input type="tel" name="no_wa"
+                                       value="{{ old('no_wa') }}"
+                                       placeholder="08123456789" class="form-input"
                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                                 <p class="text-[10px] text-gray-400 mt-1">Format angka saja (08...)</p>
                             </div>
@@ -255,8 +266,8 @@
                                 <label class="form-label">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" class="form-input">
                                     <option value="">Pilih jenis kelamin</option>
-                                    <option value="L">Laki-laki</option>
-                                    <option value="P">Perempuan</option>
+                                    <option value="L" {{ old('jenis_kelamin') === 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="P" {{ old('jenis_kelamin') === 'P' ? 'selected' : '' }}>Perempuan</option>
                                 </select>
                             </div>
                         </div>
@@ -266,7 +277,9 @@
                             <select name="paket_id" class="form-input" required>
                                 <option value="">— Pilih Durasi Paket —</option>
                                 @foreach($paket as $p)
-                                <option value="{{ $p->id }}">{{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
+                                <option value="{{ $p->id }}" {{ old('paket_id') == $p->id ? 'selected' : '' }}>
+                                    {{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -275,11 +288,13 @@
                             <label class="form-label">Metode Pembayaran</label>
                             <div class="grid grid-cols-2 gap-2 mt-1">
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <input type="radio" name="metode_pembayaran" value="cash"
+                                           {{ old('metode_pembayaran', 'cash') === 'cash' ? 'checked' : '' }} required>
                                     <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <input type="radio" name="metode_pembayaran" value="transfer"
+                                           {{ old('metode_pembayaran') === 'transfer' ? 'checked' : '' }}>
                                     <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
@@ -295,6 +310,8 @@
                 <div id="pane-perpanjang" class="hidden">
                     <form method="POST" action="/transaksi/membership" class="space-y-3">
                         @csrf
+                        {{-- ↓ Penanda tab — dikirim ke controller supaya tahu harus balik ke tab mana --}}
+                        <input type="hidden" name="tab" value="perpanjang">
                         <input type="hidden" name="tipe_member" value="perpanjang">
 
                         <div>
@@ -329,7 +346,9 @@
                             <select name="paket_id" class="form-input" required>
                                 <option value="">— Pilih Durasi Paket —</option>
                                 @foreach($paket as $p)
-                                <option value="{{ $p->id }}">{{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}</option>
+                                <option value="{{ $p->id }}" {{ old('paket_id') == $p->id ? 'selected' : '' }}>
+                                    {{ $p->nama_paket }} — Rp{{ number_format($p->harga, 0, ',', '.') }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -338,11 +357,13 @@
                             <label class="form-label">Metode Pembayaran</label>
                             <div class="grid grid-cols-2 gap-2 mt-1">
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="cash" checked required>
+                                    <input type="radio" name="metode_pembayaran" value="cash"
+                                           {{ old('metode_pembayaran', 'cash') === 'cash' ? 'checked' : '' }} required>
                                     <div class="pay-card cash"><i class="fa-solid fa-money-bill-wave text-[11px]"></i> Cash</div>
                                 </label>
                                 <label class="pay-option">
-                                    <input type="radio" name="metode_pembayaran" value="transfer">
+                                    <input type="radio" name="metode_pembayaran" value="transfer"
+                                           {{ old('metode_pembayaran') === 'transfer' ? 'checked' : '' }}>
                                     <div class="pay-card transfer"><i class="fa-solid fa-mobile-screen text-[11px]"></i> Transfer</div>
                                 </label>
                             </div>
@@ -526,19 +547,19 @@
 (function () {
     @php
         $membersJson = $members->map(fn($m) => [
-            'id'                  => $m->id,
-            'nama'                => $m->nama,
-            'kode_member'         => $m->kode_member,
-            'no_wa'               => $m->no_wa ?? '',
-            'tanggal_kadaluarsa'  => $m->tanggal_kadaluarsa,
-            'status'              => $m->status,
+            'id'                 => $m->id,
+            'nama'               => $m->nama,
+            'kode_member'        => $m->kode_member,
+            'no_wa'              => $m->no_wa ?? '',
+            'tanggal_kadaluarsa' => $m->tanggal_kadaluarsa,
+            'status'             => $m->status,
         ]);
     @endphp
 
-    var allMembers   = @json($membersJson);
-    var defaultTab   = @js($activeTab ?? 'tamu');
+    var allMembers    = @json($membersJson);
+    var defaultTab    = @js($activeTab ?? 'tamu');
     var preSelectedId = @js($selectedMemberId ?? null);
-    var TABS         = ['tamu', 'member-baru', 'perpanjang'];
+    var TABS          = ['tamu', 'member-baru', 'perpanjang'];
 
     /* ── Tab switching ── */
     function switchTab(tab) {
@@ -561,7 +582,7 @@
 
     function formatTgl(tgl) {
         if (!tgl) return 'Belum ada data';
-        var d = new Date(tgl);
+        var d   = new Date(tgl);
         var bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
         return d.getDate() + ' ' + bln[d.getMonth()] + ' ' + d.getFullYear();
     }
@@ -588,9 +609,9 @@
     }
 
     function selectMember(m) {
-        hiddenInput.value       = m.id;
-        msName.textContent      = m.nama + ' — ' + m.kode_member;
-        msMeta.textContent      = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
+        hiddenInput.value         = m.id;
+        msName.textContent        = m.nama + ' — ' + m.kode_member;
+        msMeta.textContent        = 'Aktif s/d: ' + formatTgl(m.tanggal_kadaluarsa);
         selectedCard.classList.add('show');
         searchInput.style.display = 'none';
         dropdown.classList.remove('show');
@@ -631,9 +652,12 @@
         });
     };
 
-    /* ── Init ── */
+    /* ── Init: buka tab yang benar + restore member jika ada ── */
     document.addEventListener('DOMContentLoaded', function () {
         switchTab(defaultTab);
+
+        // Jika tab perpanjang aktif dan ada member yang sudah dipilih sebelumnya,
+        // langsung tampilkan member tersebut tanpa harus cari lagi.
         if (defaultTab === 'perpanjang' && preSelectedId && searchInput) {
             var found = allMembers.find(function (m) { return m.id == preSelectedId; });
             if (found) selectMember(found);
