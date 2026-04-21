@@ -685,9 +685,16 @@ if ($transaksi->expired_at && $state === 'upload') {
 </div>
 @endsection
 
+{{--
+    CATATAN: Hanya bagian @push('scripts') yang perlu diganti di pembayaran.blade.php
+    Ganti seluruh @push('scripts') ... @endpush dengan kode di bawah ini.
+--}}
+
 @push('scripts')
-{{-- html2canvas for membership card download --}}
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+{{--
+    html2canvas TIDAK di-preload — hanya diimport saat tombol download diklik.
+    Ini menghemat ~260KB yang sebelumnya selalu didownload walau user tidak download kartu.
+--}}
 
 <script>
 /* ── Copy to clipboard ── */
@@ -706,18 +713,29 @@ function copyText(text, btn) {
     });
 }
 
-/* ── Download Membership Card ── */
+/* ── Download Membership Card — dynamic import html2canvas ── */
 async function downloadMemberCard() {
-    const btn = document.getElementById('btnDownloadCard');
+    const btn    = document.getElementById('btnDownloadCard');
     const cardEl = document.getElementById('memberCardEl');
     if (!cardEl) return;
 
     const origText = btn.innerHTML;
     btn.innerHTML = '<span class="dl-icon">⏳</span> Menyiapkan kartu...';
-    btn.style.opacity = '0.7';
+    btn.style.opacity      = '0.7';
     btn.style.pointerEvents = 'none';
 
     try {
+        /* Load html2canvas hanya saat dibutuhkan */
+        if (!window.html2canvas) {
+            await new Promise((resolve, reject) => {
+                const s  = document.createElement('script');
+                s.src    = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                s.onload  = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+
         const canvas = await html2canvas(cardEl, {
             scale: 3,
             useCORS: true,
@@ -727,17 +745,17 @@ async function downloadMemberCard() {
             height: cardEl.offsetHeight,
         });
 
-        const link = document.createElement('a');
-        link.download = 'kartu-member-{{ $member->kode_member }}.png';
-        link.href = canvas.toDataURL('image/png');
+        const link      = document.createElement('a');
+        link.download   = 'kartu-member-{{ $member->kode_member ?? "member" }}.png';
+        link.href       = canvas.toDataURL('image/png');
         link.click();
 
         GymAlert.toast('Kartu member berhasil diunduh!', 'success');
     } catch (err) {
         GymAlert.error('Gagal mengunduh kartu. Coba lagi.', 'Error');
     } finally {
-        btn.innerHTML = origText;
-        btn.style.opacity = '';
+        btn.innerHTML       = origText;
+        btn.style.opacity   = '';
         btn.style.pointerEvents = '';
     }
 }
@@ -758,15 +776,15 @@ function konfirmasiBatal() {
 
 /* ── Countdown timer ── */
 @php
-    $nowTs      = time();
-    $expiredTs  = strtotime($transaksi->expired_at ?? 'now');
+    $nowTs       = time();
+    $expiredTs   = strtotime($transaksi->expired_at ?? 'now');
     $sisaDetikJs = max(0, $expiredTs - $nowTs);
-    $aktifJs    = $sisaDetikJs > 0 && $transaksi->status === 'pending';
+    $aktifJs     = $sisaDetikJs > 0 && $transaksi->status === 'pending';
 @endphp
 
 @if($aktifJs)
 (function() {
-    let sisa = {{ $sisaDetikJs }};
+    let sisa   = {{ $sisaDetikJs }};
     const timerEl = document.getElementById('countdownTimer');
     const boxEl   = document.getElementById('countdownBox');
     if (!timerEl) return;
@@ -777,9 +795,9 @@ function konfirmasiBatal() {
     function fmt(s) {
         if (s <= 0) return '00:00:00';
         return [
-            String(Math.floor(s / 3600)).padStart(2,'0'),
-            String(Math.floor((s % 3600) / 60)).padStart(2,'0'),
-            String(s % 60).padStart(2,'0')
+            String(Math.floor(s / 3600)).padStart(2, '0'),
+            String(Math.floor((s % 3600) / 60)).padStart(2, '0'),
+            String(s % 60).padStart(2, '0')
         ].join(':');
     }
 
@@ -819,12 +837,14 @@ if (fileInput && uploadZone) {
         if (!file) return;
         if (file.size > 5 * 1024 * 1024) {
             GymAlert.error('Ukuran file terlalu besar. Maksimal 5MB.', 'File Terlalu Besar');
-            fileInput.value = ''; return;
+            fileInput.value = '';
+            return;
         }
-        const allowed = ['image/jpeg','image/jpg','image/png','image/webp'];
+        const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         if (!allowed.includes(file.type)) {
             GymAlert.error('Format tidak didukung. Gunakan JPG, PNG, atau WEBP.', 'Format Salah');
-            fileInput.value = ''; return;
+            fileInput.value = '';
+            return;
         }
         if (fileNameEl) fileNameEl.textContent = '✓ ' + file.name;
         uploadZone.classList.add('has-file');
@@ -834,10 +854,12 @@ if (fileInput && uploadZone) {
             reader.readAsDataURL(file);
         }
     });
+
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
     uploadZone.addEventListener('drop', e => {
-        e.preventDefault(); uploadZone.classList.remove('drag');
+        e.preventDefault();
+        uploadZone.classList.remove('drag');
         if (e.dataTransfer.files[0]) {
             fileInput.files = e.dataTransfer.files;
             fileInput.dispatchEvent(new Event('change'));
@@ -845,7 +867,7 @@ if (fileInput && uploadZone) {
     });
 }
 
-{{-- GANTI DENGAN INI: --}}
+/* ── Flash notifications ── */
 @if(session('notif') === 'menunggu')
     GymAlert.toast('Bukti sudah diterima, menunggu verifikasi admin.', 'info');
 @elseif(session('notif') === 'ditolak')
@@ -859,6 +881,5 @@ if (fileInput && uploadZone) {
 @if(session('error'))
     GymAlert.error(@json(session('error')));
 @endif
-
 </script>
 @endpush

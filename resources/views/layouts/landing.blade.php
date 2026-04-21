@@ -2,14 +2,29 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
     <title>{{ \App\Models\Setting::getValue('nama_gym') }} - Transform Your Body & Mind</title>
+
+    {{-- Preconnect font origins (non-blocking) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- SweetAlert2 --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    {{-- Preload LCP hero image --}}
+    <link rel="preload" as="image"
+          href="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=75&fm=webp"
+          fetchpriority="high">
+
+    {{-- Load fonts non-blocking --}}
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    </noscript>
+
+    {{-- SweetAlert2 CSS — load async, tidak blokir render --}}
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+          media="print" onload="this.media='all'">
 
     <style>
         :root {
@@ -39,9 +54,7 @@
 
         a, button { -webkit-tap-highlight-color: transparent; }
 
-        /* =====================
-           NAVBAR
-        ===================== */
+        /* ===================== NAVBAR ===================== */
         nav {
             position: fixed;
             top: 0; left: 0; right: 0;
@@ -101,7 +114,6 @@
             gap: 0.75rem;
         }
 
-        /* Hamburger Button */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -133,7 +145,6 @@
         .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
         .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* Mobile Drawer */
         .mobile-menu {
             position: fixed;
             top: 60px; left: 0; right: 0;
@@ -186,9 +197,7 @@
             padding-left: 0 !important;
         }
 
-        /* =====================
-           BUTTONS
-        ===================== */
+        /* ===================== BUTTONS ===================== */
         .btn-primary {
             background: var(--lime);
             color: #000;
@@ -225,9 +234,7 @@
 
         .btn-secondary:hover { border-color: var(--lime); color: var(--lime); }
 
-        /* =====================
-           ALERTS
-        ===================== */
+        /* ===================== ALERTS ===================== */
         .alert {
             padding: 0.875rem 1.25rem;
             border-radius: 10px;
@@ -248,9 +255,7 @@
             color: var(--danger);
         }
 
-        /* =====================
-           SECTION TITLE
-        ===================== */
+        /* ===================== SECTION TITLE ===================== */
         .section-title {
             text-align: center;
             margin-bottom: 2.5rem;
@@ -270,9 +275,7 @@
             font-size: 0.875rem;
         }
 
-        /* =====================
-           STEP INDICATOR
-        ===================== */
+        /* ===================== STEP INDICATOR ===================== */
         .steps {
             display: flex;
             align-items: center;
@@ -299,9 +302,7 @@
         .step-line { width: 48px; height: 2px; background: var(--border); }
         .step-line.active { background: var(--lime); }
 
-        /* =====================
-           FORMS
-        ===================== */
+        /* ===================== FORMS ===================== */
         .form-group { margin-bottom: 1.25rem; }
 
         .form-group label {
@@ -341,9 +342,7 @@
             pointer-events: none;
         }
 
-        /* =====================
-           PAGE WRAPPER
-        ===================== */
+        /* ===================== PAGE WRAPPER ===================== */
         .page-wrapper {
             min-height: 100vh;
             padding-top: 60px;
@@ -356,9 +355,7 @@
             align-items: center;
         }
 
-        /* =====================
-           FOOTER
-        ===================== */
+        /* ===================== FOOTER ===================== */
         footer {
             border-top: 1px solid var(--border);
             padding: 1.25rem 1.5rem;
@@ -372,11 +369,7 @@
             background: var(--bg2);
         }
 
-        /* =====================
-           SWEETALERT2 — Dark Lime Theme
-        ===================== */
-
-        /* Popup base */
+        /* ===================== SWEETALERT2 THEME ===================== */
         .gym-popup {
             background: #161616 !important;
             border: 1px solid #2a2a2a !important;
@@ -388,7 +381,6 @@
             max-width: 360px !important;
         }
 
-        /* Accent bar top */
         .gym-popup::before {
             content: '';
             display: block;
@@ -397,7 +389,6 @@
             background: var(--gym-accent, #AAFF00);
         }
 
-        /* Icon box */
         .gym-popup .swal2-icon {
             border: none !important;
             margin: 24px auto 0 !important;
@@ -414,7 +405,6 @@
             font-family: 'Outfit', sans-serif !important;
         }
 
-        /* Hide swal2 default icon decorations */
         .gym-popup .swal2-icon.swal2-success [class^='swal2-success-line'],
         .gym-popup .swal2-icon.swal2-success .swal2-success-ring,
         .gym-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'],
@@ -429,7 +419,6 @@
             display: none !important;
         }
 
-        /* Title */
         .gym-popup .swal2-title {
             color: #fff !important;
             font-family: 'Outfit', sans-serif !important;
@@ -440,7 +429,6 @@
             letter-spacing: -0.01em !important;
         }
 
-        /* Body */
         .gym-popup .swal2-html-container {
             color: #777 !important;
             font-size: 13.5px !important;
@@ -451,7 +439,6 @@
             line-height: 1.6 !important;
         }
 
-        /* Actions */
         .gym-popup .swal2-actions {
             padding: 0 20px 22px !important;
             gap: 8px !important;
@@ -460,7 +447,6 @@
             flex-wrap: nowrap !important;
         }
 
-        /* Confirm button */
         .gym-popup .swal2-confirm {
             background: var(--gym-accent, #AAFF00) !important;
             color: #000 !important;
@@ -477,7 +463,6 @@
         .gym-popup .swal2-confirm:hover { background: #88cc00 !important; transform: translateY(-1px) !important; }
         .gym-popup .swal2-confirm:focus { box-shadow: none !important; }
 
-        /* Cancel button */
         .gym-popup .swal2-cancel {
             background: #1e1e1e !important;
             color: #666 !important;
@@ -494,21 +479,18 @@
         .gym-popup .swal2-cancel:hover { border-color: #444 !important; color: #fff !important; }
         .gym-popup .swal2-cancel:focus { box-shadow: none !important; }
 
-        /* Timer progress bar */
         .gym-popup .swal2-timer-progress-bar {
             background: var(--gym-accent, #AAFF00) !important;
             opacity: 0.35 !important;
             height: 3px !important;
         }
 
-        /* Backdrop */
         .gym-backdrop {
             background: rgba(0,0,0,0.8) !important;
             backdrop-filter: blur(6px) !important;
             -webkit-backdrop-filter: blur(6px) !important;
         }
 
-        /* ── Toast ── */
         .gym-toast {
             background: #1a1a1a !important;
             border: 1px solid #2a2a2a !important;
@@ -558,9 +540,7 @@
             opacity: 0.3 !important;
         }
 
-        /* =====================
-           RESPONSIVE
-        ===================== */
+        /* ===================== RESPONSIVE ===================== */
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .nav-right .btn-primary { display: none; }
@@ -619,15 +599,14 @@
 
 @yield('content')
 
-{{-- SweetAlert2 JS --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+{{-- SweetAlert2 JS — defer agar tidak blokir render --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js" defer></script>
 
 <script>
 /* ══════════════════════════════════════════
    GymAlert — SweetAlert2 Dark Lime Theme
 ══════════════════════════════════════════ */
 const GymAlert = (() => {
-
     const THEMES = {
         success:  { accent: '#AAFF00', iconBg: 'rgba(170,255,0,0.1)',   iconColor: '#AAFF00', icon: '✓' },
         error:    { accent: '#ff4444', iconBg: 'rgba(255,68,68,0.12)',  iconColor: '#ff4444', icon: '✕' },
@@ -636,7 +615,6 @@ const GymAlert = (() => {
         question: { accent: '#a78bfa', iconBg: 'rgba(167,139,250,0.1)', iconColor: '#a78bfa', icon: '?' },
     };
 
-    /* inject CSS vars per call */
     function setVars(t) {
         let s = document.getElementById('_gym-vars');
         if (!s) { s = document.createElement('style'); s.id = '_gym-vars'; document.head.appendChild(s); }
@@ -678,59 +656,37 @@ const GymAlert = (() => {
     }
 
     return {
-
         success(text, title = 'Berhasil!') {
-            return fire('success', {
-                title, html: `<span>${text}</span>`,
-                confirmButtonText: 'OK',
-                timer: 4000, timerProgressBar: true,
-            });
+            return fire('success', { title, html: `<span>${text}</span>`, confirmButtonText: 'OK', timer: 4000, timerProgressBar: true });
         },
-
         error(text, title = 'Oops!') {
-            return fire('error', {
-                title, html: `<span>${text}</span>`,
-                confirmButtonText: 'Tutup',
-            });
+            return fire('error', { title, html: `<span>${text}</span>`, confirmButtonText: 'Tutup' });
         },
-
         warning(text, title = 'Perhatian!') {
-            return fire('warning', {
-                title, html: `<span>${text}</span>`,
-                confirmButtonText: 'Mengerti',
-                timer: 5000, timerProgressBar: true,
-            });
+            return fire('warning', { title, html: `<span>${text}</span>`, confirmButtonText: 'Mengerti', timer: 5000, timerProgressBar: true });
         },
-
         info(text, title = 'Info') {
-            return fire('info', {
-                title, html: `<span>${text}</span>`,
-                confirmButtonText: 'OK',
-            });
+            return fire('info', { title, html: `<span>${text}</span>`, confirmButtonText: 'OK' });
         },
-
         confirm({ title = 'Apakah kamu yakin?', text = '', confirmText = 'Ya, lanjutkan', cancelText = 'Batal', onConfirm } = {}) {
             return fire('question', {
                 title,
                 html: text ? `<span>${text}</span>` : undefined,
                 showCancelButton: true,
                 confirmButtonText: confirmText,
-                cancelButtonText:  cancelText,
+                cancelButtonText: cancelText,
             }).then(r => { if (r.isConfirmed && typeof onConfirm === 'function') onConfirm(); });
         },
-
         deleteConfirm(form, itemName = 'data ini') {
             return fire('error', {
                 title: 'Hapus Data?',
                 html: `Data <strong style="color:#fff;">${itemName}</strong> akan dihapus permanen.`,
                 showCancelButton: true,
                 confirmButtonText: 'Ya, hapus',
-                cancelButtonText:  'Batal',
+                cancelButtonText: 'Batal',
             }).then(r => { if (r.isConfirmed) form.submit(); });
         },
-
         toast(text, type = 'success') { return toastFire(type, text); },
-
         loading(text = 'Memproses...') {
             return Swal.fire({
                 title: text,
@@ -741,12 +697,10 @@ const GymAlert = (() => {
                 didOpen: () => Swal.showLoading(),
             });
         },
-
         close() { Swal.close(); },
     };
 })();
 
-/* ── Auto flash dari Laravel session ── */
 document.addEventListener('DOMContentLoaded', () => {
     @if(session('success'))
         GymAlert.success(@json(session('success')));
