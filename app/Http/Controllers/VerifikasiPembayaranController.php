@@ -62,7 +62,7 @@ class VerifikasiPembayaranController extends Controller
                 Membership::create([
                     'member_id' => $member->id,
                     'transaksi_id' => $transaksi->id,
-                    'paket_id' => $paket->id,   
+                    'paket_id' => $paket->id,
                     'tanggal_mulai' => $start,
                     'tanggal_selesai' => $end,
                     'status' => 'aktif'
@@ -97,8 +97,12 @@ class VerifikasiPembayaranController extends Controller
         ]);
 
         $verif->transaksi->update([
-            'status' => 'ditolak'
+            'status' => 'ditolak',
+            'expired_at' => now()->addHours(24), // kasih waktu upload ulang 24 jam
         ]);
+
+        // Tambah ini ↓
+        session()->flash('notif_ditolak', true);
 
         // KIRIM WA NOTIFIKASI PENOLAKAN
         $alasan = $request->catatan_admin ?? 'Bukti transfer tidak sesuai atau tidak terbaca.';

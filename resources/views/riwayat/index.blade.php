@@ -286,8 +286,7 @@
                     {{-- Bukti ── --}}
                     <td>
                         @if($item->verifikasi && $item->verifikasi->bukti_pembayaran)
-                            <a href="{{ asset('storage/'.$item->verifikasi->bukti_pembayaran) }}"
-                               target="_blank"
+                           <a href="{{ Storage::url($item->verifikasi->bukti_pembayaran) }}" target="_blank"
                                class="inline-flex items-center gap-1 text-[11.5px] font-semibold text-blue-600 hover:underline">
                                 <i class="fa-solid fa-image text-[10px]"></i> Lihat Bukti
                             </a>

@@ -1088,7 +1088,7 @@
 <section id="kontak">
     <div class="section-title">
         <h2>Hubungi <span>Kami</span></h2>
-        <p>Ada pertanyaan? Jangan ragu untuk menghubungi kami</p>
+        <ph>Ada pertanyaan? Jangan ragu untuk menghubungi kami</ph>
     </div>
 
     <div class="kontak-grid">

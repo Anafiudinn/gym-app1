@@ -218,7 +218,7 @@
                        <td class="td-cell text-center">
     @if($d->bukti_pembayaran)
         {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
-        <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+       <a href="{{ Storage::url($d->bukti_pembayaran) }}" target="_blank"
            class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
            style="background:rgba(16,185,129,0.08);">
             <i class="fa-solid fa-image text-[10px]"></i> Lihat
@@ -294,7 +294,7 @@
                    <div>
     <span class="text-gray-400">Bukti</span><br>
     {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
-    <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+   <a href="{{ Storage::url($d->bukti_pembayaran) }}" target="_blank"
        class="font-semibold text-emerald-600 underline">Lihat foto</a>
 </div>
                 </div>
@@ -436,7 +436,7 @@
                       <td class="td-cell text-center">
     @if($d->bukti_pembayaran)
         {{-- GANTI asset() menjadi Storage::disk('s3')->url() --}}
-        <a href="{{ Storage::disk('s3')->url($d->bukti_pembayaran) }}" target="_blank"
+       <a href="{{ Storage::url($d->bukti_pembayaran) }}" target="_blank"
            class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition"
            style="background:rgba(16,185,129,0.08);">
             <i class="fa-solid fa-image text-[10px]"></i> Lihat

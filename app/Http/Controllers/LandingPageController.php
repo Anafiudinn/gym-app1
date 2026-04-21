@@ -136,6 +136,8 @@ class LandingPageController extends Controller
             ->with(['member', 'paket', 'verifikasi'])
             ->firstOrFail();
 
+        $transaksi->load('verifikasi'); // force reload relasi verifikasi
+
         // Logika Auto-Reject
         if ($transaksi->status == 'pending' && $transaksi->expired_at && now()->gt($transaksi->expired_at)) {
             $transaksi->update(['status' => 'ditolak']);
@@ -160,8 +162,12 @@ class LandingPageController extends Controller
             return redirect()->back()->with('error', 'Pembayaran ini sudah tervalidasi.');
         }
 
-        // 2. Cek apakah sudah expired
-        if ($transaksi->expired_at && now()->gt($transaksi->expired_at)) {
+        // Cek expired HANYA jika status masih pending & belum pernah disentuh admin
+        if (
+            $transaksi->status === 'pending'
+            && $transaksi->expired_at
+            && now()->gt($transaksi->expired_at)
+        ) {
             $transaksi->update(['status' => 'ditolak']);
             return redirect()->back()->with('error', 'Maaf, waktu pembayaran sudah habis. Silahkan daftar ulang.');
         }
@@ -183,7 +189,7 @@ class LandingPageController extends Controller
         // 3. Proses upload
         if ($request->hasFile('bukti')) {
             // Kita simpan hasil store() ke variabel $path
-            $path = $request->file('bukti')->store('bukti', 's3');
+            $path = $request->file('bukti')->store('bukti_pembayaran');
         }
 
         // 4. CEK DULU: Kalau path masih kosong, JANGAN SIMPAN ke DB
@@ -230,7 +236,7 @@ class LandingPageController extends Controller
         }
         // --- LOGIKA NOTIFIKASI ADMIN END ---
 
-        return redirect('/pembayaran/' . $kode)->with('success', 'Bukti berhasil dikirim! Admin akan segera memverifikasi.');
+        return redirect('/pembayaran/' . $kode)->with('notif', 'menunggu');
     }
     public function batal($kode)
     {

@@ -570,7 +570,7 @@ if ($transaksi->expired_at && $state === 'upload') {
                class="btn-outline" style="text-decoration:none;">
                 Cek Status Pendaftaran
             </a>
-            <a href="https://wa.me/{{ \App\Models\Setting::getValue('no_telp') }}?text=Halo%20Admin%2C%20saya%20ingin%20menanyakan%20status%20pendaftaran%20dengan%20kode%20{{ $transaksi->kode_invoice }}"
+             <a href="https://wa.me/{{ '62' . ltrim(preg_replace('/[^0-9]/', '', \App\Models\Setting::getValue('no_telp')), '0') }}?text=Halo%20Admin%2C%20saya%20ingin%20menanyakan%20status%20pendaftaran%20dengan%20kode%20{{ $transaksi->kode_invoice }}"
                class="btn-outline" style="margin-top:0.75rem;text-decoration:none;" target="_blank">
                 Hubungi Admin
             </a>
@@ -845,27 +845,20 @@ if (fileInput && uploadZone) {
     });
 }
 
-/* ── Flash session ── */
-document.addEventListener('DOMContentLoaded', () => {
-    @if(session('success'))
-        GymAlert.success(@json(session('success')));
-    @endif
-    @if(session('error'))
-        GymAlert.error(@json(session('error')));
-    @endif
-    @if(session('warning'))
-        GymAlert.warning(@json(session('warning')));
-    @endif
+{{-- GANTI DENGAN INI: --}}
+@if(session('notif') === 'menunggu')
+    GymAlert.toast('Bukti sudah diterima, menunggu verifikasi admin.', 'info');
+@elseif(session('notif') === 'ditolak')
+    GymAlert.error('Bukti pembayaranmu ditolak admin. Silahkan upload ulang bukti yang valid.', 'Bukti Ditolak');
+@elseif($state === 'sukses')
+    GymAlert.success('Membership kamu resmi aktif. Tunjukkan kode member saat masuk gym!', '🎉 Selamat!');
+@elseif($state === 'expired')
+    GymAlert.error('Batas waktu pembayaran sudah lewat. Silahkan daftar ulang.', 'Invoice Kedaluwarsa');
+@endif
 
-    @if($state === 'sukses')
-        GymAlert.success('Membership kamu resmi aktif. Tunjukkan kode member saat masuk gym!', '🎉 Selamat!');
-    @elseif($state === 'ditolak')
-        GymAlert.error('Bukti pembayaranmu ditolak admin. Silahkan upload ulang bukti yang valid.', 'Bukti Ditolak');
-    @elseif($state === 'expired')
-        GymAlert.error('Batas waktu pembayaran sudah lewat. Silahkan daftar ulang.', 'Invoice Kedaluwarsa');
-    @elseif($state === 'menunggu')
-        GymAlert.toast('Bukti sudah diterima, menunggu verifikasi admin.', 'info');
-    @endif
-});
+@if(session('error'))
+    GymAlert.error(@json(session('error')));
+@endif
+
 </script>
 @endpush
