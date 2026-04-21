@@ -785,6 +785,16 @@
                 });
         }
 
+        window.addEventListener('pageshow', function(event) {
+    // Cek apakah halaman dimuat dari cache (tombol back/forward)
+    if (event.persisted || (typeof window.performance !== 'undefined' && window.performance.navigation.type === 2)) {
+        // Tutup SweetAlert secara paksa jika dia mencoba muncul
+        if (typeof Swal !== 'undefined') {
+            Swal.close();
+        }
+    }
+});
+
         // Jalankan saat halaman siap
         document.addEventListener('DOMContentLoaded', updateWaStatus);
     </script>

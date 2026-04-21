@@ -14,14 +14,18 @@ use Illuminate\Support\Facades\DB;
 class VerifikasiPembayaranController extends Controller
 {
     // 🔹 list verifikasi
-    public function index()
-    {
-        $data = VerifikasiPembayaran::with('transaksi.member', 'transaksi.paket')
-            ->latest()
-            ->get();
+  public function index(Request $request)
+{
+    $tab = $request->get('tab', 'pending'); // Ambil dari URL atau default 'pending'
+    
+    $pending = VerifikasiPembayaran::where('status', 'pending')->latest()->get();
+    
+    $history = VerifikasiPembayaran::whereIn('status', ['diterima', 'ditolak'])
+                ->latest()
+                ->paginate(10);
 
-        return view('verifikasi.index', compact('data'));
-    }
+    return view('verifikasi.index', compact('pending', 'history', 'tab'));
+}
 
     // 🔹 TERIMA
     public function terima($id)

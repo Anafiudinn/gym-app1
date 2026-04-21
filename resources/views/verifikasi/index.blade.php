@@ -135,22 +135,21 @@
 @endpush
 
 @section('content')
-@php
-    $pending = $data->where('status', 'pending');
-    $history = $data->whereIn('status', ['diterima', 'ditolak']);
-@endphp
 
 {{-- ── TABS ── --}}
 <div class="flex items-center gap-6 mb-5 pb-3 border-b border-gray-100 fade-up overflow-x-auto">
-    <button onclick="switchTab('pending')" id="tab-pending" class="tab-btn active flex items-center gap-2">
-        Perlu Verifikasi
-        @if($pending->count() > 0)
-            <span class="counter-pill">{{ $pending->count() }}</span>
-        @endif
-    </button>
-    <button onclick="switchTab('history')" id="tab-history" class="tab-btn">
-        Riwayat Selesai
-    </button>
+   <button onclick="switchTab('pending')" id="tab-pending" class="tab-btn active flex items-center gap-2">
+    Perlu Verifikasi
+    @if($pending->count() > 0)
+        <span class="counter-pill">{{ $pending->count() }}</span>
+    @endif
+</button>
+
+<button onclick="switchTab('history')" id="tab-history" class="tab-btn">
+    Riwayat Selesai
+    {{-- Gunakan ->total() jika ingin muncul angka total riwayat --}}
+    <span class="text-gray-400 text-[10px]">({{ $history->total() }})</span>
+</button>
 </div>
 
 {{-- ════════════════════════════════════════════
@@ -466,6 +465,13 @@
             </table>
         </div>
 
+        {{-- Di bagian bawah table history --}}
+<div class="mt-4">
+    {{ $history->appends(['tab' => 'history'])->links() }}
+</div>
+
+        {{-- Filter empty --}}
+
         <div id="history-empty-filter" class="hidden">
             <div class="empty-state">
                 <div class="empty-icon">
@@ -476,6 +482,7 @@
         </div>
     </div>
 </div>
+
 
 @endsection
 
@@ -575,5 +582,42 @@
         });
         filterHistory();
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // 1. Ambil parameter 'tab' dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTab = urlParams.get('tab');
+
+    // 2. Jika di URL ada tab=history, jalankan fungsi switchTab
+    if (currentTab === 'history') {
+        switchTab('history');
+    } else {
+        // Default tetap pending
+        switchTab('pending');
+    }
+});
+
+/* Update fungsi switchTab agar lebih rapi */
+function switchTab(type) {
+    // Sembunyikan semua section & non-aktifkan semua button
+    ['pending', 'history'].forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        const section = document.getElementById('section-' + t);
+        
+        if (btn) btn.classList.remove('active');
+        if (section) section.classList.add('hidden');
+    });
+
+    // Aktifkan yang dipilih
+    const activeBtn = document.getElementById('tab-' + type);
+    const activeSection = document.getElementById('section-' + type);
+    
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activeSection) activeSection.classList.remove('hidden');
+
+    // Tambahan: Update URL tanpa reload halaman
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?tab=' + type;
+    window.history.pushState({path:newUrl}, '', newUrl);
+}
 </script>
 @endpush
